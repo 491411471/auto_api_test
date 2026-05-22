@@ -1,4 +1,0 @@
-路径: $.data.records[0].productId
-操作符: ==
-期望值: 1779354588996
-实际值: None

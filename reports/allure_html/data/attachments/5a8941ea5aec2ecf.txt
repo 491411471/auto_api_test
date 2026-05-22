@@ -1,5 +1,0 @@
-SELECT order_id
-FROM llxz_order.ct_user_orders
-WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' AND create_time >= DATE_SUB( NOW(), INTERVAL 30 DAY )
-ORDER BY create_time DESC
-LIMIT 3;

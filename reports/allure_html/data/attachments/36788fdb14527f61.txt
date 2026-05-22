@@ -1,4 +1,0 @@
-路径: $.data.records[*].type
-操作符: all_eq
-期望值: 2
-实际值: None

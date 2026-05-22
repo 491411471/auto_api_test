@@ -15,16 +15,17 @@ environments:
       auth_config:
         key: "token"
         value: "rusn4k46vsmqfgfzuybjtzulnj38pcv6"
-        xianyu_token: "idul55n7yune1fow9qrnr04x1sqqaprr"  # 测试环境闲鱼店铺token（需要单独获取）
+        xianyu_token: "qju4adicp7y36gun2yv5q9f0qavzvsqh"  # 测试环境闲鱼店铺token（需要单独获取）
       timeout: 15
       max_retries: 3
       request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制
+
     # 运营端配置
     admin:
       auth_type: "api_token"
       auth_config:
         key: "token"
-        value: "d3gj83m7ieoytmnxxozhn88450tcsnvs"
+        value: "bmg4v451ek6nujc8d7xrcgjr2d8uqxtk"
       timeout: 15
       max_retries: 3
       request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制

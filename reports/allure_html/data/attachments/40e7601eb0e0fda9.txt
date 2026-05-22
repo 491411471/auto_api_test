@@ -1,4 +1,0 @@
-路径: data.records[0].orderAddressDto.createTime
-操作符: ==
-期望值: 2026-05-21 17:05:38
-实际值: 2026-05-21 11:40:09

@@ -1,4 +1,0 @@
-路径: $.responseType
-操作符: ==
-期望值: SUCCESS
-实际值: FLOW_ERR

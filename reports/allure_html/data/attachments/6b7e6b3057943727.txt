@@ -1,4 +1,0 @@
-路径: data.records[*].orderAddressDto.realname
-操作符: any_contain
-期望值: 陶大帅
-实际值: None

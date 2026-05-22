@@ -95,3 +95,24 @@ xianyu_product_audit_test:
           operator: "is_null"
         - path: "$.traceId"
           operator: "not_empty"
+
+xianyu_product_offline_test:
+  - case_id: "UPI_001"
+    title: "更新商品信息-下架操作"
+    description: "将最新商品下架，type=2"
+    method: POST
+    endpoint: "/hzsx/xianyu/product/updateProductInfo"
+    json:
+      productId: "${product_id}"
+      type: ${product_type}
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true

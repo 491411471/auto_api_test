@@ -1,6 +1,0 @@
-请求参数: {'requestSource': 'businessNewOfListHeaderStatus'}
-SQL: SELECT status, count(*) as total_count
-FROM llxz_order.ct_user_orders
-WHERE (shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' AND
-       channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
-       (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) and status ='06'

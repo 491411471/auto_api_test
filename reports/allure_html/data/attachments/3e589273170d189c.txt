@@ -1,4 +1,0 @@
-路径: $.rpcResult
-操作符: ==
-期望值: SUCCESS
-实际值: SUCCESS

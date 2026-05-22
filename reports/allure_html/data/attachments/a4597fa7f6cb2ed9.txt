@@ -1,1 +1,0 @@
-{'channel_group_code': '001', 'page_size': 10, 'page_number': 1, 'get_latest_product_sql': 'SELECT id, product_id \nFROM llxz_product.ct_product \nORDER BY create_time DESC \nLIMIT 1\n'}

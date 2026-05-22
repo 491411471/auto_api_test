@@ -1,1 +1,0 @@
-POST /hzsx/product/updateProductInfo

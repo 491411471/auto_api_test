@@ -1,9 +1,0 @@
-{
-  "businessType": 1,
-  "queryType": "queryPageList",
-  "requestSource": "businessNewOfListHeaderStatus",
-  "isQueryHistory": false,
-  "pageNumber": 1,
-  "pageSize": 10,
-  "orderId": "008OI999999999999999999999999"
-}

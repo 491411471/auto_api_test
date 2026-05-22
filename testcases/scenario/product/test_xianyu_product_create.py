@@ -2,29 +2,34 @@ import json
 import allure
 from pathlib import Path
 import yaml
-
+from common.test_helpers import replace_placeholders, validate
 from utils.product_utils import (
     gen_product_name,
     generate_uuid,
-    upload_test_image,
-    replace_placeholders
+    upload_test_image
 )
 
 
 def load_xianyu_request_template(yaml_path: str) -> dict:
-
     with open(yaml_path, 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f)
     return data['xianyu_product_create_tests'][0]
 
 
 def load_audit_template(yaml_path: str) -> dict:
-    """
-    加载审核请求模板 YAML 文件
-    """
+    """加载审核请求模板 YAML 文件"""
     with open(yaml_path, 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f)
     return data['xianyu_product_audit_test'][0]
+
+
+# ========== 新增：加载下架模板函数 ==========
+def load_offline_template(yaml_path: str) -> dict:
+    """加载下架请求模板 YAML 文件"""
+    with open(yaml_path, 'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f)
+    return data['xianyu_product_offline_test'][0]   # 返回第一个用例
+# ========================================
 
 
 def attach_error_detail(error_msg: str, context: str):
@@ -36,7 +41,7 @@ def attach_error_detail(error_msg: str, context: str):
 @allure.story("新建闲鱼商品")
 class TestXianYuProductCreate:
 
-    @allure.title("新建闲鱼商品-完整流程验证")
+    @allure.title("新建闲鱼商品-完整流程验证（含下架）")
     def test_create_xianyu_product_success(self, xianyu_api_client, db, admin_api_client):
         project_root = Path(__file__).resolve().parent.parent.parent.parent
 
@@ -48,35 +53,28 @@ class TestXianYuProductCreate:
         with allure.step("阶段二：审核闲鱼商品"):
             self._audit_xianyu_product(admin_api_client, db, project_root, product_id_db)
 
+        # ========== 第三阶段：商家端下架商品（从YAML读取配置） ==========
+        with allure.step("阶段三：下架闲鱼商品"):
+            self._offline_xianyu_product(xianyu_api_client, project_root, product_id_db)
+
+    # ---------------------- 原有方法（未修改） ----------------------
     def _create_xianyu_product(self, xianyu_api_client, db, project_root):
         """创建闲鱼商品并返回商品ID"""
-        # 1. 准备测试数据
         product_name, variables = self._prepare_test_data(xianyu_api_client)
-        
-        # 2. 加载并替换模板
         template = self._load_create_template(project_root)
         create_payload = replace_placeholders(template, variables)
-        
-        # 3. 发送创建请求
         json_data = create_payload.get("body")
         endpoint = create_payload.get("endpoint")
         create_result = self._send_create_request(xianyu_api_client, endpoint, json_data)
-        
-        # 4. 验证响应
         self._assert_create_response(create_result)
-        
-        # 5. 查询数据库验证
         product_id_db = self._verify_product_in_db(db, product_name)
-        
         allure.attach("闲鱼商品创建成功：接口调用成功 → 数据库记录正确", "创建阶段结果", attachment_type=allure.attachment_type.TEXT)
         return product_id_db
 
     def _prepare_test_data(self, xianyu_api_client):
-        """准备测试数据"""
         product_name = gen_product_name()
         uuid_1 = generate_uuid()
         image_url = upload_test_image(xianyu_api_client, "/data/scenario/images/xianyu.jpg")
-        
         variables = {
             "product_name": product_name,
             "uuid_1": uuid_1,
@@ -87,28 +85,22 @@ class TestXianYuProductCreate:
         return product_name, variables
 
     def _load_create_template(self, project_root):
-        """加载创建模板"""
         yaml_path = project_root / "data" / "scenario" / "product" / "xianyu_product_create.yaml"
         if not yaml_path.exists():
             raise FileNotFoundError(f"YAML 配置文件不存在: {yaml_path}")
-        
         template = load_xianyu_request_template(str(yaml_path))
         allure.attach(json.dumps(template, indent=2), "原始模板", attachment_type=allure.attachment_type.JSON)
         return template
 
     def _send_create_request(self, xianyu_api_client, endpoint, json_data):
-        """发送创建请求"""
         required_fields = ['categoryIds', 'name', 'title', 'itemLeaseDTO']
         for field in required_fields:
             if field not in json_data or json_data.get(field) is None:
                 raise ValueError(f"必填参数 {field} 缺失或为空")
-        
         response = xianyu_api_client.post(endpoint, json=json_data)
         allure.attach(str(response.status_code), "HTTP 状态码", attachment_type=allure.attachment_type.TEXT)
-        
         result = response.json()
         allure.attach(json.dumps(result, indent=2, ensure_ascii=False), "闲鱼商品创建-接口响应", attachment_type=allure.attachment_type.JSON)
-        
         if not result.get('businessSuccess'):
             error_detail = (
                 f"闲鱼商品创建业务失败\n"
@@ -117,101 +109,52 @@ class TestXianYuProductCreate:
                 f"  错误信息: {result.get('errorMessage', '未知错误')}"
             )
             attach_error_detail(error_detail, "业务错误详情")
-        
         return result
 
     def _assert_create_response(self, result):
-        """验证创建响应"""
         assert result.get('businessSuccess') is True, (
-            f"闲鱼商品创建业务失败！\n"
-            f"  期望值: True\n"
-            f"  实际值: {result.get('businessSuccess')}\n"
-            f"  错误码: {result.get('errorCode', 'N/A')}\n"
-            f"  错误信息: {result.get('errorMessage', '未知错误')}"
+            f"闲鱼商品创建业务失败！\n期望值: True\n实际值: {result.get('businessSuccess')}\n"
+            f"错误码: {result.get('errorCode', 'N/A')}\n错误信息: {result.get('errorMessage', '未知错误')}"
         )
-        
-        assert result.get('data') is True, (
-            f"商品创建 data 字段不符合预期！\n"
-            f"  期望值: True\n"
-            f"  实际值: {result.get('data')}"
-        )
-        
-        assert result.get('rpcResult') == 'SUCCESS', (
-            f"商品创建 rpcResult 不符合预期！\n"
-            f"  期望值: SUCCESS\n"
-            f"  实际值: {result.get('rpcResult')}\n"
-            f"  错误码: {result.get('errorCode', 'N/A')}"
-        )
+        assert result.get('data') is True, f"商品创建 data 字段不符合预期！期望值: True 实际值: {result.get('data')}"
+        assert result.get('rpcResult') == 'SUCCESS', f"商品创建 rpcResult 不符合预期！期望值: SUCCESS 实际值: {result.get('rpcResult')}"
 
     def _verify_product_in_db(self, db, product_name):
-        """验证数据库中的商品信息"""
         sql = "SELECT id, name, category_id FROM llxz_product.ct_product WHERE name = %s AND product_type = 'xianyu' ORDER BY create_time DESC LIMIT 1"
         result = db.fetch_one(sql, (product_name,))
-        
         assert result is not None, f"未找到闲鱼商品记录，商品名称: {product_name}"
-        
         product_id = result.get('id')
         db_product_name = result.get('name')
         category_id = result.get('category_id')
-        
-        allure.attach(
-            f"商品ID: {product_id}\n商品名称: {db_product_name}\n分类ID: {category_id}",
-            "数据库商品信息",
-            attachment_type=allure.attachment_type.TEXT
-        )
-        
-        assert db_product_name == product_name, (
-            f"数据库商品名称不匹配！\n"
-            f"  期望值: {product_name}\n"
-            f"  实际值: {db_product_name}"
-        )
-        
-        assert category_id == 1230, (
-            f"数据库分类ID不匹配！\n"
-            f"  期望值: 1230\n"
-            f"  实际值: {category_id}"
-        )
-        
+        allure.attach(f"商品ID: {product_id}\n商品名称: {db_product_name}\n分类ID: {category_id}", "数据库商品信息", attachment_type=allure.attachment_type.TEXT)
+        assert db_product_name == product_name, f"数据库商品名称不匹配！期望值: {product_name} 实际值: {db_product_name}"
+        assert category_id == 1230, f"数据库分类ID不匹配！期望值: 1230 实际值: {category_id}"
         allure.attach(f"商品ID: {product_id}", "新增商品ID", attachment_type=allure.attachment_type.TEXT)
         return product_id
 
     def _audit_xianyu_product(self, admin_api_client, db, project_root, product_id_db):
-        """审核闲鱼商品并验证"""
-        # 1. 加载审核模板
         audit_body = self._load_audit_template(project_root, product_id_db)
-        
-        # 2. 发送审核请求
         audit_result = self._send_audit_request(admin_api_client, audit_body)
-        
-        # 3. 验证审核响应
         self._assert_audit_response(audit_result)
-        
-        # 4. 验证数据库审核状态
         self._verify_audit_status(db, product_id_db)
-        
-        allure.attach("完整流程验证通过：商品创建成功 → 审核接口调用成功 → 审核状态变为2", "最终结果", attachment_type=allure.attachment_type.TEXT)
+        allure.attach("商品审核成功：审核接口调用成功 → 审核状态变为2", "审核阶段结果", attachment_type=allure.attachment_type.TEXT)
 
     def _load_audit_template(self, project_root, product_id_db):
-        """加载审核模板"""
         yaml_path = project_root / "data" / "scenario" / "product" / "xianyu_product_create.yaml"
         if not yaml_path.exists():
             raise FileNotFoundError(f"审核 YAML 配置文件不存在: {yaml_path}")
-        
         audit_case = load_audit_template(str(yaml_path))
         audit_body = audit_case['body']
         audit_body['id'] = product_id_db
-        
         allure.attach(json.dumps(audit_body, indent=2), "审核请求体", attachment_type=allure.attachment_type.TEXT)
         return audit_body
 
     def _send_audit_request(self, admin_api_client, audit_body):
-        """发送审核请求"""
         response = admin_api_client.post("/hzsx/xianyu/product/opeAuditProductPost", json=audit_body)
         allure.attach(str(response.status_code), "HTTP 状态码", attachment_type=allure.attachment_type.TEXT)
-        
         result = response.json()
+        print("审核通过接口响应数据：",json.dumps(result, indent=2, ensure_ascii=False))
         allure.attach(json.dumps(result, indent=2, ensure_ascii=False), "商品审核-接口响应", attachment_type=allure.attachment_type.JSON)
-        
         if not result.get('businessSuccess'):
             error_detail = (
                 f"商品审核业务失败\n"
@@ -220,50 +163,87 @@ class TestXianYuProductCreate:
                 f"  错误信息: {result.get('errorMessage', '未知错误')}"
             )
             attach_error_detail(error_detail, "业务错误详情")
-        
         return result
 
     def _assert_audit_response(self, result):
-        """验证审核响应"""
         assert result.get('businessSuccess') is True, (
-            f"商品审核业务失败！\n"
-            f"  期望值: True\n"
-            f"  实际值: {result.get('businessSuccess')}\n"
-            f"  错误码: {result.get('errorCode', 'N/A')}\n"
-            f"  错误信息: {result.get('errorMessage', '未知错误')}"
+            f"商品审核业务失败！\n期望值: True\n实际值: {result.get('businessSuccess')}\n"
+            f"错误码: {result.get('errorCode', 'N/A')}\n错误信息: {result.get('errorMessage', '未知错误')}"
         )
-        
-        assert result.get('data') is True, (
-            f"商品审核 data 字段不符合预期！\n"
-            f"  期望值: True\n"
-            f"  实际值: {result.get('data')}"
-        )
-        
-        assert result.get('rpcResult') == 'SUCCESS', (
-            f"商品审核 rpcResult 不符合预期！\n"
-            f"  期望值: SUCCESS\n"
-            f"  实际值: {result.get('rpcResult')}\n"
-            f"  错误码: {result.get('errorCode', 'N/A')}"
-        )
+        assert result.get('data') is True, f"商品审核 data 字段不符合预期！期望值: True 实际值: {result.get('data')}"
+        assert result.get('rpcResult') == 'SUCCESS', f"商品审核 rpcResult 不符合预期！期望值: SUCCESS 实际值: {result.get('rpcResult')}"
 
     def _verify_audit_status(self, db, product_id_db):
-        """验证数据库审核状态"""
         result = db.fetch_one("SELECT audit_state FROM llxz_product.ct_product WHERE id = %s", (product_id_db,))
-        
         assert result is not None, f"未找到商品记录，id={product_id_db}"
-        
         actual_audit_state = result.get('audit_state')
         assert actual_audit_state is not None, "数据库中 audit_state 字段为空"
-        
-        allure.attach(
-            f"商品ID: {product_id_db}\n审核状态: {actual_audit_state}",
-            "数据库审核状态",
-            attachment_type=allure.attachment_type.TEXT
-        )
-        
-        assert actual_audit_state == 2, (
-            f"商品审核状态不符合预期！\n"
-            f"  期望值: 2\n"
-            f"  实际值: {actual_audit_state}\n"
-            f"  商品ID: {product_id_db}"
-        )
+        allure.attach(f"商品ID: {product_id_db}\n审核状态: {actual_audit_state}", "数据库审核状态", attachment_type=allure.attachment_type.TEXT)
+        assert actual_audit_state == 2, f"商品审核状态不符合预期！期望值: 2 实际值: {actual_audit_state} 商品ID: {product_id_db}"
+
+    # ========== 下架操作方法，从YAML读取配置 ==========
+    def _offline_xianyu_product(self, xianyu_api_client, project_root, product_id_db):
+        """商家端下架闲鱼商品，配置从 YAML 读取，支持变量替换和动态断言"""
+        yaml_path = project_root / "data" / "scenario" / "product" / "xianyu_product_create.yaml"
+        if not yaml_path.exists():
+            raise FileNotFoundError(f"下架 YAML 配置文件不存在: {yaml_path}")
+
+        # 1. 加载模板
+        offline_case = load_offline_template(str(yaml_path))
+
+        # 2. 准备动态变量（占位符替换）
+        variables = {
+            "product_id": str(product_id_db),
+            "product_type": 2   # 2 表示下架，可根据需要从外部传入
+        }
+
+        # 3. 替换占位符（深拷贝避免修改原模板）
+        import copy
+        case_copy = copy.deepcopy(offline_case)
+        # 替换 json 体中的占位符
+        if 'json' in case_copy:
+            case_copy['json'] = replace_placeholders(case_copy['json'], variables)
+
+        # 4. 提取请求参数
+        endpoint = case_copy['endpoint']
+        method = case_copy.get('method', 'POST').upper()  # 默认 POST
+        json_data = case_copy.get('json', {})
+        print("商品下架请求参数：" + json.dumps(json_data, indent=2,ensure_ascii=False))
+        expected_status = case_copy.get('expected_status', 200)
+        validate_data_list = case_copy.get('validate_data', [])
+
+        allure.attach(json.dumps(case_copy, indent=2, ensure_ascii=False), "下架请求配置（已替换变量）", attachment_type=allure.attachment_type.JSON)
+
+        # 5. 发送请求（目前仅支持 POST，如需其他方法可扩展）
+        if method == 'POST':
+            response = xianyu_api_client.post(endpoint, json=json_data)
+        else:
+            raise ValueError(f"暂不支持 HTTP 方法: {method}")
+
+        allure.attach(str(response.status_code), "HTTP 状态码", attachment_type=allure.attachment_type.TEXT)
+
+        # 6. 验证 HTTP 状态码
+        assert response.status_code == expected_status, (f"HTTP 状态码不符合预期！期望: {expected_status}, 实际: {response.status_code}")
+
+        result = response.json()
+        allure.attach(json.dumps(result, indent=2, ensure_ascii=False), "闲鱼商品下架-接口响应", attachment_type=allure.attachment_type.JSON)
+
+        # 7. 根据 validate_data 动态断言
+        for validate in validate_data_list:
+            path = validate['path']
+            operator = validate['operator']
+            expected_value = validate.get('value')
+
+            # 从 response json 中提取实际值（）
+            # 若需支持嵌套，可扩展使用 jsonpath 库
+            if path.startswith("$."):
+                key = path[2:]  # 去掉 "$."
+                actual_value = result.get(key)
+            else:
+                # 支持直接取字段（无 $.)
+                actual_value = result.get(path)
+
+            validate(actual_value, operator, expected_value, path)
+
+        allure.attach("闲鱼商品下架成功：接口调用成功，响应符合 YAML 断言", "下架阶段结果", attachment_type=allure.attachment_type.TEXT)
+    # ========== 下架方法结束 ==========

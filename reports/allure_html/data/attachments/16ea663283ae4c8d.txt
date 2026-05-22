@@ -1,4 +1,0 @@
-路径: $.responseType
-操作符: ==
-期望值: SYS_ERR
-实际值: SYS_ERR

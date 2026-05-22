@@ -1,4 +1,0 @@
-路径: $.errorMessage
-操作符: contains
-期望值: 订单id不能为空
-实际值: 订单id不能为空!

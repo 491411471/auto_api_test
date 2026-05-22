@@ -1,4 +1,0 @@
-路径: data.searchCount
-操作符: ==
-期望值: True
-实际值: True

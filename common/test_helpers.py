@@ -233,7 +233,7 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
             except (JsonPathParserError, JsonPathLexerError) as e:
                 logger.debug(f"JSONPath 解析失败: {jsonpath_str}, 错误: {e}，降级使用自定义解析")
 
-        # 2. 条件筛选语法：array[?(@.field=='value')].subpath（保留原有逻辑）
+        # 2. 条件筛选语法：array[?(@.field=='value')].subpath
         pattern = r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\?\s*\(\s*@\.([a-zA-Z_][a-zA-Z0-9_]*)\s*==\s*[\'\"](.*?)[\'\"]\s*\)\s*\](?:\.(.*))?$'
         match = re.match(pattern, path)
         if match:
@@ -250,7 +250,7 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
                     return item
             return None
 
-        # ==================== [MODIFIED] 3. 增强的点分隔路径（支持 [*] 通配符） ====================
+        # ==================== 3. 增强的点分隔路径（支持 [*] 通配符） ====================
         # 清洗开头的 '$' 或 '$.'
         clean_path = path
         if clean_path.startswith('$.'):
@@ -576,6 +576,7 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
             # 执行断言验证
             assert_status_code(resp.status_code, case['expected_status'])
             validate_response(case, response_data, variables)
+            # 执行后置操作（如 SQL 数据校验）
             process_post_operations(case, db, variables)
             break  # 断言通过则跳出循环
 

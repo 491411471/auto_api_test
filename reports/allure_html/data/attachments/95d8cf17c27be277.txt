@@ -1,4 +1,0 @@
-路径: $.data.hisTransactionOrderCount
-操作符: >=
-期望值: 3
-实际值: 0

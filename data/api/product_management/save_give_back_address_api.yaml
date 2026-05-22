@@ -56,3 +56,63 @@ save_give_back_address_tests:
       - path: "$.errorMessage"
         operator: "=="
         value: null
+
+  - case_id: "SBA_003"
+    title: "启用归还地址--type=1"
+    description: "禁用归还地址--type=1"
+    method: POST
+    endpoint: "/hzsx/shopAddress/updateShopGiveBackAddressesType"
+    sql:
+      query: "select id from llxz_product.ct_shop_give_back_addresses where type =0 order by create_time desc"
+      columns: [ "id" ]
+    json:
+      id: ${id}
+      type: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  - case_id: "SBA_004"
+    title: "修改归还地址"
+    description: "修改归还地址信息，将地址类型改为1"
+    method: POST
+    endpoint: "/hzsx/shopAddress/updateShopGiveBackAddressById"
+    sql:
+      query: "SELECT id FROM llxz_product.ct_shop_give_back_addresses WHERE type = 1 AND delete_time IS NULL ORDER BY create_time DESC LIMIT 1"
+      columns: [ "id" ]
+    json:
+      id: ${id}
+      name: "${random_name}"
+      telephone: "${random_telephone}"
+      provinceId: 340000
+      cityId: 340100
+      areaId: 340111
+      provinceStr: "北京"
+      cityStr: "北京市"
+      areaStr: "东城区"
+      street: "${random_street}"
+      address: [ "140000", "140100", "140105" ]
+      type: 1
+      freightType: "FREE"
+      channelGroupCode: "001"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+

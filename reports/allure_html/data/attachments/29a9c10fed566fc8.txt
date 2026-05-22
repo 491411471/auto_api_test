@@ -1,4 +1,0 @@
-路径: $.data[0].shopId
-操作符: ==
-期望值: 71008738021cd3393bacbac182bd6a86af0b5c87
-实际值: 71008738021cd3393bacbac182bd6a86af0b5c87

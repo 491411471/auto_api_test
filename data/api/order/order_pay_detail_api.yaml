@@ -6,7 +6,7 @@ variables:
     SELECT order_id, status
     FROM llxz_order.ct_user_orders
     WHERE shop_id = '${shop_id}'
-      AND channel_provenance NOT IN (6, 8)
+      AND channel_provenance NOT IN (6, 7, 8)
     ORDER BY create_time DESC
     LIMIT 1
 

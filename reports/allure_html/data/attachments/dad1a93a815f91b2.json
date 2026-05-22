@@ -1,9 +1,0 @@
-{
-  "isMembership": 1,
-  "repairOrderConfig": {
-    "id": "1",
-    "price": "100.00",
-    "settlementProportion": "0.8",
-    "beizhu": "缺少订单ID测试"
-  }
-}

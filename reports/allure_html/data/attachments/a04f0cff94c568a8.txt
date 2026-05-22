@@ -1,5 +1,0 @@
-SELECT name 
-FROM llxz_product.ct_product 
-WHERE name IS NOT NULL AND status = 1 
-ORDER BY create_time DESC
-LIMIT 1

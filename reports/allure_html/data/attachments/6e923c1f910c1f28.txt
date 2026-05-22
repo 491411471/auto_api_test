@@ -1,5 +1,0 @@
-请求参数: {}
-SQL: [多条 SQL，共 1 条] 第一条: SELECT id, product_id 
-FROM llxz_product.ct_product 
-ORDER BY create_time DESC 
-LIMIT 1

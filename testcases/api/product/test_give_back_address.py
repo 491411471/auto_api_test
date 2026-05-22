@@ -27,21 +27,44 @@ class TestProductAuditQuery:
             "random_telephone": gen_chinese_phone()
         }
 
-    # def test_SBA_001_audit_state(self, merchant_api_client, db):
-    #     case = next((c for c in _ALL_CASES if c['case_id'] == "SBA_001"), None)
-    #     if not case:
-    #         pytest.fail("未找到用例 SBA_001")
-    #     global_vars = self._load_global_vars()
-    #     global_vars.update(self._dynamic_vars)  # 使用当前测试的动态变量
-    #     if 'variables' in case and isinstance(case['variables'], dict):
-    #         global_vars.update(case['variables'])
-    #     allure.dynamic.title(f"{case['case_id']} - {case.get('title', '')}")
-    #     execute_test_case(case, merchant_api_client, db, global_vars)
+    def test_SBA_001_audit_state(self, merchant_api_client, db):
+        case = next((c for c in _ALL_CASES if c['case_id'] == "SBA_001"), None)
+        if not case:
+            pytest.fail("未找到用例 SBA_001")
+        global_vars = self._load_global_vars()
+        global_vars.update(self._dynamic_vars)  # 使用当前测试的动态变量
+        if 'variables' in case and isinstance(case['variables'], dict):
+            global_vars.update(case['variables'])
+        allure.dynamic.title(f"{case['case_id']} - {case.get('title', '')}")
+        execute_test_case(case, merchant_api_client, db, global_vars)
 
     def test_SBA_002_audit_state(self, merchant_api_client, db):
         case = next((c for c in _ALL_CASES if c['case_id'] == "SBA_002"), None)
         if not case:
             pytest.fail("未找到用例 SBA_002")
+        global_vars = self._load_global_vars()
+        global_vars.update(self._dynamic_vars)  # 使用当前测试的动态变量
+        if 'variables' in case and isinstance(case['variables'], dict):
+            global_vars.update(case['variables'])
+        allure.dynamic.title(f"{case['case_id']} - {case.get('title', '')}")
+        execute_test_case(case, merchant_api_client, db, global_vars)
+
+    def test_SBA_003_audit_state(self, merchant_api_client, db):
+        case = next((c for c in _ALL_CASES if c['case_id'] == "SBA_003"), None)
+        if not case:
+            pytest.fail("未找到用例 SBA_003")
+        global_vars = self._load_global_vars()
+        global_vars.update(self._dynamic_vars)  # 使用当前测试的动态变量
+        if 'variables' in case and isinstance(case['variables'], dict):
+            global_vars.update(case['variables'])
+        allure.dynamic.title(f"{case['case_id']} - {case.get('title', '')}")
+        execute_test_case(case, merchant_api_client, db, global_vars)
+
+
+    def test_SBA_004_audit_state(self, merchant_api_client, db):
+        case = next((c for c in _ALL_CASES if c['case_id'] == "SBA_004"), None)
+        if not case:
+            pytest.fail("未找到用例 SBA_004")
         global_vars = self._load_global_vars()
         global_vars.update(self._dynamic_vars)  # 使用当前测试的动态变量
         if 'variables' in case and isinstance(case['variables'], dict):

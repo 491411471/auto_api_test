@@ -1,4 +1,0 @@
-路径: $.data.phoneSubmitOrderCount
-操作符: ==
-期望值: 22
-实际值: 0

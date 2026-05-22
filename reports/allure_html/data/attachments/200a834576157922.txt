@@ -1,1 +1,0 @@
-SELECT type, status FROM llxz_product.ct_product WHERE product_id = '1779354588996'

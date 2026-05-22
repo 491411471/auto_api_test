@@ -1,6 +1,0 @@
-请求参数: {}
-SQL: [多条 SQL，共 1 条] 第一条: SELECT product_id 
-FROM llxz_product.ct_product 
-WHERE product_id IS NOT NULL and status = 1 
-order by create_time desc
-LIMIT 1

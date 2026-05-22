@@ -1,7 +1,0 @@
-请求参数: {}
-SQL: SELECT COUNT(*) AS success_order_count 
-FROM llxz_order.ct_user_orders 
-WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' 
-AND uid = '619bc3860e5563dcaf713299856586685040bbfccx7tadydd25z' 
-AND delete_time IS NULL 
-AND status IN ('05', '06', '09');

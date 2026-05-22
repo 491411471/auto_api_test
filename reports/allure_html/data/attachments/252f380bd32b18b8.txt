@@ -1,1 +1,0 @@
-select order_id from llxz_order.ct_user_orders where shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' and status = '13' and channel_provenance NOT IN (6, 8) and withhold_type is not null limit 1
