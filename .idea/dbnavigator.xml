@@ -1,0 +1,1227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DBNavigator.Project.DDLFileAttachmentManager">
+    <mappings />
+    <preferences />
+  </component>
+  <component name="DBNavigator.Project.DataEditorManager">
+    <record-view-column-sorting-type value="BY_INDEX" />
+    <value-preview-text-wrapping value="false" />
+    <value-preview-pinned value="false" />
+  </component>
+  <component name="DBNavigator.Project.DatabaseAssistantManager">
+    <assistants>
+      <assistant-state connection-id="virtual-mysql-connection" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
+        <tools />
+      </assistant-state>
+      <assistant-state connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
+        <tools />
+      </assistant-state>
+      <assistant-state connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="3F500E461F5449FE932CE799D4326103" availability="AVAILABLE" acknowledgement="ENGAGED" selected="true">
+        <chats>
+          <chat id="3F500E461F5449FE932CE799D4326103" title="" session-signature="" timestamp="1778839448561">
+            <messages />
+            <context provider="" profile="" model="" action="" interactive="true" />
+          </chat>
+        </chats>
+        <tools />
+      </assistant-state>
+    </assistants>
+    <selection-state>
+      <model-selection />
+    </selection-state>
+  </component>
+  <component name="DBNavigator.Project.DatabaseBrowserManager">
+    <autoscroll-to-editor value="false" />
+    <autoscroll-from-editor value="true" />
+    <show-object-properties value="true" />
+    <loaded-nodes />
+  </component>
+  <component name="DBNavigator.Project.DatabaseConsoleManager">
+    <connection id="26c19248-0e92-47ef-873e-30eec3c1dca2">
+      <console name="测试环境数据库" type="STANDARD" schema="mysql" session="Main"><![CDATA[select * from llxz_order.ct_user_orders where order_id like '008OI202604092042160772696559616T'
+
+-- 用户认证表
+select * from llxz_user.ct_user_certification where uid=''
+
+select * from llxz_order.ct_user_orders where user_name='周树泉';
+select * from llxz_order.ct_user_orders_history where user_name='周树泉'
+				 
+-- 正常订单		is_violation:是否违约（01正常，02结算单逾期，\n03提前归还，04 账单逾期）
+-- '订单状态 01:待支付 02:支付中 03:已支付申请关单 04:待发货 05:待确认收货 06:租用中 07:待结算 08:结算待支付 09:订单完成 10:交易关闭 12待归还 13下单待审核 14申请取消 15商家关单',							 
+SELECT order_id,channel_provenance FROM llxz_order.ct_user_orders where channel_provenance <>2 LIMIT 1;
+SELECT * FROM llxz_order.ct_user_orders where order_id='008OI202603242036289731008229376T';
+select * from llxz_order.ct_order_by_stages_ext where order_id='008OI202602142022604732018507776T'  -- 订单扩展表
+
+
+SELECT * FROM llxz_order.ct_user_orders where order_id LIKE '%520896T%' LIMIT 1;
+-- done_status(0未逾期 | 1已逾期)  status：'催收状态'
+SELECT * FROM llxz_order.ct_debt_collection_manage_order where order_id='008OI202603192034511330766086144T'
+
+-- '状态:  1：待支付 2：已支付 3：逾期已支付 4：逾期待支付 5：已取消  6: 已结算 7:已退款'
+SELECT * FROM llxz_order.ct_order_by_stages where order_id='008OI202604092042160772696559616T' LIMIT 15;
+-- 查询账期时间三天内、账期日是0点的账单数据
+select distinct order_id, statement_date,create_time from llxz_order.ct_order_by_stages where create_time  between '2026-03-02 12:00:00'-INTERVAL 3 DAY 
+and '2026-03-02 12:00:00' and statement_date like '%00:00:00%';
+-- -- 所有的支付宝交互都查这张表
+SELECT * FROM `llxz_components`.ct_alipay_commerce_rent_order WHERE order_id = '2025112701502300000009930001807558' LIMIT 10;
+--租赁订单支付请求记录 可通过交易流水号查看平台订单号
+SELECT * from `llxz_components`.ct_alipay_commerce_rent_order_pay WHERE `trade_no`='2025112722001471991433403332' LIMIT 1;
+
+-- 查询商家选择配置的归还地址
+select * from `llxz_product`.ct_shop_give_back_addresses where `shop_id`='008OI202510211980630785981919232' LIMIT 10;
+
+-- 部分还款
+select * from llxz_order.ct_order_by_stages_part where order_id='008OI202602042019001313151959040T' LIMIT 20;
+
+SELECT telephone,uid 
+FROM llxz_order.ct_users 
+WHERE telephone IS NOT NULL -- 排除 NULL 值
+	AND telephone != '' -- 排除空字符	
+	AND telephone REGEXP '^1[3-9][0-9]{9}$' -- 中国大陆手机号正则
+	AND CHAR_LENGTH(
+	TRIM( telephone )) = 11 -- 确保去除空格后长度为11
+	LIMIT 1000,200;
+										 							 
+								 
+select count(id) from llxz_marketing.ct_prize_activity_invitation_relation where activity_id = '1905221921667158016' 
+	 
+select * from ct_tiktok_app_pay where order_id='008OI202504101910222984149340160'
+
+select * from llxz_order.ct_user_orders where order_id='012OI202409139020429712597630976'
+-- 通过订单号查询用户信息	
+select * from llxz_user.ct_user where uid=(select uid from llxz_order.ct_user_orders where order_id='012OI202409139020429712597630976')
+select * from llxz_user.ct_user where uid=(select uid from llxz_order.ct_user_orders where order_id='012OI202409139020429712597630976')
+
+
+SELECT * FROM ct_user_orders WHERE STATUS IN ( '13', '04' ) AND date( rent_start ) < date(now())
+
+select * from llxz_order.ct_message_execute_record ORDER BY id DESC LIMIT 30;
+
+select * from llxz_product.ct_product_audit_log where item_id='1748225510791' LIMIT 30;
+
+select * from llxz_order.ct_message_execute_record limit 30;
+
+
+-- 商品下架 
+-- type  0回收站中的商品 1已上架售卖的商品 2放在仓库的商品
+-- common_status  公域状态, 3 公域显示  ,4 公域隐藏
+-- status  商品状态 0为失效 1为有效 
+-- shop_status  0失效 1有效
+-- hide  上架不显示 0否 1是
+-- all_hide  公域隐藏 0否 1是
+-- audit_state  商品审核状态 0为正在审核中 1为审核不通过 2为审核通过
+SELECT t.create_time, t.update_time, t.delete_time, t.category_id, t.`type`, t.common_status, t.status, t.shop_id, t.shop_status, t.audit_state, product_color_picture
+FROM llxz_product.ct_product t where product_id = '1623308580547'
+
+-- operate_category_id  分类Id
+-- parent_category_id  父类id
+-- status  0失效  1有效
+-- hide  隐藏
+-- all_hide  公域隐藏
+select t.update_time, t.delete_time, t.operate_category_id, t.parent_category_id, t.status, t.hide, t.all_hide, t.enjoy_first 
+from llxz_product.ct_ope_category_product t where t.item_id = '1623308580547'
+
+select  group_CONCAT('"', t.product_id, '"') 
+from (
+    
+select t.product_id from llxz_product.ct_product t where t.audit_state = 2 and t.delete_time is null
+) t
+
+SELECT cobs.order_id, cobs.current_periods AS currentPeriods, cobs.current_periods_rent AS periodAmount
+FROM llxz_order.ct_user_orders AS cuo
+         INNER JOIN llxz_order.ct_order_by_stages AS cobs ON cobs.order_id = cuo.order_id
+WHERE cobs.statement_date BETWEEN '2025-06-26 00:00:00' AND '2025-06-26 23:59:59'
+  AND cobs.STATUS = 1
+  AND cuo.STATUS = '06'
+  AND cuo.is_violation IN ('01', '03')
+  AND cobs.shop_id = '2024082807241574431724844255789'
+GROUP BY cobs.order_id;
+
+
+-- 查询明日到期的订单
+SELECT cobs.order_id,
+                cobs.current_periods AS currentPeriods,
+                cobs.current_periods_rent AS periodAmount
+                FROM llxz_order.ct_user_orders AS cuo
+                                 INNER JOIN llxz_order.ct_order_by_stages AS cobs ON cobs.order_id = cuo.order_id
+                WHERE DATE_SUB(cobs.statement_date, INTERVAL 1 DAY)
+                        BETWEEN  '2025-06-25 00:00:00' AND '2025-06-25 23:59:59'
+                  AND cobs.STATUS IN (1)
+                  AND cuo.STATUS IN ('06')
+                  AND cuo.is_violation IN ('01', '03')
+  AND cobs.shop_id = '2024082807241574431724844255789'
+                GROUP BY cobs.order_id
+
+
+
+SELECT * FROM llxz_user.`ct_backstage_function_new` WHERE `name` = "商家审核";
+------------------------------------------------------------------------------------------------------------
+-- 物流显示异常排查方法  查看手机号是否一致
+ -- ct_order_logistics_info 存留物流信息表
+select * from llxz_order.`ct_order_logistics_info` where order_id='008OI202506301939578815705649152' LIMIT 10;
+select * from `llxz_order`.ct_order_address where order_id='008OI202510301983812710184591360' LIMIT 2;  
+select * from `llxz_order`.ct_order_address where order_id='008OI202509171968158929502015488'  
+select * from llxz_user.`ct_user_third_info` where uid='80e92cd3ce63a1cd2e459d0e8f450ebda042858fkzftmek6b3ws'
+------------------------------------------------------------------------------------------------------------- 
+SELECT * FROM `llxz_components`.`ct_alipay_open_mini_order_create` WHERE order_id = '2025091601502300000003020075420099'   LIMIT 0, 25;
+
+-- llxz_user.ct_backstage_use 后端用户表
+select * from llxz_user.ct_backstage_user where mobile='18966426026'
+
+-- 回传订单数
+select * from llxz_components.ct_alipay_commerce_rent_order_by_create c1 left join llxz_components.ct_alipay_commerce_rent_order_changed c2 on c1.out_order_id = c2.out_order_id where 
+ c1.`success` = '1' and c2.status = 'SIGNED' and c1.create_time between '2025-07-29 00:00:00' and '2025-07-30 23:59:59' and c1.out_order_id like '011%'
+
+-- 查看订单是否有押金记录
+ SELECT * FROM `llxz_components`.`ct_alipay_freeze` WHERE order_id = '008OI202508281960977203829088256'   LIMIT 0, 25;
+
+--由平台订单号查询支付宝侧的租赁交易组件ID
+ select * from llxz_components.ct_alipay_commerce_rent_order_changed where out_order_id = '012OI202512111999009062366253056' LIMIT 10;
+
+-- C端是否有归还地址
+ select * from `llxz_product`.`ct_shop` where name = '零零享测' LIMIT 1;
+ SELECT * FROM llxz_order.ct_user_orders_back_address_opt WHERE `order_id` = "008OI202509011962449277135835136" LIMIT 10; 
+ SELECT * FROM llxz_product.ct_shop_give_back_addresses WHERE `shop_id` = "2025051701510761661747461067563" LIMIT 10;
+
+-- 
+SELECT * FROM  `llxz_order`.`ct_alipay_commerce_rent_order`  LIMIT 0, 25; --  WHERE out_order_id = '008OI202509261971261784741330944' 
+
+
+select * from llxz_components.ct_alipay_trade_app_pay where order_id = '008OI202509021962777114711834624' limit 20
+select * from llxz_components.ct_alipay_trade_serial where order_id = '008OI202509021962777114711834624' limit 20
+
+
+
+SELECT
+  cobs.order_id,
+  cobs.current_periods AS currentPeriods,
+  cobs.current_periods_rent AS periodAmount
+FROM
+  llxz_order.ct_user_orders AS cuo
+  INNER JOIN llxz_order.ct_order_by_stages AS cobs ON cobs.order_id = cuo.order_id
+WHERE
+  cobs.statement_date between '2025-11-05 00:00:00' and '2025-11-05 23:59:59'
+  AND cobs.STATUS IN (1, 4, 7)
+  AND cuo.STATUS IN ('06', '07')
+  AND cuo.is_violation IN ('01', '03')
+  AND cobs.shop_id = '2025052401355357401748064953824'
+GROUP BY
+  cobs.order_id
+LIMIT 20
+
+select * from `llxz_product`.`ct_shop` where name = '人人享租' LIMIT 1;
+select * from `llxz_product`.`ct_shop` where name LIKE '%林殊租赁%' LIMIT 1;
+
+
+SELECT *
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  AND create_time >= CURDATE() - INTERVAL (WEEKDAY(CURDATE()) + 7) DAY
+  AND create_time < CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY
+  AND delete_time IS NULL
+  -- AND rent_start IS NOT NULL
+  AND quick_order = 0 -- 0代表私域
+  -- AND quick_order IS NOT NULL -- 确保不为空
+  -- AND quick_order != 0 -- 非0代表公域
+-- AND status IN ('05', '06', '07', '08', '09', '12', '16')
+-- 	AND user_name='章煜'
+ORDER BY create_time DESC
+LIMIT 50;
+
+
+SELECT *
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  AND create_time >= CURDATE() - INTERVAL (WEEKDAY(CURDATE()) + 7) DAY
+  AND create_time < CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY
+  AND delete_time IS NULL
+  AND rent_start IS NOT NULL
+  -- AND quick_order = 0 -- 0代表私域
+ AND quick_order IS NOT NULL -- 确保不为空
+ AND quick_order != 0 -- 非0代表公域
+-- AND status IN ('05', '06', '07', '08', '09', '12', '16')
+-- 	AND user_name='章煜'
+ORDER BY create_time DESC
+LIMIT 1000;
+
+select * FROM llxz_order.ct_shop_week_report limit 5000;
+
+
+
+-- 店铺认证  `type` tinyint(4) DEFAULT NULL COMMENT '企业类型 : 1 个体工商户   2 企业'
+-- 查询店铺信息
+select * from llxz_product.ct_shop where `name` like '%ALLSTAR%' LIMIT 10;
+-- 绕过验签
+select * from llxz_product.ct_shop_enterprise_infos t where t.shop_id = '2026020309044954611770080689258' LIMIT 10; -- seal_status：签章认证状态  1未认证  2认证失败  3已认证 4重新认证
+
+select * from llxz_product.ct_
+
+-- 入驻店铺时填写的收货地址
+select * from llxz_product.ct_shop_give_back_addresses where shop_id='2025121109344240531765416882637' -- 快递方式-包邮:FREE  到付:PAY  自提:SELF
+
+
+SELECT * FROM llxz_order.ct_user_orders WHERE STATUS IN ( '05', '06', '07', '08', '09', '12', '10' ) AND create_time > '2026-01-08 00:00:00' 
+AND create_time < '2026-01-08 23:59:59' 
+AND channel_id IN ('004','005','007','008','009','011','012','082')
+-- and shop_id='2023030506211651281678011676591'
+LIMIT 100;
+
+select * from llxz_order.`dy_after_sale_apply` WHERE order_id = "012OI202601092009443795120001024" LIMIT 10;
+
+select * from llxz_order.`dy_after_sale_apply` WHERE order_id = "012OI202601092009446819934605312" LIMIT 10;
+
+select * from llxz_marketing.ct_order_complaints where order_id='008IO202602032018654141136916480'
+
+-- ---------------------------------------------------------------------------------------
+select * from  llxz_order.ct_user_order_items where order_id = '008OI202602142022589543432892416T';
+
+
+select  * from llxz_product.ct_product_snapshots where id = '271131';    -- snap_shot_id
+select * from llxz_marketing.ct_order_complaints
+
+
+select  * from llxz_order.ct_order_compensation_apply where order_id = '008OI202601292016696058035814400T'  limit  100;
+
+
+select * from llxz_order.ct_order_by_stages where order_id='008OI202604282049036067860750336T'
+
+
+SELECT * from llxz_product.ct_shop where is_locked ='0' and `status` ='5' and cancelled ='0' and channel_group_code ='001'
+
+
+
+
+SELECT cos.*
+        FROM llxz_order.ct_user_orders co INNER JOIN llxz_order.ct_order_by_stages cos ON co.order_id = cos.order_id
+        WHERE cos.`status` IN (1,4)
+          AND cos.debit_status = '1'
+          AND co.type in ('11','12','13','14','15')
+          AND cos.statement_date < '2026-03-25 23:59:59'
+          AND cos.order_id IN
+              (
+                  SELECT DISTINCT cos1.order_id
+                  FROM llxz_order.ct_user_orders co1 INNER JOIN llxz_order.ct_order_by_stages cos1 ON co1.order_id = cos1.order_id
+                  WHERE cos1.`status` IN (1,4)
+                    AND cos1.debit_status = '1'
+                    AND co1.`status` = '06'
+                    AND co1.type in ('11','12','13','14','15')
+                    AND cos1.statement_date BETWEEN '2025-07-25 23:59:59' AND '2026-03-25 23:59:59'
+                    AND co1.id > 12105649
+              )
+          AND NOT EXISTS (
+              SELECT 1
+              FROM llxz_order.ct_order_by_stages cos2
+              WHERE cos2.order_id = cos.order_id
+                AND cos2.`status` IN (1,4)
+                AND cos2.debit_status = '1'
+                AND cos2.statement_date < '2026-03-25 23:59:59'
+                AND (
+                    cos2.current_periods < cos.current_periods
+                    OR (cos2.current_periods = cos.current_periods AND cos2.id  < cos.id)
+                )
+          )
+        LIMIT 100;
+				
+				
+------------------------------------------------------------------------------------------------------
+-- amount发生交易金额  commission佣金 技术服务费
+SELECT *
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' AND channel_provenance != 6 AND channel_provenance != 8
+ORDER BY create_time DESC
+LIMIT 1]]></console>
+      <console name="测试环境数据库 1" type="STANDARD" schema="mysql" session="Main"><![CDATA[-- '订单状态 01:待支付 02:支付中 03:已支付申请关单 04:待发货 05:待确认收货 06:租用中 07:待结算 08:结算待支付 09:订单完成 10:交易关闭 12待归还 13下单待审核 14申请取消 15商家关单'
+SELECT *  FROM llxz_order.ct_user_orders  WHERE order_id='008OI202605132054461722232184832T';
+-- SELECT * FROM llxz_order.ct_user_orders  WHERE shop_id='71008738021cd3393bacbac182bd6a86af0b5c87' and status='13';
+SELECT order_id FROM llxz_order.ct_user_orders  WHERE shop_id='71008738021cd3393bacbac182bd6a86af0b5c87' and status='06' order by create_time DESC limit 1;
+
+
+SELECT 
+        status as status_label,
+        COUNT(*) as count
+    FROM llxz_order.ct_user_orders
+    WHERE shop_id = '${shop_id}'
+        AND channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+        AND rent_start IS NOT NULL
+        AND (delete_time IS NULL OR delete_time <= '2001-01-01 00:00:00')
+    GROUP BY status
+
+    UNION ALL
+
+    -- 查询总计
+ SELECT COUNT(*) as total_count
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+    AND channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+    AND rent_start IS NOT NULL
+    AND (delete_time IS NULL OR delete_time <= '2001-01-01 00:00:00')
+    AND status IN ('06', '07')
+    AND unrent_time > NOW();
+
+SELECT status, count(*) as ct
+FROM ct_user_orders
+WHERE (shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' AND
+       channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
+       (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL))
+GROUP BY status;
+
+
+SELECT COUNT(*) AS total_count 
+        FROM llxz_order.ct_user_orders 
+        WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' 
+          AND status = '06' 
+--           AND DATE(return_due_date) = DATE_ADD(CURDATE(), INTERVAL 1 DAY) 
+          AND (delete_time IS NULL OR delete_time <= '2001-01-01 00:00:00')
+
+
+-- type = 7 续租
+select  * from `llxz_components`.ct_alipay_commerce_rent_order where source_out_order_id = '008OI202512262004481841562312704T' limit 100;
+
+-- 状态:  1：待支付 2：已支付 3：逾期已支付 4：逾期待支付 5：已取消  6: 已结算 7:已退款
+select * from llxz_order.ct_order_by_stages where order_id='007IO202506171934812002119716864' and shop_id='71008738021cd3393bacbac182bd6a86af0b5c87'
+
+-- 使用优惠券信息
+SELECT * FROM `llxz_order`.`ct_order_by_stages_discount` where order_id='008OI202512111999037590594064384T'
+
+-- 化押金支付，退还
+SELECT * FROM llxz_order.ct_shop_cash_pledge WHERE order_id ='008OI202512121999298012094308352T';
+SELECT * FROM `llxz_order`.`ct_shop_cash_pledge_usage`  WHERE order_id ='008OI202512121999298012094308352T';
+
+-- 查询商家选择配置的归还地址
+-- select * from `llxz_product`.ct_shop_give_back_addresses where `shop_id`='71008738021cd3393bacbac182bd6a86af0b5c87' LIMIT 100;
+select * from `llxz_product`.ct_shop_give_back_addresses where create_time like '%2025-12-29%';
+
+- 查询身份证件
+SELECT * FROM llxz_user.ct_user_certification u INNER JOIN llxz_order.ct_user_orders o ON u.uid = o.uid where o.order_id='008OI202511171990234310863142912'
+
+-- ct_backstage_user 修改用户账号类型表，shop_main_account_typ--2是主账号，1是普通账号
+-- ct_debt_collection_manage_order_deal---订单跟进完成
+-- ct_debt_collection_manage_payback---回款金额记录
+-- ct_alipay_trade_pay
+-- ct_alipay_order_contract_state
+
+-- crm项目数据
+select * from tb_customer where employee_name="陶大帅"
+
+select * from tb_customer where employee_name="陶大帅" AND create_time>"2025-03-10 00:00:00" and create_time<"2025-03-16 23:59:59";
+
+select * from tb_customer where employee_name="陶大帅" AND create_time>"2025-03-17 00:00:00" and create_time<"2025-03-23 23:59:59"; 
+							 
+-- 正常订单		is_violation:是否违约（01正常，02结算单逾期，\n03提前归还，04 账单逾期）
+-- '订单状态 01:待支付 02:支付中 03:已支付申请关单 04:待发货 05:待确认收货 06:租用中 07:待结算 08:结算待支付 09:订单完成 10:交易关闭 12待归还 13下单待审核 14申请取消 15商家关单',							 
+SELECT * FROM llxz_order.ct_user_orders where order_id='008OI202510301983799070835146752'
+
+select * from llxz_order.ct_user_orders_ext where order_id='008OI202205116479377664128598016'
+
+SELECT count(*) FROM llxz_order.ct_user_orders where shop_id='71008738021cd3393bacbac182bd6a86af0b5c87'
+-- done_status(0未逾期 | 1已逾期)  status：'催收状态'
+SELECT * FROM llxz_order.ct_debt_collection_manage_order where order_id='008OI202504171912749613484478464'
+
+-- '状态:  1：待支付 2：已支付 3：逾期已支付 4：逾期待支付 5：已取消  6: 已结算 7:已退款'
+SELECT * FROM llxz_order.ct_order_by_stages where order_id='008OI202507061941675832175104000 '
+
+-- 部分还款
+select * from llxz_order.ct_order_by_stages_part where order_id='008OI202103085206719446278889472'
+
+
+SELECT telephone,uid FROM llxz_order.ct_users WHERE	telephone IS NOT NULL -- 排除 NULL 值
+                                                    AND telephone != '' -- 排除空字符串
+																										AND telephone REGEXP '^1[3-9][0-9]{9}$' -- 中国大陆手机号正则
+																										AND CHAR_LENGTH(TRIM( telephone )) = 11 -- 确保去除空格后长度为11
+																										LIMIT 1000,200;
+										 							 
+								 
+select count(id) from llxz_marketing.ct_prize_activity_invitation_relation where activity_id = '1905221921667158016' 
+	 
+select * from ct_tiktok_app_pay where order_id='008OI202504101910222984149340160'
+
+select * from llxz_order.ct_user_orders where order_id='012OI202409139020429712597630976'
+-- 通过订单号查询用户信息	
+select * from llxz_user.ct_user where uid=(select uid from llxz_order.ct_user_orders where order_id='012OI202409139020429712597630976')
+select * from llxz_user.ct_user where uid=(select uid from llxz_order.ct_user_orders where order_id='012OI202409139020429712597630976')
+
+
+SELECT * FROM ct_user_orders WHERE STATUS IN ( '13', '04' ) AND date( rent_start ) < date(now())
+
+select * from llxz_order.ct_message_execute_record ORDER BY id DESC
+
+select * from llxz_product.ct_product_audit_log where item_id='1748225510791'
+
+select * from llxz_order.ct_message_execute_record
+
+
+-- 商品下架 
+-- type  0回收站中的商品 1已上架售卖的商品 2放在仓库的商品
+-- common_status  公域状态, 3 公域显示  ,4 公域隐藏
+-- status  商品状态 0为失效 1为有效 
+-- shop_status  0失效 1有效
+-- hide  上架不显示 0否 1是
+-- all_hide  公域隐藏 0否 1是
+-- audit_state  商品审核状态 0为正在审核中 1为审核不通过 2为审核通过
+SELECT t.create_time, t.update_time, t.delete_time, t.category_id, t.`type`, t.common_status, t.status, t.shop_id, t.shop_status, t.audit_state, product_color_picture
+FROM llxz_product.ct_product t where product_id = '1623308580547'
+
+-- operate_category_id  分类Id
+-- parent_category_id  父类id
+-- status  0失效  1有效
+-- hide  隐藏
+-- all_hide  公域隐藏
+select t.update_time, t.delete_time, t.operate_category_id, t.parent_category_id, t.status, t.hide, t.all_hide, t.enjoy_first 
+from llxz_product.ct_ope_category_product t where t.item_id = '1623308580547'
+
+-- 71008738021cd3393bacbac182bd6a86af0b5c87   sass人人享租1
+-- 2025041702585837981744873138304 NQ
+
+-- 店铺认证  `type` tinyint(4) DEFAULT NULL COMMENT '企业类型 : 1 个体工商户   2 企业'
+-- 查询店铺信息
+select * from llxz_product.ct_shop where  name LIKE '%莫小贝%'
+select * from llxz_product.ct_shop where `name` like '%sass人人享租1%'
+-- 绕过验签
+select * from llxz_product.ct_shop_enterprise_infos t where t.shop_id = '2025122501531681921766641996005' -- seal_status：签章认证状态  1未认证  2认证失败  3已认证 4重新认证
+select * from llxz_product.ct_shop_enterprise_infos t where t.shop_id = '2025121810424137851766025761407' -- seal_status：签章认证状态  1未认证  2认证失败  3已认证 4重新认证
+-- 入驻店铺时填写的收货地址
+select * from llxz_product.ct_shop_give_back_addresses where shop_id='71008738021cd3393bacbac182bd6a86af0b5c87' -- 快递方式-包邮:FREE  到付:PAY  自提:SELF
+
+-- select * from llxz_product.ct_company_identify_url t where t.shop_id = '2025071510435873091752547438117'
+-- select * from llxz_product.sign_enterprise_user t where t.shop_id = '2025071510435873091752547438117'
+
+
+--  业务单代扣解约  
+select * from llxz_components.ct_alipayUser_agreement_log a where a.user_id in ('2088102635680708','');
+select * from llxz_components.ct_alipayUser_agreement_log a where a.agreement_no ='20255509172925619770';
+select * from llxz_components.ct_alipayUser_agreement_log a where a.external_agreement_no='008OI202507081942459003594477568';
+SELECT * FROM `ct_alipay_open_mini_order_create` WHERE order_id = '2024072801502300000003740051191939'   LIMIT 0, 25;
+select * from llxz_product.ct_product t where t.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' and t.audit_state = '3' and t.delete_time is null
+
+-- 商品店铺关联查询
+SELECT * FROM llxz_product.ct_product AS p INNER JOIN llxz_product.ct_shop AS s ON p.shop_id = s.shop_id 
+WHERE p.STATUS = 1 AND p.shop_status = 1  AND p.lock_state = 0  AND p.audit_state = 0  LIMIT 1
+
+-- 删除实名认证
+DELETE FROM `llxz_user`.`ct_user_certification` where uid='caf37cac04517925409e6a2c2f8b9312dd797c60xkfztd5v70ct';
+DELETE FROM `llxz_user`.`ct_user_third_info` where uid = 'caf37cac04517925409e6a2c2f8b9312dd797c60xkfztd5v70ct';
+DELETE FROM `llxz_user`.`ct_user` WHERE uid = 'caf37cac04517925409e6a2c2f8b9312dd797c60xkfztd5v70ct';
+
+-- 查询有效商品
+select * from llxz_product.ct_product where audit_state=0 and shop_status=1 and status=1 and lock_state=0 and delete_time is NULL LIMIT 1
+SELECT id FROM llxz_product.ct_product WHERE audit_state = 0 LIMIT 1
+select * from llxz_product.ct_product where id=5270
+
+-- 同城店铺
+SELECT * FROM llxz_product.`ct_shop_invite_code_usage`
+SELECT * FROM llxz_product.ct_shop WHERE status IN (3) LIMIT 1
+
+
+-- 订单使用的券信息
+SELECT * FROM `llxz_order`.`ct_order_by_stages_discount` where order_id='008OI202512101998640572422938624T'
+
+-- 九州品盾表  saas_charge  这个是等级     risk_type  这个是分数
+select * from llxz_components.ct_pindun_fllock 
+SELECT create_time,saas_charge AS 等级,risk_type AS 分数 FROM llxz_components.ct_pindun_fllock ORDER BY create_time DESC
+
+
+-- 租后管理已分配订单表
+select * from llxz_order.ct_debt_collection_manage_order where order_id='008OI202505291927987776159092736'
+
+select * from llxz_order.ct_action_audit where order_id='008OI202509121966401215316840448'
+
+-- 店铺周报sql	
+-- '订单状态 01:待支付 02:支付中 03:已支付申请关单 04:待发货 05:待确认收货 06:租用中 07:待结算 08:结算待支付 09:订单完成 10:交易关闭 12待归还 13下单待审核 14申请取消 15商家关单'
+	-- 统计上周一0点到周末59分59秒店铺=71008738021cd3393bacbac182bd6a86af0b5c87店铺的订单数
+SELECT *
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  AND create_time >= CURDATE() - INTERVAL (WEEKDAY(CURDATE()) + 7) DAY
+  AND create_time < CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY
+  AND delete_time IS NULL
+  AND rent_start IS NOT NULL
+  -- AND quick_order = 0 -- 0代表私域
+ AND quick_order IS NOT NULL -- 确保不为空
+ AND quick_order != 0; -- 非0代表公域
+-- AND status IN ('05', '06', '07', '08', '09', '12', '16')
+-- 	AND user_name='章煜'
+ORDER BY create_time DESC;
+
+-- 上上周数据
+SELECT *
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  -- 上上周一 00:00:00
+  AND create_time >= CURDATE() - INTERVAL (WEEKDAY(CURDATE()) + 14) DAY
+  -- 上上周日 23:59:59.999
+  AND create_time < CURDATE() - INTERVAL (WEEKDAY(CURDATE()) + 7) DAY
+  AND delete_time IS NULL
+  -- 根据需要取消注释以下条件
+  -- AND rent_start IS NOT NULL
+  -- AND quick_order = 0 -- 0代表私域
+  -- AND quick_order IS NOT NULL -- 确保不为空
+  -- AND quick_order != 0; -- 非0代表公域
+  -- AND status IN ('05', '06', '07', '08', '09', '12', '16')
+  -- AND user_name='章煜'
+ORDER BY create_time DESC;
+
+
+select
+    CASE WHEN (uo.quick_order is null OR uo.quick_order = '' OR uo.quick_order = '0')
+         THEN '私域' ELSE '公域' END as domain,
+    count(distinct obs.order_id) as count
+from ct_order_by_stages obs
+join ct_user_orders uo on obs.order_id = uo.order_id
+where uo.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  and uo.create_time >= '2025-11-20 00:00:00'
+  and uo.create_time <= '2025-11-20 23:59:59'
+  and uo.delete_time is null
+  and obs.create_time >= '2025-11-19 00:00:00'
+  and obs.total_rent > 0
+  and obs.status in ('2', '3', '7')
+group by domain;
+
+
+SELECT order_id
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  AND channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+  AND channel_provenance != 6 AND channel_provenance != 8
+	AND status='06'
+	ORDER BY create_time DESC
+	LIMIT 1;
+	
+SELECT o.order_id
+FROM llxz_order.ct_user_orders o
+WHERE o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  AND o.channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+  AND o.channel_provenance NOT IN (6, 8)
+  AND o.status = '06'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM llxz_order.ct_shop_order_complete_apply_log l
+    WHERE l.order_id = o.order_id
+  )
+ORDER BY o.create_time DESC
+LIMIT 1;
+
+
+SELECT COUNT(*) as total_count
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+	AND channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+	AND rent_start IS NOT NULL
+	AND (delete_time IS NULL OR delete_time <= '2001-01-01 00:00:00')
+	AND status IN ('06')
+	AND unrent_time < NOW();
+
+
+
+select total_rent,status from llxz_order.ct_order_by_stages where order_id =
+(SELECT order_id
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  AND channel_provenance != 6 AND channel_provenance != 8
+	ORDER BY create_time DESC
+	LIMIT 1)
+LIMIT 1
+
+
+
+WITH order_counts AS (
+SELECT 
+order_id,
+COUNT(*) OVER (PARTITION BY order_id) as stage_count,
+ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY create_time DESC) as rn
+FROM llxz_order.ct_order_by_stages
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87')
+SELECT order_id
+FROM order_counts
+WHERE stage_count > 1 AND rn = 1
+LIMIT 1;]]></console>
+    </connection>
+  </component>
+  <component name="DBNavigator.Project.DatabaseEditorStateManager">
+    <last-used-providers />
+  </component>
+  <component name="DBNavigator.Project.DatabaseFileManager">
+    <open-files />
+  </component>
+  <component name="DBNavigator.Project.DatabasePrerequisiteManager">
+    <prerequisites />
+  </component>
+  <component name="DBNavigator.Project.DatabaseSessionManager">
+    <connection id="26c19248-0e92-47ef-873e-30eec3c1dca2" />
+  </component>
+  <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" dataset="llxz_order.ct_ads_field_label" active-filter-id="" />
+  </component>
+  <component name="DBNavigator.Project.ExecutionManager">
+    <retain-sticky-names value="false" />
+  </component>
+  <component name="DBNavigator.Project.FileConnectionMappingManager">
+    <mapping file-url="file://$PROJECT_DIR$/../../测试环境数据常用sql/测试环境数据库.sql" connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" session-id="MAIN" current-schema="mysql" />
+    <mapping file-url="file://$PROJECT_DIR$/../../测试环境数据常用sql/测试环境数据库 1.sql" connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" session-id="MAIN" current-schema="mysql" />
+  </component>
+  <component name="DBNavigator.Project.ObjectQuickFilterManager">
+    <last-used-operator value="EQUAL" />
+    <filters />
+  </component>
+  <component name="DBNavigator.Project.ScriptExecutionManager" clear-outputs="true">
+    <recently-used-interfaces />
+  </component>
+  <component name="DBNavigator.Project.Settings">
+    <connections>
+      <connection source-id="" id="26c19248-0e92-47ef-873e-30eec3c1dca2" active="true" signed="true">
+        <database>
+          <name value="测试环境数据库" />
+          <description value="测试环境数据库" />
+          <database-type value="MYSQL" />
+          <config-type value="BASIC" />
+          <database-version value="8.0" />
+          <driver-source value="BUNDLED" />
+          <driver-library value="" />
+          <driver value="" />
+          <url-type value="DATABASE" />
+          <host value="lxztestmysqlpldb.rwlb.rds.aliyuncs.com" />
+          <port value="3306" />
+          <database value="mysql" />
+          <tns-folder value="" />
+          <tns-profile value="" />
+          <server-type value="" />
+          <protocol value="" />
+          <url-parameters />
+          <type value="USER_PASSWORD" />
+          <user value="my_user1" />
+          <token-type value="" />
+          <token-config-file value="" />
+          <token-profile value="" />
+          <adb-compartment-ocid value="" />
+          <adb-database-ocid value="" />
+          <azure-token-database-id-uri value="" />
+          <azure-token-tenant-id value="" />
+          <azure-token-client-id value="" />
+          <azure-token-client-certificate-file value="" />
+          <session-user value="my_user1@36.7.157.8" />
+        </database>
+        <properties>
+          <auto-commit value="false" />
+        </properties>
+        <ssh-settings>
+          <active value="false" />
+          <proxy-host value="" />
+          <proxy-port value="22" />
+          <proxy-user value="" />
+          <auth-type value="PASSWORD" />
+          <key-file value="" />
+        </ssh-settings>
+        <ssl-settings>
+          <active value="false" />
+          <certificate-authority-file value="" />
+          <client-certificate-file value="" />
+          <client-key-file value="" />
+        </ssl-settings>
+        <details>
+          <charset value="UTF-8" />
+          <session-management value="true" />
+          <ddl-file-binding value="true" />
+          <database-logging value="true" />
+          <connect-automatically value="true" />
+          <restore-workspace value="true" />
+          <restore-workspace-deep value="false" />
+          <environment-type value="default" />
+          <connectivity-timeout value="30" />
+          <idle-time-to-disconnect value="30" />
+          <idle-time-to-disconnect-pool value="5" />
+          <credential-expiry-time value="10" />
+          <max-connection-pool-size value="7" />
+          <alternative-statement-delimiter value="" />
+        </details>
+        <debugger>
+          <compile-dependencies value="true" />
+          <tcp-host-address value="" />
+          <tcp-port-from value="4000" />
+          <tcp-port-to value="4999" />
+          <jdwp-tunnel-type value="NONE" />
+          <debugger-type value="JDBC" />
+          <reverse-ssh-tunnel>
+            <host value="" />
+            <port value="22" />
+            <bind-host value="127.0.0.1" />
+            <bind-port value="0" />
+            <auth-type value="PASSWORD" />
+            <user value="" />
+            <key-file value="" />
+          </reverse-ssh-tunnel>
+        </debugger>
+        <object-filters hide-empty-schemas="false" hide-pseudo-columns="false" hide-audit-columns="false">
+          <object-filters />
+          <object-type-filter use-master-settings="true">
+            <object-type name="SCHEMA" enabled="true" />
+            <object-type name="USER" enabled="true" />
+            <object-type name="ROLE" enabled="true" />
+            <object-type name="PRIVILEGE" enabled="true" />
+            <object-type name="CHARSET" enabled="true" />
+            <object-type name="TABLE" enabled="true" />
+            <object-type name="VIEW" enabled="true" />
+            <object-type name="JSON_VIEW" enabled="true" />
+            <object-type name="MATERIALIZED_VIEW" enabled="true" />
+            <object-type name="NESTED_TABLE" enabled="true" />
+            <object-type name="COLUMN" enabled="true" />
+            <object-type name="INDEX" enabled="true" />
+            <object-type name="CONSTRAINT" enabled="true" />
+            <object-type name="DATASET_TRIGGER" enabled="true" />
+            <object-type name="DATABASE_TRIGGER" enabled="true" />
+            <object-type name="SYNONYM" enabled="true" />
+            <object-type name="SEQUENCE" enabled="true" />
+            <object-type name="PROCEDURE" enabled="true" />
+            <object-type name="FUNCTION" enabled="true" />
+            <object-type name="PACKAGE" enabled="true" />
+            <object-type name="TYPE" enabled="true" />
+            <object-type name="TYPE_ATTRIBUTE" enabled="true" />
+            <object-type name="ARGUMENT" enabled="true" />
+            <object-type name="JAVA_CLASS" enabled="true" />
+            <object-type name="JAVA_FIELD" enabled="true" />
+            <object-type name="JAVA_METHOD" enabled="true" />
+            <object-type name="JAVA_RESOURCE" enabled="true" />
+            <object-type name="DIMENSION" enabled="true" />
+            <object-type name="CLUSTER" enabled="true" />
+            <object-type name="DBLINK" enabled="true" />
+            <object-type name="CREDENTIAL" enabled="true" />
+            <object-type name="AI_PROFILE" enabled="true" />
+            <object-type name="AI_MODEL" enabled="true" />
+          </object-type-filter>
+        </object-filters>
+      </connection>
+    </connections>
+    <browser-settings>
+      <general>
+        <display-mode value="TABBED" />
+        <navigation-history-size value="100" />
+        <show-object-details value="false" />
+        <enable-sticky-paths value="true" />
+        <enable-quick-filters value="false" />
+      </general>
+      <filters>
+        <object-type-filter>
+          <object-type name="SCHEMA" enabled="true" />
+          <object-type name="USER" enabled="true" />
+          <object-type name="ROLE" enabled="true" />
+          <object-type name="PRIVILEGE" enabled="true" />
+          <object-type name="CHARSET" enabled="true" />
+          <object-type name="TABLE" enabled="true" />
+          <object-type name="VIEW" enabled="true" />
+          <object-type name="JSON_VIEW" enabled="true" />
+          <object-type name="MATERIALIZED_VIEW" enabled="true" />
+          <object-type name="NESTED_TABLE" enabled="true" />
+          <object-type name="COLUMN" enabled="true" />
+          <object-type name="INDEX" enabled="true" />
+          <object-type name="CONSTRAINT" enabled="true" />
+          <object-type name="DATASET_TRIGGER" enabled="true" />
+          <object-type name="DATABASE_TRIGGER" enabled="true" />
+          <object-type name="SYNONYM" enabled="true" />
+          <object-type name="SEQUENCE" enabled="true" />
+          <object-type name="PROCEDURE" enabled="true" />
+          <object-type name="FUNCTION" enabled="true" />
+          <object-type name="PACKAGE" enabled="true" />
+          <object-type name="TYPE" enabled="true" />
+          <object-type name="TYPE_ATTRIBUTE" enabled="true" />
+          <object-type name="ARGUMENT" enabled="true" />
+          <object-type name="JAVA_CLASS" enabled="true" />
+          <object-type name="JAVA_FIELD" enabled="true" />
+          <object-type name="JAVA_METHOD" enabled="true" />
+          <object-type name="JAVA_RESOURCE" enabled="true" />
+          <object-type name="DIMENSION" enabled="true" />
+          <object-type name="CLUSTER" enabled="true" />
+          <object-type name="DBLINK" enabled="true" />
+          <object-type name="CREDENTIAL" enabled="true" />
+          <object-type name="AI_PROFILE" enabled="true" />
+          <object-type name="AI_MODEL" enabled="true" />
+        </object-type-filter>
+      </filters>
+      <sorting>
+        <object-type name="COLUMN" sorting-type="NAME" />
+        <object-type name="FUNCTION" sorting-type="NAME" />
+        <object-type name="PROCEDURE" sorting-type="NAME" />
+        <object-type name="ARGUMENT" sorting-type="POSITION" />
+        <object-type name="TYPE ATTRIBUTE" sorting-type="POSITION" />
+      </sorting>
+      <default-editors>
+        <object-type name="VIEW" editor-type="SELECTION" />
+        <object-type name="PACKAGE" editor-type="SELECTION" />
+        <object-type name="TYPE" editor-type="SELECTION" />
+      </default-editors>
+    </browser-settings>
+    <navigation-settings>
+      <lookup-filters>
+        <lookup-objects>
+          <object-type name="SCHEMA" enabled="true" />
+          <object-type name="USER" enabled="false" />
+          <object-type name="ROLE" enabled="false" />
+          <object-type name="PRIVILEGE" enabled="false" />
+          <object-type name="CHARSET" enabled="false" />
+          <object-type name="TABLE" enabled="true" />
+          <object-type name="VIEW" enabled="true" />
+          <object-type name="JSON VIEW" enabled="true" />
+          <object-type name="MATERIALIZED VIEW" enabled="true" />
+          <object-type name="INDEX" enabled="true" />
+          <object-type name="CONSTRAINT" enabled="true" />
+          <object-type name="DATASET TRIGGER" enabled="true" />
+          <object-type name="DATABASE TRIGGER" enabled="true" />
+          <object-type name="SYNONYM" enabled="false" />
+          <object-type name="SEQUENCE" enabled="true" />
+          <object-type name="PROCEDURE" enabled="true" />
+          <object-type name="FUNCTION" enabled="true" />
+          <object-type name="PACKAGE" enabled="true" />
+          <object-type name="TYPE" enabled="true" />
+          <object-type name="JAVA CLASS" enabled="true" />
+          <object-type name="INNER CLASS" enabled="true" />
+          <object-type name="JAVA FIELD" enabled="true" />
+          <object-type name="JAVA METHOD" enabled="true" />
+          <object-type name="JAVA PARAMETER" enabled="true" />
+          <object-type name="JAVA RESOURCE" enabled="true" />
+          <object-type name="DIMENSION" enabled="false" />
+          <object-type name="CLUSTER" enabled="false" />
+          <object-type name="DBLINK" enabled="false" />
+          <object-type name="CREDENTIAL" enabled="false" />
+        </lookup-objects>
+        <force-database-load value="false" />
+        <prompt-connection-selection value="true" />
+        <prompt-schema-selection value="true" />
+      </lookup-filters>
+    </navigation-settings>
+    <dataset-grid-settings>
+      <general>
+        <enable-zooming value="true" />
+        <enable-column-tooltip value="true" />
+      </general>
+      <sorting>
+        <nulls-first value="true" />
+        <max-sorting-columns value="4" />
+      </sorting>
+      <audit-columns>
+        <column-names value="" />
+        <visible value="true" />
+        <editable value="false" />
+      </audit-columns>
+    </dataset-grid-settings>
+    <dataset-editor-settings>
+      <text-editor-popup>
+        <active value="false" />
+        <active-if-empty value="false" />
+        <data-length-threshold value="100" />
+        <popup-delay value="1000" />
+      </text-editor-popup>
+      <values-actions-popup>
+        <show-popup-button value="true" />
+        <element-count-threshold value="1000" />
+        <data-length-threshold value="250" />
+      </values-actions-popup>
+      <general>
+        <fetch-block-size value="100" />
+        <fetch-timeout value="30" />
+        <trim-whitespaces value="true" />
+        <convert-empty-strings-to-null value="true" />
+        <select-content-on-cell-edit value="true" />
+        <large-value-preview-active value="true" />
+      </general>
+      <filters>
+        <prompt-filter-dialog value="true" />
+        <default-filter-type value="BASIC" />
+      </filters>
+      <qualified-text-editor text-length-threshold="300">
+        <content-types>
+          <content-type name="Text" enabled="true" />
+          <content-type name="Properties" enabled="true" />
+          <content-type name="XML" enabled="true" />
+          <content-type name="DTD" enabled="true" />
+          <content-type name="HTML" enabled="true" />
+          <content-type name="XHTML" enabled="true" />
+          <content-type name="SQL" enabled="true" />
+          <content-type name="PL/SQL" enabled="true" />
+          <content-type name="JSON" enabled="true" />
+          <content-type name="JSON5" enabled="true" />
+          <content-type name="YAML" enabled="true" />
+        </content-types>
+      </qualified-text-editor>
+      <record-navigation>
+        <navigation-target value="VIEWER" />
+      </record-navigation>
+    </dataset-editor-settings>
+    <code-editor-settings>
+      <general>
+        <show-object-navigation-gutter value="false" />
+        <show-spec-declaration-navigation-gutter value="true" />
+        <enable-spellchecking value="true" />
+        <enable-reference-spellchecking value="false" />
+      </general>
+      <confirmations>
+        <save-changes value="false" />
+        <revert-changes value="true" />
+        <exit-on-changes value="ASK" />
+      </confirmations>
+    </code-editor-settings>
+    <code-completion-settings>
+      <filters>
+        <basic-filter>
+          <filter-element type="RESERVED_WORD" id="keyword" selected="true" />
+          <filter-element type="RESERVED_WORD" id="function" selected="true" />
+          <filter-element type="RESERVED_WORD" id="parameter" selected="true" />
+          <filter-element type="RESERVED_WORD" id="datatype" selected="true" />
+          <filter-element type="RESERVED_WORD" id="exception" selected="true" />
+          <filter-element type="OBJECT" id="schema" selected="true" />
+          <filter-element type="OBJECT" id="role" selected="true" />
+          <filter-element type="OBJECT" id="user" selected="true" />
+          <filter-element type="OBJECT" id="privilege" selected="true" />
+          <user-schema>
+            <filter-element type="OBJECT" id="table" selected="true" />
+            <filter-element type="OBJECT" id="view" selected="true" />
+            <filter-element type="OBJECT" id="json view" selected="true" />
+            <filter-element type="OBJECT" id="materialized view" selected="true" />
+            <filter-element type="OBJECT" id="index" selected="true" />
+            <filter-element type="OBJECT" id="constraint" selected="true" />
+            <filter-element type="OBJECT" id="trigger" selected="true" />
+            <filter-element type="OBJECT" id="synonym" selected="false" />
+            <filter-element type="OBJECT" id="sequence" selected="true" />
+            <filter-element type="OBJECT" id="procedure" selected="true" />
+            <filter-element type="OBJECT" id="function" selected="true" />
+            <filter-element type="OBJECT" id="package" selected="true" />
+            <filter-element type="OBJECT" id="type" selected="true" />
+            <filter-element type="OBJECT" id="dimension" selected="true" />
+            <filter-element type="OBJECT" id="cluster" selected="true" />
+            <filter-element type="OBJECT" id="dblink" selected="true" />
+          </user-schema>
+          <public-schema>
+            <filter-element type="OBJECT" id="table" selected="false" />
+            <filter-element type="OBJECT" id="view" selected="false" />
+            <filter-element type="OBJECT" id="json view" selected="false" />
+            <filter-element type="OBJECT" id="materialized view" selected="false" />
+            <filter-element type="OBJECT" id="index" selected="false" />
+            <filter-element type="OBJECT" id="constraint" selected="false" />
+            <filter-element type="OBJECT" id="trigger" selected="false" />
+            <filter-element type="OBJECT" id="synonym" selected="false" />
+            <filter-element type="OBJECT" id="sequence" selected="false" />
+            <filter-element type="OBJECT" id="procedure" selected="false" />
+            <filter-element type="OBJECT" id="function" selected="false" />
+            <filter-element type="OBJECT" id="package" selected="false" />
+            <filter-element type="OBJECT" id="type" selected="false" />
+            <filter-element type="OBJECT" id="dimension" selected="false" />
+            <filter-element type="OBJECT" id="cluster" selected="false" />
+            <filter-element type="OBJECT" id="dblink" selected="false" />
+          </public-schema>
+          <any-schema>
+            <filter-element type="OBJECT" id="table" selected="true" />
+            <filter-element type="OBJECT" id="view" selected="true" />
+            <filter-element type="OBJECT" id="json view" selected="true" />
+            <filter-element type="OBJECT" id="materialized view" selected="true" />
+            <filter-element type="OBJECT" id="index" selected="true" />
+            <filter-element type="OBJECT" id="constraint" selected="true" />
+            <filter-element type="OBJECT" id="trigger" selected="true" />
+            <filter-element type="OBJECT" id="synonym" selected="true" />
+            <filter-element type="OBJECT" id="sequence" selected="true" />
+            <filter-element type="OBJECT" id="procedure" selected="true" />
+            <filter-element type="OBJECT" id="function" selected="true" />
+            <filter-element type="OBJECT" id="package" selected="true" />
+            <filter-element type="OBJECT" id="type" selected="true" />
+            <filter-element type="OBJECT" id="dimension" selected="true" />
+            <filter-element type="OBJECT" id="cluster" selected="true" />
+            <filter-element type="OBJECT" id="dblink" selected="true" />
+          </any-schema>
+        </basic-filter>
+        <extended-filter>
+          <filter-element type="RESERVED_WORD" id="keyword" selected="true" />
+          <filter-element type="RESERVED_WORD" id="function" selected="true" />
+          <filter-element type="RESERVED_WORD" id="parameter" selected="true" />
+          <filter-element type="RESERVED_WORD" id="datatype" selected="true" />
+          <filter-element type="RESERVED_WORD" id="exception" selected="true" />
+          <filter-element type="OBJECT" id="schema" selected="true" />
+          <filter-element type="OBJECT" id="user" selected="true" />
+          <filter-element type="OBJECT" id="role" selected="true" />
+          <filter-element type="OBJECT" id="privilege" selected="true" />
+          <user-schema>
+            <filter-element type="OBJECT" id="table" selected="true" />
+            <filter-element type="OBJECT" id="view" selected="true" />
+            <filter-element type="OBJECT" id="json view" selected="true" />
+            <filter-element type="OBJECT" id="materialized view" selected="true" />
+            <filter-element type="OBJECT" id="index" selected="true" />
+            <filter-element type="OBJECT" id="constraint" selected="true" />
+            <filter-element type="OBJECT" id="trigger" selected="true" />
+            <filter-element type="OBJECT" id="synonym" selected="true" />
+            <filter-element type="OBJECT" id="sequence" selected="true" />
+            <filter-element type="OBJECT" id="procedure" selected="true" />
+            <filter-element type="OBJECT" id="function" selected="true" />
+            <filter-element type="OBJECT" id="package" selected="true" />
+            <filter-element type="OBJECT" id="type" selected="true" />
+            <filter-element type="OBJECT" id="dimension" selected="true" />
+            <filter-element type="OBJECT" id="cluster" selected="true" />
+            <filter-element type="OBJECT" id="dblink" selected="true" />
+          </user-schema>
+          <public-schema>
+            <filter-element type="OBJECT" id="table" selected="true" />
+            <filter-element type="OBJECT" id="view" selected="true" />
+            <filter-element type="OBJECT" id="json view" selected="true" />
+            <filter-element type="OBJECT" id="materialized view" selected="true" />
+            <filter-element type="OBJECT" id="index" selected="true" />
+            <filter-element type="OBJECT" id="constraint" selected="true" />
+            <filter-element type="OBJECT" id="trigger" selected="true" />
+            <filter-element type="OBJECT" id="synonym" selected="true" />
+            <filter-element type="OBJECT" id="sequence" selected="true" />
+            <filter-element type="OBJECT" id="procedure" selected="true" />
+            <filter-element type="OBJECT" id="function" selected="true" />
+            <filter-element type="OBJECT" id="package" selected="true" />
+            <filter-element type="OBJECT" id="type" selected="true" />
+            <filter-element type="OBJECT" id="dimension" selected="true" />
+            <filter-element type="OBJECT" id="cluster" selected="true" />
+            <filter-element type="OBJECT" id="dblink" selected="true" />
+          </public-schema>
+          <any-schema>
+            <filter-element type="OBJECT" id="table" selected="true" />
+            <filter-element type="OBJECT" id="view" selected="true" />
+            <filter-element type="OBJECT" id="json view" selected="true" />
+            <filter-element type="OBJECT" id="materialized view" selected="true" />
+            <filter-element type="OBJECT" id="index" selected="true" />
+            <filter-element type="OBJECT" id="constraint" selected="true" />
+            <filter-element type="OBJECT" id="trigger" selected="true" />
+            <filter-element type="OBJECT" id="synonym" selected="true" />
+            <filter-element type="OBJECT" id="sequence" selected="true" />
+            <filter-element type="OBJECT" id="procedure" selected="true" />
+            <filter-element type="OBJECT" id="function" selected="true" />
+            <filter-element type="OBJECT" id="package" selected="true" />
+            <filter-element type="OBJECT" id="type" selected="true" />
+            <filter-element type="OBJECT" id="dimension" selected="true" />
+            <filter-element type="OBJECT" id="cluster" selected="true" />
+            <filter-element type="OBJECT" id="dblink" selected="true" />
+          </any-schema>
+        </extended-filter>
+      </filters>
+      <sorting enabled="true">
+        <sorting-element type="RESERVED_WORD" id="keyword" />
+        <sorting-element type="RESERVED_WORD" id="datatype" />
+        <sorting-element type="OBJECT" id="column" />
+        <sorting-element type="OBJECT" id="table" />
+        <sorting-element type="OBJECT" id="view" />
+        <sorting-element type="OBJECT" id="json view" />
+        <sorting-element type="OBJECT" id="materialized view" />
+        <sorting-element type="OBJECT" id="index" />
+        <sorting-element type="OBJECT" id="constraint" />
+        <sorting-element type="OBJECT" id="trigger" />
+        <sorting-element type="OBJECT" id="synonym" />
+        <sorting-element type="OBJECT" id="sequence" />
+        <sorting-element type="OBJECT" id="procedure" />
+        <sorting-element type="OBJECT" id="function" />
+        <sorting-element type="OBJECT" id="package" />
+        <sorting-element type="OBJECT" id="type" />
+        <sorting-element type="OBJECT" id="dimension" />
+        <sorting-element type="OBJECT" id="cluster" />
+        <sorting-element type="OBJECT" id="dblink" />
+        <sorting-element type="OBJECT" id="schema" />
+        <sorting-element type="OBJECT" id="role" />
+        <sorting-element type="OBJECT" id="user" />
+        <sorting-element type="RESERVED_WORD" id="function" />
+        <sorting-element type="RESERVED_WORD" id="parameter" />
+      </sorting>
+      <format>
+        <enforce-code-style-case value="true" />
+      </format>
+    </code-completion-settings>
+    <execution-engine-settings>
+      <statement-execution>
+        <fetch-block-size value="100" />
+        <execution-timeout value="20" />
+        <debug-execution-timeout value="600" />
+        <focus-result value="false" />
+        <prompt-execution value="false" />
+      </statement-execution>
+      <script-execution>
+        <command-line-interfaces />
+        <execution-timeout value="300" />
+      </script-execution>
+      <method-execution>
+        <execution-timeout value="30" />
+        <debug-execution-timeout value="600" />
+        <parameter-history-size value="10" />
+      </method-execution>
+      <method-execution>
+        <execution-timeout value="30" />
+        <debug-execution-timeout value="600" />
+        <parameter-history-size value="10" />
+      </method-execution>
+    </execution-engine-settings>
+    <operation-settings>
+      <transactions>
+        <uncommitted-changes>
+          <on-project-close value="ASK" />
+          <on-disconnect value="ASK" />
+          <on-autocommit-toggle value="ASK" />
+        </uncommitted-changes>
+        <multiple-uncommitted-changes>
+          <on-commit value="ASK" />
+          <on-rollback value="ASK" />
+        </multiple-uncommitted-changes>
+      </transactions>
+      <session-browser>
+        <disconnect-session value="ASK" />
+        <kill-session value="ASK" />
+        <reload-on-filter-change value="false" />
+      </session-browser>
+      <compiler>
+        <compile-type value="KEEP" />
+        <compile-dependencies value="ASK" />
+        <always-show-controls value="false" />
+      </compiler>
+    </operation-settings>
+    <ddl-file-settings>
+      <extensions>
+        <mapping file-type-id="VIEW" extensions="vw" />
+        <mapping file-type-id="TRIGGER" extensions="trg" />
+        <mapping file-type-id="PROCEDURE" extensions="prc" />
+        <mapping file-type-id="FUNCTION" extensions="fnc" />
+        <mapping file-type-id="PACKAGE" extensions="pkg" />
+        <mapping file-type-id="PACKAGE_SPEC" extensions="pks" />
+        <mapping file-type-id="PACKAGE_BODY" extensions="pkb" />
+        <mapping file-type-id="TYPE" extensions="tpe" />
+        <mapping file-type-id="TYPE_SPEC" extensions="tps" />
+        <mapping file-type-id="TYPE_BODY" extensions="tpb" />
+        <mapping file-type-id="JAVA_SOURCE" extensions="sql" />
+      </extensions>
+      <general>
+        <lookup-ddl-files value="true" />
+        <create-ddl-files value="false" />
+        <synchronize-ddl-files value="true" />
+        <use-qualified-names value="false" />
+        <make-scripts-rerunnable value="true" />
+      </general>
+    </ddl-file-settings>
+    <assistant-settings>
+      <credential-settings>
+        <credentials />
+      </credential-settings>
+      <profile-settings>
+        <profiles />
+      </profile-settings>
+    </assistant-settings>
+    <general-settings>
+      <regional-settings>
+        <date-format value="MEDIUM" />
+        <number-format value="UNGROUPED" />
+        <locale value="SYSTEM_DEFAULT" />
+        <use-custom-formats value="false" />
+      </regional-settings>
+      <environment>
+        <environment-types>
+          <environment-type id="development" name="Development" description="Development environment" color="-2430209/-12296320" readonly-code="false" readonly-data="false" />
+          <environment-type id="integration" name="Integration" description="Integration environment" color="-2621494/-12163514" readonly-code="true" readonly-data="false" />
+          <environment-type id="production" name="Production" description="Productive environment" color="-11574/-10271420" readonly-code="true" readonly-data="true" />
+          <environment-type id="other" name="Other" description="" color="-1576/-10724543" readonly-code="false" readonly-data="false" />
+        </environment-types>
+        <visibility-settings>
+          <connection-tabs value="true" />
+          <dialog-headers value="true" />
+          <object-editor-tabs value="true" />
+          <script-editor-tabs value="false" />
+          <execution-result-tabs value="true" />
+        </visibility-settings>
+      </environment>
+    </general-settings>
+  </component>
+  <component name="DBNavigator.Project.StatementExecutionManager">
+    <execution-variables />
+    <execution-variable-types />
+  </component>
+</project>
