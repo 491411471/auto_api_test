@@ -1,0 +1,398 @@
+# common/test_helpers.py
+import json
+import re
+from typing import Any, Dict, Set
+
+import allure
+from common.logger import logger
+from utils.assert_utils import assert_status_code
+from utils.variable_utils import validate
+from typing import List, Dict, Any
+
+try:
+    from jsonpath_ng import parse as jsonpath_parse
+    from jsonpath_ng.exceptions import JsonPathParserError, JsonPathLexerError
+    JSONPATH_AVAILABLE = True
+except ImportError:
+    JSONPATH_AVAILABLE = False
+    JsonPathParserError = Exception
+    JsonPathLexerError = Exception
+
+
+# ==================== 通用变量替换函数 ====================
+# def replace_placeholders(data: Any, variables: Dict[str, Any]) -> Any:
+#     """递归替换对象中所有字符串值里的 ${key} 占位符。"""
+#     if isinstance(data, str):
+#         def replacer(match):
+#             key = match.group(1)
+#             if key in variables:
+#                 val = variables[key]
+#                 return str(val) if val is not None else ''
+#             return match.group(0)
+#         return re.sub(r'\$\{([^}]+)}', replacer, data)
+#     elif isinstance(data, dict):
+#         return {k: replace_placeholders(v, variables) for k, v in data.items()}
+#     elif isinstance(data, list):
+#         return [replace_placeholders(item, variables) for item in data]
+#     else:
+#         return data
+def replace_placeholders(data: Any, variables: Dict[str, Any]) -> Any:
+    if isinstance(data, str):
+        # 完全匹配占位符 ${key}
+        for key, value in variables.items():
+            placeholder = f"${{{key}}}"
+            if data == placeholder:
+                # 递归处理 value（可能包含嵌套占位符）
+                return replace_placeholders(value, variables)
+        # 部分匹配替换（可能字符串内嵌多个占位符）
+        def replacer(match):
+            key = match.group(1)
+            if key in variables:
+                val = variables[key]
+                return str(val) if val is not None else ''
+            return match.group(0)
+        return re.sub(r'\$\{([^}]+)}', replacer, data)
+    elif isinstance(data, dict):
+        return {k: replace_placeholders(v, variables) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [replace_placeholders(item, variables) for item in data]
+    else:
+        return data
+
+def extract_placeholders(obj: Any) -> Set[str]:
+    """提取对象中所有 ${xxx} 占位符的键名集合"""
+    obj_str = json.dumps(obj, ensure_ascii=False)
+    return set(re.findall(r'\$\{([^}]+)}', obj_str))
+
+
+# ==================== SQL 处理 ====================
+def execute_sql(db, sql_config: Dict[str, Any]) -> Any:
+    """执行 SQL，支持单行和多行结果"""
+    query = sql_config.get('query')
+    if not query:
+        return None
+
+    multiple = sql_config.get('multiple', False)
+    column = sql_config.get('column')
+
+    step_name = f"执行数据库查询: {column if column else '多行'}" if multiple else f"执行数据库查询: {column if column else '单行'}"
+    with allure.step(step_name):
+        allure.attach(query, name="执行的 SQL", attachment_type=allure.attachment_type.TEXT)
+        logger.info(f"执行 SQL: {query}")
+
+        if multiple:
+            rows = db.fetch_all(query)  # 假设 db 有 fetch_all 方法
+            if not rows:
+                raise ValueError(f"SQL 无结果: {query}")
+            if column:
+                values = [row[column] for row in rows]
+                allure.attach(f"{column} = {values}", name="SQL 结果", attachment_type=allure.attachment_type.TEXT)
+                return values
+            allure.attach(str(rows), name="SQL 结果", attachment_type=allure.attachment_type.TEXT)
+            return rows
+        else:
+            result = db.fetch_one(query)
+            if result is None:
+                raise ValueError(f"SQL 无结果: {query}")
+            if column:
+                if column not in result:
+                    raise ValueError(f"列 '{column}' 不存在，可用: {list(result.keys())}")
+                value = result[column]
+                allure.attach(f"{column} = {value}", name="SQL 结果", attachment_type=allure.attachment_type.TEXT)
+                return value
+            allure.attach(str(result), name="SQL 结果", attachment_type=allure.attachment_type.TEXT)
+            return result
+
+
+def process_dynamic_data(case: Dict[str, Any], db, variables: Dict[str, Any]) -> None:
+    if 'sql' not in case:
+        return
+    with allure.step("处理 SQL 动态数据，从数据库获取测试变量"):
+        sql_config = case['sql']
+        sql_config_replaced = replace_placeholders(sql_config, variables)
+        allure.attach(sql_config_replaced.get('query', ''), name="替换变量后的 SQL", attachment_type=allure.attachment_type.TEXT)
+        result = execute_sql(db, sql_config_replaced)
+
+        if isinstance(result, list):
+            # 多行结果
+            column = sql_config.get('column')
+            if column:
+                variables[column] = result
+                logger.info(f"从数据库获取的变量（多行）: {column} = {result}")
+                allure.attach(f"{column} = {result}", name="从数据库获取的变量（多行）", attachment_type=allure.attachment_type.TEXT)
+            else:
+                variables['sql_result'] = result
+                logger.info(f"从数据库获取的变量（多行）: sql_result = {result}")
+                allure.attach(f"sql_result = {result}", name="从数据库获取的变量（多行）", attachment_type=allure.attachment_type.TEXT)
+        elif isinstance(result, dict):
+            variables.update(result)
+            logger.info(f"从数据库获取的变量: {result}")
+            allure.attach(str(result), name="从数据库获取的变量（多列）", attachment_type=allure.attachment_type.TEXT)
+        else:
+            column = sql_config.get('column')
+            if column:
+                variables[column] = result
+                logger.info(f"从数据库获取的变量: {column} = {result}")
+                allure.attach(f"{column} = {result}", name="从数据库获取的变量", attachment_type=allure.attachment_type.TEXT)
+            else:
+                variables['sql_result'] = result
+                logger.info(f"从数据库获取的变量: sql_result = {result}")
+                allure.attach(f"sql_result = {result}", name="从数据库获取的变量", attachment_type=allure.attachment_type.TEXT)
+
+
+# ==================== 响应处理与断言 ====================
+def get_records_from_response(data: Dict[str, Any]) -> list:
+    """安全提取响应中的 records 列表"""
+    if not isinstance(data, dict):
+        return []
+    if 'records' in data and isinstance(data['records'], list):
+        return data['records']
+    if 'data' in data and isinstance(data['data'], dict):
+        inner = data['data']
+        if 'records' in inner and isinstance(inner['records'], list):
+            return inner['records']
+    return []
+
+
+def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], variables: Dict[str, Any]) -> None:
+    """执行所有断言验证，每个断言独立写入 Allure 步骤（无额外嵌套）"""
+
+    def get_value_by_path_enhanced(obj: Any, path: str) -> Any:
+        """增强的路径取值，支持 JSONPath、条件筛选、数组索引等"""
+        # 1. JSONPath 优先
+        if JSONPATH_AVAILABLE:
+            jsonpath_str = path
+            if not jsonpath_str.startswith('$'):
+                jsonpath_str = '$.' + jsonpath_str
+            jsonpath_str = re.sub(r"==\s*'([^']*)'", r'=="\1"', jsonpath_str)
+            jsonpath_str = re.sub(r'\?\(\s*@\.', '?(@.', jsonpath_str)
+            try:
+                expr = jsonpath_parse(jsonpath_str)
+                matches = expr.find(obj)
+                if matches:
+                    return matches[0].value if len(matches) == 1 else [m.value for m in matches]
+            except (JsonPathParserError, JsonPathLexerError) as e:
+                logger.debug(f"JSONPath 解析失败: {jsonpath_str}, 错误: {e}，降级使用自定义解析")
+
+        # 2. 条件筛选语法：array[?(@.field=='value')].subpath
+        pattern = r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\?\s*\(\s*@\.([a-zA-Z_][a-zA-Z0-9_]*)\s*==\s*[\'\"](.*?)[\'\"]\s*\)\s*\](?:\.(.*))?$'
+        match = re.match(pattern, path)
+        if match:
+            array_name, field_name, expected_value, sub_path = match.groups()
+            if not isinstance(obj, dict):
+                return None
+            array_obj = obj.get(array_name)
+            if not isinstance(array_obj, list):
+                return None
+            for item in array_obj:
+                if isinstance(item, dict) and str(item.get(field_name)) == expected_value:
+                    if sub_path:
+                        return get_value_by_path_enhanced(item, sub_path)
+                    return item
+            return None
+
+        # 3. 普通点分隔路径（支持数组索引）
+        parts = []
+        for part in path.split('.'):
+            if '[' in part and ']' in part:
+                array_name = part[:part.index('[')] if part.index('[') > 0 else ''
+                indices = re.findall(r'\[(\d+)\]', part)
+                if array_name:
+                    parts.append(array_name)
+                for idx in indices:
+                    parts.append(int(idx))
+            else:
+                parts.append(part)
+
+        current = obj
+        for part in parts:
+            if current is None:
+                return None
+            if isinstance(current, dict):
+                if part not in current:
+                    return None
+                current = current[part]
+            elif isinstance(current, list):
+                if isinstance(part, int) and 0 <= part < len(current):
+                    current = current[part]
+                else:
+                    return None
+            else:
+                return None
+        return current
+
+    # ---- expected_fields ----
+    if case.get('expected_fields'):
+        from utils.assert_utils import assert_json_contains
+        for field in case['expected_fields']:
+            with allure.step(f"验证字段存在: {field}"):
+                assert_json_contains(response_data, "", [field])
+
+    # ---- expected_values ----
+    if case.get('expected_values'):
+        from utils.assert_utils import assert_json_value
+        for key, expected in case['expected_values'].items():
+            with allure.step(f"验证键值对: {key} == {expected}"):
+                if isinstance(expected, str) and '${' in expected:
+                    expected = replace_placeholders(expected, variables)
+                assert_json_value(response_data, key, expected)
+
+    # ---- validate_data ----
+    records_cache = None
+    if case.get('validate_data'):
+        for idx, v in enumerate(case['validate_data']):
+            path = v['path']
+            operator = v['operator']
+            expected = v['value']
+
+            if isinstance(expected, str) and '${' in expected:
+                expected = replace_placeholders(expected, variables)
+
+            # 特殊处理空 records
+            if path == "data.records" and operator == "==" and expected == []:
+                if records_cache is None:
+                    records_cache = get_records_from_response(response_data)
+                with allure.step(f"验证 records 为空列表"):
+                    assert records_cache == [], f"期望 records 为空列表，实际为: {records_cache}"
+                continue
+
+            if path == "data" and operator == "==" and expected is None:
+                actual_data = response_data.get('data') if isinstance(response_data, dict) else None
+                with allure.step(f"验证 data 为 None"):
+                    assert actual_data is None, f"期望 data 为 None，实际为: {actual_data}"
+                continue
+
+            # 每个断言独立步骤
+            step_title = f"断言 {idx+1}: {path} {operator} {expected}"
+            with allure.step(step_title):
+                actual = get_value_by_path_enhanced(response_data, path)
+                allure.attach(
+                    f"路径: {path}\n操作符: {operator}\n期望值: {expected}\n实际值: {actual}",
+                    name="断言详情",
+                    attachment_type=allure.attachment_type.TEXT
+                )
+                # 附加响应数据快照
+                response_preview = json.dumps(response_data, ensure_ascii=False)[:2000]
+                allure.attach(response_preview, name="响应数据快照", attachment_type=allure.attachment_type.JSON)
+                validate(actual, operator, expected, path)
+
+    # ---- min_count ----
+    if case.get('min_count'):
+        with allure.step(f"验证 records 最小数量 >= {case['min_count']}"):
+            if records_cache is None:
+                records_cache = get_records_from_response(response_data)
+            assert len(records_cache) >= case['min_count'], \
+                f"订单数量应不少于 {case['min_count']}, 实际为 {len(records_cache)}"
+
+
+# ==================== 主执行函数 ====================
+def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str, Any]) -> None:
+    """完整执行测试用例，所有关键步骤写入 Allure 报告"""
+    logger.info(f"开始测试用例: {case.get('title', '未知')}")
+
+    # 设置用例标题（用例ID + 标题）
+    case_title = f"{case.get('case_id', '未知')} | {case.get('title', '未命名用例')}"
+    allure.dynamic.title(case_title)
+    allure.dynamic.description(f"用例ID: {case.get('case_id', '未知')}  |  描述: {case.get('description', '无')}")
+
+    # 步骤1：合并变量
+    with allure.step("1. 合并测试变量（全局变量 + 用例私有变量）"):
+        if 'variables' in case and isinstance(case['variables'], dict):
+            merged_vars = {**variables, **case['variables']}
+            logger.info(f"合并用例私有变量: {case['variables']}")
+        else:
+            merged_vars = variables.copy()
+        variables.clear()
+        variables.update(merged_vars)
+        logger.info(f"最终使用的 variables: {variables}")
+        allure.attach(str(variables), name="最终 variables", attachment_type=allure.attachment_type.TEXT)
+
+    # 步骤2：第一次变量替换
+    with allure.step("2. 第一次变量替换（使用已有变量替换请求参数、SQL 中的已知占位符）"):
+        case = replace_placeholders(case, variables)
+        logger.info(f"第一次替换后的请求参数: {case.get('params', {})}")
+        logger.info(f"第一次替换后的 SQL: {case.get('sql', {}).get('query', '')}")
+        allure.attach(
+            f"请求参数: {case.get('params', {})}\nSQL: {case.get('sql', {}).get('query', '')}",
+            name="第一次替换后数据",
+            attachment_type=allure.attachment_type.TEXT
+        )
+
+    # 步骤3：处理 SQL 动态数据
+
+    process_dynamic_data(case, db, variables)
+
+    # 步骤4：第二次变量替换
+    with allure.step("3. 第二次变量替换（使用包含数据库结果的完整 variables 替换所有剩余占位符）"):
+        case = replace_placeholders(case, variables)
+        logger.debug(f"最终替换后的请求参数: {case.get('params', {})}")
+        logger.debug(f"最终替换后的 SQL: {case.get('sql', {}).get('query', '')}")
+        allure.attach(
+            f"请求参数: {case.get('params', {})}\nSQL: {case.get('sql', {}).get('query', '')}",
+            name="最终替换后数据",
+            attachment_type=allure.attachment_type.TEXT
+        )
+
+    # 步骤5：发送请求并验证响应
+    with allure.step(f"4. 发送 HTTP {case.get('method', 'POST').upper()} 请求并验证响应"):
+        method = case.get('method', 'POST').upper()
+        endpoint = case.get('endpoint', '')
+        allure.attach(f"{method} {endpoint}", name="请求 URL", attachment_type=allure.attachment_type.TEXT)
+        # 初始化变量
+        params = case.get('params', {})  # URL 查询参数
+        body_data = case.get('json', {})  # 默认请求体数据
+        print("body_data", body_data)
+        # 判断是否为 form-urlencoded 格式
+        # 约定 YAML 中新增一个字段 body_type 来标识，或者直接判断 body 里是否有特定的结构
+        body_type = case.get('body_type', 'json')  # 默认为 json
+        print("body_type:", body_type)
+        if method == 'GET':
+            allure.attach(str(params), name="请求参数 (Query)", attachment_type=allure.attachment_type.TEXT)
+            resp = api_client.get(endpoint, params=params)
+        else:
+            # 处理 form-urlencoded (对应 Postman 的 x-www-form-urlencoded)
+            if body_type == 'form-urlencoded':
+                # 将字典转换为 key=value&key2=value2 的字符串格式
+                # requests 库会自动设置 Content-Type: application/x-www-form-urlencoded
+                import urllib.parse
+                encoded_data = urllib.parse.urlencode(body_data)
+
+                allure.attach(
+                    urllib.parse.unquote(encoded_data),  # 解码展示方便阅读
+                    name="请求体 (Form-UrlEncoded)",
+                    attachment_type=allure.attachment_type.TEXT
+                )
+                print("encoded_data------------",encoded_data)
+                # 发送 form 数据
+                resp = api_client.post(endpoint, data=encoded_data, params=params)
+
+            else:
+                # 默认的 JSON 请求 (对应 Postman 的 raw-JSON)
+                allure.attach(json.dumps(body_data, ensure_ascii=False, indent=2), name="请求体 (JSON)", attachment_type=allure.attachment_type.JSON)
+                if body_data:
+                    resp = api_client.post(endpoint, json=body_data, params=params)
+                else:
+                    resp = api_client.post(endpoint, params=params)
+
+        logger.info(f"响应状态码: {resp.status_code}")
+        allure.attach(str(resp.status_code), name="HTTP 状态码", attachment_type=allure.attachment_type.TEXT)
+        assert_status_code(resp.status_code, case['expected_status'])
+
+        response_data = resp.json()
+        response_str = json.dumps(response_data, ensure_ascii=False)[:5000]
+        allure.attach(response_str, name="完整响应体", attachment_type=allure.attachment_type.JSON)
+        logger.info(f"解析后的 JSON 摘要: {response_str[:200]}...")
+        validate_response(case, response_data, variables)
+
+    logger.info(f"测试通过: {case['case_id']} - {case['title']}")
+
+def get_case_by_id(case_list: List[Dict[str, Any]], case_id: str) -> Dict[str, Any]:
+    """
+    根据 case_id 从用例列表中获取测试用例数据。
+    该函数用于测试框架中，当所有用例数据已通过 YAML 加载为列表后，
+    可依据用例编号快速定位具体用例，避免重复遍历和手动判断。
+    """
+    for case in case_list:
+        if case.get('case_id') == case_id:
+            return case
+    raise ValueError(f"未找到 case_id 为 {case_id} 的测试数据")

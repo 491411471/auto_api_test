@@ -1,0 +1,83 @@
+# 订单列表批量分配负责人测试数据
+# 接口：/hzsx/business/order/batch_assign_responsible_person
+# 请求方法：POST
+# 接口功能：批量将订单分配给指定负责人
+# 创建时间：2026-05-13
+# 更新时间：2026-05-13
+
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/business/order/batch_assign_responsible_person"
+# 公共变量（动态数据）
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  responsible_person_id: "1011190"  # 负责人ID
+  responsible_person_name: "李娴"   # 负责人姓名
+
+order_batch_assign_tests:
+  # ==================== 正常批量分配负责人 ====================
+  - case_id: OBAR_001
+    title: "订单列表分配一个负责人--正常分配"
+    description: "验证批量将订单分配给指定负责人的接口功能"
+    <<: *common_endpoint
+    json:
+      orderIdList:
+        - "${order_id}"  # 动态获取订单ID列表
+      shopId: "${shop_id}"          # 动态引用店铺ID
+      responsiblePersonId: "${responsible_person_id}"      # 动态引用负责人ID
+      responsiblePersonName: "${responsible_person_name}"  # 动态引用负责人姓名
+    sql:
+      query: |
+        SELECT order_id
+        FROM llxz_order.ct_user_orders
+        WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' AND create_time >= DATE_SUB( NOW(), INTERVAL 30 DAY )
+        ORDER BY create_time DESC
+        LIMIT 1;
+      column: "order_id"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.finalSuccess"
+        operator: "=="
+        value: true
+
+
+#   ==================== 空订单列表分配 ====================
+  - case_id: OBAR_002
+    title: "订单列表批量分配负责人--空订单列表"
+    description: "验证当订单列表为空时的分配接口处理"
+    <<: *common_endpoint
+    json:
+      orderIdList: "${order_id}"  # 动态获取订单ID列表
+      shopId: "${shop_id}"
+      responsiblePersonId: "${responsible_person_id}"
+      responsiblePersonName: "${responsible_person_name}"
+    sql:
+      query: |
+        SELECT order_id
+        FROM llxz_order.ct_user_orders
+        WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' AND create_time >= DATE_SUB( NOW(), INTERVAL 30 DAY )
+        ORDER BY create_time DESC
+        LIMIT 3;
+      column: "order_id"
+      multiple: true          # 关键：多行查询，返回列表
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+

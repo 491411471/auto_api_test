@@ -1,0 +1,4 @@
+路径: data.records[*].realName
+操作符: all_eq
+期望值: 陶玥
+实际值: None

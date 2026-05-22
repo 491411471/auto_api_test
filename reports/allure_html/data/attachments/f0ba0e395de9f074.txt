@@ -1,0 +1,6 @@
+
+                        UPDATE llxz_order.ct_user_orders
+                        SET withhold_type = 9,
+                            user_is_signed = 2
+                        WHERE order_id = '008OI202605212057178300345618432T'
+                    

@@ -1,0 +1,5 @@
+2026-04-30 11:14:02,588 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_key | timeout=15
+2026-04-30 11:15:16,005 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_key | timeout=15
+2026-04-30 11:16:49,880 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=15
+2026-04-30 11:20:36,263 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=15 | headers=
+2026-04-30 11:21:31,065 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=15 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'j38rrid901dnubll4ullztv8bt31pnxy'}

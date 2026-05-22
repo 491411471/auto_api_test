@@ -1,0 +1,351 @@
+# 全局变量（公共配置）
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+.common_endpoint: &common_endpoint
+  method: GET
+  endpoint: "/hzsx/business/order/countOrderStatus"
+
+.common_params: &common_params
+  requestSource: "businessNewOfListHeaderStatus"
+
+order_status_tests:
+  # ==================== 全部订单 ====================
+  - case_id: OST_001
+    title: "验证全部订单统计"
+    description: "查询当前店铺所有订单数量，与接口返回的 status=00 的 total 比较"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT COUNT(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE shop_id = '${shop_id}'
+            AND channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+            AND rent_start IS NOT NULL
+            AND (delete_time IS NULL OR delete_time <= '2001-01-01 00:00:00');
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='00')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 待支付 ====================
+  - case_id: OST_002
+    title: "验证待支付订单统计"
+    description: "状态为待支付（status='01'）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT status, count(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE (shop_id = '${shop_id}' AND
+               channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
+               (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) and status ='01'
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='01')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 待审核 ====================
+  - case_id: OST_003
+    title: "验证待审核订单统计"
+    description: "状态为待审核（status='13'）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT status, count(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE (shop_id = '${shop_id}' AND
+               channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
+               (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) and status IN ('13','14')
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='11')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 待发货 ====================
+  - case_id: OST_004
+    title: "验证待发货订单统计"
+    description: "状态为待发货（status='04'）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT status, count(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE (shop_id = '${shop_id}' AND
+               channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
+               (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) and status ='04'
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='04')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 待确认收货 ====================
+  - case_id: OST_005
+    title: "验证待确认收货订单统计"
+    description: "状态为待确认收货（status='05'）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT status, count(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE (shop_id = '${shop_id}' AND
+               channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
+               (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) and status ='05'
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='05')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 租用中 ====================
+  - case_id: OST_006
+    title: "验证租用中订单统计"
+    description: "状态为租用中（status='06'）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT status, count(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE (shop_id = '${shop_id}' AND
+               channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
+               (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) and status ='06'
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='06')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 待结算 ====================
+  - case_id: OST_007
+    title: "验证待结算订单统计"
+    description: "状态为待结算（status='07'）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT status, count(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE (shop_id = '${shop_id}' AND
+               channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
+               (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) and status ='07'
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='07')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 订单完成 ====================
+  - case_id: OST_008
+    title: "验证订单完成统计"
+    description: "状态为订单完成（status='09'）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT status, count(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE (shop_id = '${shop_id}' AND
+               channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
+               (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) and status ='09'
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='09')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 待归还 ====================
+  - case_id: OST_009
+    title: "验证待归还订单统计"
+    description: "状态为待归还（status='06'|'07'|unrent_time >当日期时间）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT COUNT(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE shop_id = '${shop_id}'
+          AND channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+          AND rent_start IS NOT NULL
+          AND (delete_time IS NULL OR delete_time <= '2001-01-01 00:00:00')
+          AND status IN ('06')
+          AND unrent_time < NOW();
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='12')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 归还中 ====================
+  - case_id: OST_010
+    title: "验证归还中订单统计"
+    description: "状态为归还中（status='19'）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT count(*) as total_count
+        FROM llxz_order.ct_user_orders
+        WHERE (shop_id = '${shop_id}' AND
+              channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
+              (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) AND `status` IN ('07') AND return_time IS NOT NULL
+        GROUP BY status;
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='19')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 已逾期 ====================
+  - case_id: OST_011
+    title: "验证已逾期订单统计"
+    description: "状态为已逾期（status='20'）的订单数量"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT count(*) AS total_count
+        FROM llxz_order.ct_user_orders
+        WHERE(shop_id = '${shop_id}'
+        		AND channel_id IN ( '004', '007', '008', '009', '011', '012', '085' )
+        		AND rent_start IS NOT NULL
+        	AND ( delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL ))
+        	AND `status` IN ( '06', '07', '08', '12' )
+        	AND is_violation = '04'
+        GROUP BY STATUS;
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='20')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 今日未还 ====================
+  - case_id: OST_012
+    title: "验证今日未还订单统计"
+    description: "今日未还：租用中且应还日期小于等于今日且未实际归还（需根据业务调整条件）"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT COUNT(DISTINCT cobs.order_id) AS total_count
+        FROM llxz_order.ct_user_orders AS cuo
+        INNER JOIN llxz_order.ct_order_by_stages AS cobs ON cobs.order_id = cuo.order_id
+        WHERE
+        cobs.statement_date >= CURDATE()
+        AND cobs.statement_date < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+        AND cobs.STATUS IN (1)
+        AND cuo.STATUS IN ('06', '07')
+        AND cuo.is_violation IN ('01', '03')
+        AND cobs.shop_id = '${shop_id}';
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='21')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 今日已还 ====================
+  - case_id: OST_013
+    title: "验证今日已还订单统计"
+    description: "今日已还：今日内实际归还的订单（status='22'）"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT COUNT(DISTINCT re.order_id) AS total_count
+        FROM (
+        SELECT DISTINCT bs.order_id
+        FROM llxz_order.ct_order_by_stages bs
+        LEFT JOIN llxz_order.ct_user_orders uo ON bs.order_id = uo.order_id
+        WHERE bs.repayment_date >= CURDATE()
+            AND bs.repayment_date < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            AND uo.STATUS IN ('06', '09')
+            AND NOT EXISTS (
+                SELECT 1
+                FROM llxz_order.ct_order_by_stages bse
+                WHERE bse.order_id = bs.order_id AND bse.STATUS = '4'
+            )
+            AND uo.shop_id = '${shop_id}'
+
+        UNION ALL
+
+        SELECT DISTINCT bs.order_id
+        FROM llxz_order.ct_order_by_stages bs
+        LEFT JOIN llxz_order.ct_user_orders uo ON bs.order_id = uo.order_id
+        LEFT JOIN llxz_order.ct_order_by_stages_part sp ON bs.id = sp.periods_id
+        WHERE sp.create_time >= CURDATE()
+            AND sp.create_time < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            AND bs.STATUS IN ('1', '2')
+            AND uo.STATUS IN ('06', '09')
+            AND sp.STATUS = '3'
+            AND NOT EXISTS (
+                SELECT 1
+                FROM llxz_order.ct_order_by_stages bse
+                WHERE bse.order_id = bs.order_id AND bse.STATUS = '4'
+            )
+            AND uo.shop_id = '${shop_id}'
+            ) re;
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='22')].total"
+        operator: "=="
+        value: "${total_count}"
+
+  # ==================== 明日到期 ====================
+  - case_id: OST_014
+    title: "验证明日到期订单统计"
+    description: "明日到期：租用中且应还日期为明天（status='23'）"
+    <<: *common_endpoint
+    params:
+      <<: *common_params
+    sql:
+      query: |
+        SELECT COUNT(DISTINCT cobs.order_id) AS total_count
+        FROM llxz_order.ct_user_orders AS cuo
+        INNER JOIN llxz_order.ct_order_by_stages AS cobs ON cobs.order_id = cuo.order_id
+        WHERE cobs.statement_date BETWEEN CONCAT( CURDATE() + INTERVAL 1 DAY, ' 00:00:00' )
+                                      AND CONCAT( CURDATE() + INTERVAL 1 DAY, ' 23:59:59' )
+          AND cobs.STATUS = 1
+          AND cuo.STATUS IN ( '06', '07' )
+          AND cuo.is_violation IN ( '01', '03' )
+          AND cobs.shop_id = '${shop_id}'
+      column: "total_count"
+    expected_status: 200
+    validate_data:
+      - path: "data[?(@.status=='23')].total"
+        operator: "=="
+        value: "${total_count}"

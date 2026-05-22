@@ -1,0 +1,340 @@
+{
+  "case_id": "PC_001",
+  "title": "\u65b0\u589e\u5546\u54c1-\u7b14\u8bb0\u672c\u7535\u8111\uff08\u77ed\u79df\uff09",
+  "description": "\u52a8\u6001\u751f\u6210\u5b8c\u6574\u5546\u54c1\u6570\u636e\uff0c\u8c03\u7528\u65b0\u589e\u63a5\u53e3\uff0c\u9a8c\u8bc1\u6210\u529f",
+  "method": "POST",
+  "endpoint": "/hzsx/product/busInsertProduct",
+  "json": {
+    "name": "\u3010\u81ea\u52a8\u5316\u6d4b\u8bd5\u3011\u9ad8\u6e05-ipad-\u7ea2",
+    "oldNewDegree": 1,
+    "businessModel": "0",
+    "showPriceRatio": 1.15,
+    "labels": [],
+    "additionals": null,
+    "shopAdditionals": [],
+    "makeOrderServicesIds": [],
+    "buyOutSupport": 1,
+    "productSkuses": [
+      {
+        "cycs": [
+          {
+            "days": "10",
+            "price": "1",
+            "salePrice": "130.00",
+            "montyNum": "0",
+            "dayOrMonth": "day",
+            "totalRental": "10.00"
+          }
+        ],
+        "skuBuyOutSupport": 1,
+        "depositPrice": 0,
+        "inventory": "100",
+        "memo": null,
+        "marketPrice": "100",
+        "platformSpecValue": null,
+        "specAll": [
+          {
+            "opeSpecId": 1,
+            "platformSpecName": "\u989c\u8272",
+            "platformSpecValue": "1"
+          },
+          {
+            "opeSpecId": 2,
+            "platformSpecName": "\u89c4\u683c",
+            "platformSpecValue": "\u4e09\u4e2a\u6708\u8d77\u79df--\u968f\u79df\u968f\u8fd8"
+          },
+          {
+            "opeSpecId": 3,
+            "platformSpecName": "\u54c1\u724c",
+            "platformSpecValue": "3"
+          }
+        ],
+        "isFirst": true,
+        "uuid": "58dfdb17-4ca4-49fd-a8ed-e58514053438",
+        "salePrice": "130.00",
+        "sort": 1
+      },
+      {
+        "cycs": [
+          {
+            "days": "10",
+            "price": "1",
+            "salePrice": "130.00",
+            "montyNum": "0",
+            "dayOrMonth": "day",
+            "totalRental": "10.00"
+          }
+        ],
+        "skuBuyOutSupport": 1,
+        "depositPrice": 0,
+        "inventory": "100",
+        "memo": null,
+        "marketPrice": "100",
+        "platformSpecValue": null,
+        "specAll": [
+          {
+            "opeSpecId": 1,
+            "platformSpecName": "\u989c\u8272",
+            "platformSpecValue": "1"
+          },
+          {
+            "opeSpecId": 2,
+            "platformSpecName": "\u89c4\u683c",
+            "platformSpecValue": "\u5230\u671f\u5f52\u8fd8/\u7eed\u79df/\u8d2d\u4e70"
+          },
+          {
+            "opeSpecId": 3,
+            "platformSpecName": "\u54c1\u724c",
+            "platformSpecValue": "3"
+          }
+        ],
+        "uuid": "57918e26-dc63-4716-982a-c419c9014b3f",
+        "salePrice": "130.00",
+        "sort": 2
+      }
+    ],
+    "minRentCycle": "",
+    "maxRentCycle": "",
+    "type": 1,
+    "detail": "<p>\u5546\u54c1\u8be6\u60c5</p>",
+    "province": "110000",
+    "city": "110100",
+    "freightType": "PAY",
+    "addIds": [
+      831
+    ],
+    "images": [
+      {
+        "uid": "70b0b416d6c44504be613850798ae0b2",
+        "src": "https://oss.llxzu.com/3a4ebe058ee244ad8ee65045455618cc.png",
+        "url": "https://oss.llxzu.com/3a4ebe058ee244ad8ee65045455618cc.png",
+        "isMain": null,
+        "width": 750,
+        "height": 750
+      }
+    ],
+    "src": null,
+    "productId": "",
+    "salesVolume": null,
+    "lowestSalePrice": null,
+    "parameters": [],
+    "productCouponList": null,
+    "collected": null,
+    "productSkusInventoryList": [
+      {
+        "productSpecName1": "1",
+        "productSpecName2": "\u4e09\u4e2a\u6708\u8d77\u79df--\u968f\u79df\u968f\u8fd8",
+        "productSpecName3": "3",
+        "dateDayInventoryMap": {
+          "2026-05-21": 100,
+          "2026-05-22": 100,
+          "2026-05-23": 100,
+          "2026-05-24": 100,
+          "2026-05-25": 100,
+          "2026-05-26": 100,
+          "2026-05-27": 100,
+          "2026-05-28": 100,
+          "2026-05-29": 100,
+          "2026-05-30": 100,
+          "2026-05-31": 100,
+          "2026-06-01": 100,
+          "2026-06-02": 100,
+          "2026-06-03": 100
+        }
+      },
+      {
+        "productSpecName1": "1",
+        "productSpecName2": "\u5230\u671f\u5f52\u8fd8/\u7eed\u79df/\u8d2d\u4e70",
+        "productSpecName3": "3",
+        "dateDayInventoryMap": {
+          "2026-05-21": 100,
+          "2026-05-22": 100,
+          "2026-05-23": 100,
+          "2026-05-24": 100,
+          "2026-05-25": 100,
+          "2026-05-26": 100,
+          "2026-05-27": 100,
+          "2026-05-28": 100,
+          "2026-05-29": 100,
+          "2026-05-30": 100,
+          "2026-05-31": 100,
+          "2026-06-01": 100,
+          "2026-06-02": 100,
+          "2026-06-03": 100
+        }
+      }
+    ],
+    "calendar": [
+      {
+        "cycs": [
+          {
+            "days": "10",
+            "price": "1",
+            "salePrice": "130.00",
+            "montyNum": "0",
+            "dayOrMonth": "day",
+            "totalRental": "10.00"
+          }
+        ],
+        "skuBuyOutSupport": 1,
+        "depositPrice": 0,
+        "inventory": "100",
+        "memo": null,
+        "marketPrice": "100",
+        "platformSpecValue": null,
+        "specAll": [
+          {
+            "opeSpecId": 1,
+            "platformSpecName": "\u989c\u8272",
+            "platformSpecValue": "1"
+          },
+          {
+            "opeSpecId": 2,
+            "platformSpecName": "\u89c4\u683c",
+            "platformSpecValue": "\u4e09\u4e2a\u6708\u8d77\u79df--\u968f\u79df\u968f\u8fd8"
+          },
+          {
+            "opeSpecId": 3,
+            "platformSpecName": "\u54c1\u724c",
+            "platformSpecValue": "3"
+          }
+        ],
+        "isFirst": true,
+        "uuid": "58dfdb17-4ca4-49fd-a8ed-e58514053438",
+        "salePrice": "130.00",
+        "sort": 1
+      },
+      {
+        "cycs": [
+          {
+            "days": "10",
+            "price": "1",
+            "salePrice": "130.00",
+            "montyNum": "0",
+            "dayOrMonth": "day",
+            "totalRental": "10.00"
+          }
+        ],
+        "skuBuyOutSupport": 1,
+        "depositPrice": 0,
+        "inventory": "100",
+        "memo": null,
+        "marketPrice": "100",
+        "platformSpecValue": null,
+        "specAll": [
+          {
+            "opeSpecId": 1,
+            "platformSpecName": "\u989c\u8272",
+            "platformSpecValue": "1"
+          },
+          {
+            "opeSpecId": 2,
+            "platformSpecName": "\u89c4\u683c",
+            "platformSpecValue": "\u5230\u671f\u5f52\u8fd8/\u7eed\u79df/\u8d2d\u4e70"
+          },
+          {
+            "opeSpecId": 3,
+            "platformSpecName": "\u54c1\u724c",
+            "platformSpecValue": "3"
+          }
+        ],
+        "uuid": "57918e26-dc63-4716-982a-c419c9014b3f",
+        "salePrice": "130.00",
+        "sort": 2
+      }
+    ],
+    "specs": [
+      {
+        "name": "\u989c\u8272",
+        "opeSpecId": 1,
+        "values": [
+          {
+            "name": "1"
+          }
+        ]
+      },
+      {
+        "opeSpecId": 2,
+        "name": "\u5957\u9910",
+        "values": [
+          {
+            "name": "\u4e09\u4e2a\u6708\u8d77\u79df--\u968f\u79df\u968f\u8fd8"
+          },
+          {
+            "name": "\u5230\u671f\u5f52\u8fd8/\u7eed\u79df/\u8d2d\u4e70"
+          }
+        ]
+      }
+    ],
+    "serviceTel": null,
+    "renewalSwitch": 0,
+    "categoryIds": [
+      8,
+      1230
+    ],
+    "title": "\u3010\u81ea\u52a8\u5316\u6d4b\u8bd5\u3011\u9ad8\u6e05-ipad-\u7ea2",
+    "speFirstName": "\u89c4\u683c1",
+    "colorSpecs": {
+      "name": "\u989c\u8272",
+      "opeSpecId": 1,
+      "values": [
+        {
+          "name": "1"
+        }
+      ]
+    },
+    "speSecName": "\u89c4\u683c2",
+    "specSecond": {
+      "opeSpecId": 2,
+      "name": "\u5957\u9910",
+      "values": [
+        {
+          "name": "\u4e09\u4e2a\u6708\u8d77\u79df--\u968f\u79df\u968f\u8fd8"
+        },
+        {
+          "name": "\u5230\u671f\u5f52\u8fd8/\u7eed\u79df/\u8d2d\u4e70"
+        }
+      ]
+    },
+    "productColorPicture": [],
+    "address": [
+      "110000",
+      "110100",
+      "110101"
+    ],
+    "customLeaseTerm": "1",
+    "speThirdName": "\u89c4\u683c3",
+    "spethird": {
+      "opeSpecId": 3,
+      "platformSpecName": "\u54c1\u724c",
+      "platformSpecValue": "",
+      "values": [
+        {
+          "name": "3"
+        }
+      ]
+    },
+    "shopId": null,
+    "isBuyout": 1,
+    "productType": "zulinkuaijie",
+    "id": 0,
+    "categoryId": 1230,
+    "channelGroupCode": "001",
+    "draft": "",
+    "isTable": true,
+    "source": "3"
+  },
+  "expected_status": 200,
+  "validate_data": [
+    {
+      "path": "$.businessSuccess",
+      "operator": "==",
+      "value": true
+    },
+    {
+      "path": "$.data",
+      "operator": "==",
+      "value": true
+    }
+  ]
+}

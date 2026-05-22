@@ -1,0 +1,3 @@
+responseType: == SUCCESS (实际: SUCCESS)
+businessSuccess: == True (实际: True)
+data: not_empty None (实际: True)

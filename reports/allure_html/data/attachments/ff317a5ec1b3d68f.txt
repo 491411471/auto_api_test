@@ -1,0 +1,4 @@
+SELECT id, product_id 
+FROM llxz_product.ct_product 
+ORDER BY create_time DESC 
+LIMIT 1

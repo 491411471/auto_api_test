@@ -1,0 +1,3 @@
+SELECT COALESCE(SUM(current_periods_rent), 0) AS paid_rent
+FROM llxz_order.ct_order_by_stages
+WHERE order_id = '008IO202605212057386587926597632T' AND status = '2'

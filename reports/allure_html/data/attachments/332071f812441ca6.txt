@@ -1,0 +1,1 @@
+SELECT order_id FROM llxz_order.ct_user_orders  WHERE shop_id='71008738021cd3393bacbac182bd6a86af0b5c87' AND channel_provenance != 6 and channel_provenance != 8 and status='06' order by create_time DESC limit 1;

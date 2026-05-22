@@ -1,0 +1,7 @@
+请求参数: {'orderId': '008IO202605212057386587926597632T', 'status': '13'}
+SQL: [多条 SQL，共 2 条] 第一条: SELECT order_id, status
+FROM llxz_order.ct_user_orders
+WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  AND channel_provenance NOT IN (6, 8)
+ORDER BY create_time DESC
+LIMIT 1

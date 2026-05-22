@@ -1,0 +1,17 @@
+{
+  "businessType": 1,
+  "queryType": "queryPageList",
+  "requestSource": "businessNewOfListHeaderStatus",
+  "isQueryHistory": false,
+  "pageNumber": 1,
+  "pageSize": 10,
+  "createDate": [
+    "2026-03-31T16:00:00.000Z",
+    "2026-04-29T16:00:00.000Z"
+  ],
+  "createTimeStart": "2026-04-01 00:00:00",
+  "createTimeEnd": "2026-04-30 00:00:00",
+  "delivaryCalendar": null,
+  "guangGaoId": "",
+  "userName": ""
+}

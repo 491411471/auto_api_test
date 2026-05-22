@@ -1,0 +1,4 @@
+路径: $.errorCode
+操作符: ==
+期望值: HZSX_VALIDATE_ERR
+实际值: HZSX_VALIDATE_ERR

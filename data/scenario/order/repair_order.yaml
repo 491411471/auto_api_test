@@ -1,0 +1,89 @@
+# 补押金业务流
+flow_name: "补订单流程"
+description: "查询可补订单 → 获取用途数据 → 提交补订单 → 验证补订单记录"
+
+# 全局重试配置（用于提交补订单遇到"已存在"类错误时的重试）
+retry_config:
+  max_attempts: 3
+  interval_seconds: 5
+  # 支持多种错误关键词（满足任一即触发重试）
+  error_keywords:
+    - "订单中已存在{name}，请勿重复补订单"
+    - "订单中已存在闲鱼指定商家，请勿重复补订单"
+
+# 商家端相关配置
+merchant:
+  # 查询可补订单的 SQL（需要替换 ${shop_id}）
+  query_order_sql: |
+    SELECT order_id,product_id
+    FROM llxz_order.ct_user_orders
+    WHERE status IN ('13', '06', '04')
+      AND channel_provenance NOT IN (6, 8)
+      AND shop_id = '${shop_id}'
+    ORDER BY create_time DESC
+    LIMIT 1
+
+  # 获取补订单用途列表
+  get_repair_order_list:
+    endpoint: "/hzsx/repairOrder/selectRepairOrderList"
+    method: GET
+    # 请求参数（需要替换 ${shop_id}、${channelGroupCode}、${skuId}、${productId}）
+    params_template:
+      pageNumber: 1
+      pageSize: 1000
+      shopId: "${shop_id}"
+      channelGroupCode: "001"
+      name: ""                     # 可传空字符串
+#      skuId: 461649                # 固定值，根据业务调整
+#      productId: 1735266880919     # 固定值，根据业务调整
+      productId: "${product_id}"
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "not_empty"
+        value: 0
+
+  # 提交补订单
+  submit_repair_order:
+    endpoint: "/hzsx/business/order/shopMakeOrder"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "${repair_id}"
+        price: "${repair_price}"
+        settlementProportion: "${repair_settlement}"
+        beizhu: "自动化补押金测试"
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "not_empty"
+        value: 0
+
+  # 查询补订单记录（用于最终验证）
+  query_repair_order_list:
+    endpoint: "/hzsx/business/order/queryMakeOrderList"
+    method: POST
+    body_template:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupId: "001"
+      orderId: "${order_id}"
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records[0].orderId"
+        operator: "=="
+        value: "${expected_order_id}"    # 将在测试代码中动态赋值
+      - path: "$.data.backstageMakeOrderDtoList.records[0].servicePrice"
+        operator: "=="
+        value: "${repair_price}"

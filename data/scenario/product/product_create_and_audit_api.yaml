@@ -1,0 +1,225 @@
+variables:
+  channel_group_code: "001"
+  category_id: 1230
+  # 动态变量（在测试代码中生成并注入）
+  product_name: ""
+  uuid_1: ""
+  uuid_2: ""
+  image_url: ""
+  inventory_date_map: {}
+
+product_create_tests:
+  case_id: "PC_001"
+  title: "新增商品-笔记本电脑（短租）"
+  description: "动态生成完整商品数据，调用新增接口，验证成功"
+  method: POST
+  endpoint: "/hzsx/product/busInsertProduct"
+  json:
+    name: ${product_name}
+    oldNewDegree: 1
+    businessModel: "0"
+    showPriceRatio: 1.15
+    labels: []
+    additionals: null
+    shopAdditionals: []
+    makeOrderServicesIds: []
+    buyOutSupport: 1
+    productSkuses:
+      - cycs:
+          - days: "10"
+            price: "1"
+            salePrice: "130.00"
+            montyNum: "0"
+            dayOrMonth: "day"
+            totalRental: "10.00"
+        skuBuyOutSupport: 1
+        depositPrice: 0
+        inventory: "100"
+        memo: null
+        marketPrice: "100"
+        platformSpecValue: null
+        specAll:
+          - opeSpecId: 1
+            platformSpecName: "颜色"
+            platformSpecValue: "1"
+          - opeSpecId: 2
+            platformSpecName: "规格"
+            platformSpecValue: "三个月起租--随租随还"
+          - opeSpecId: 3
+            platformSpecName: "品牌"
+            platformSpecValue: "3"
+        isFirst: true
+        uuid: ${uuid_1}
+        salePrice: "130.00"
+        sort: 1
+      - cycs:
+          - days: "10"
+            price: "1"
+            salePrice: "130.00"
+            montyNum: "0"
+            dayOrMonth: "day"
+            totalRental: "10.00"
+        skuBuyOutSupport: 1
+        depositPrice: 0
+        inventory: "100"
+        memo: null
+        marketPrice: "100"
+        platformSpecValue: null
+        specAll:
+          - opeSpecId: 1
+            platformSpecName: "颜色"
+            platformSpecValue: "1"
+          - opeSpecId: 2
+            platformSpecName: "规格"
+            platformSpecValue: "到期归还/续租/购买"
+          - opeSpecId: 3
+            platformSpecName: "品牌"
+            platformSpecValue: "3"
+        uuid: ${uuid_2}
+        salePrice: "130.00"
+        sort: 2
+    minRentCycle: ""
+    maxRentCycle: ""
+    type: 1
+    detail: "<p>商品详情</p>"
+    province: "110000"
+    city: "110100"
+    freightType: "PAY"
+    addIds:
+      - 831
+    images:
+      - uid: "70b0b416d6c44504be613850798ae0b2"
+        src: ${image_url}
+        url: ${image_url}
+        isMain: null
+        width: 750
+        height: 750
+    src: null
+    productId: ""
+    salesVolume: null
+    lowestSalePrice: null
+    parameters: []
+    productCouponList: null
+    collected: null
+    productSkusInventoryList:
+      - productSpecName1: "1"
+        productSpecName2: "三个月起租--随租随还"
+        productSpecName3: "3"
+        dateDayInventoryMap: ${inventory_date_map}
+      - productSpecName1: "1"
+        productSpecName2: "到期归还/续租/购买"
+        productSpecName3: "3"
+        dateDayInventoryMap: ${inventory_date_map}
+    calendar:
+      - cycs:
+          - days: "10"
+            price: "1"
+            salePrice: "130.00"
+            montyNum: "0"
+            dayOrMonth: "day"
+            totalRental: "10.00"
+        skuBuyOutSupport: 1
+        depositPrice: 0
+        inventory: "100"
+        memo: null
+        marketPrice: "100"
+        platformSpecValue: null
+        specAll:
+          - opeSpecId: 1
+            platformSpecName: "颜色"
+            platformSpecValue: "1"
+          - opeSpecId: 2
+            platformSpecName: "规格"
+            platformSpecValue: "三个月起租--随租随还"
+          - opeSpecId: 3
+            platformSpecName: "品牌"
+            platformSpecValue: "3"
+        isFirst: true
+        uuid: ${uuid_1}
+        salePrice: "130.00"
+        sort: 1
+      - cycs:
+          - days: "10"
+            price: "1"
+            salePrice: "130.00"
+            montyNum: "0"
+            dayOrMonth: "day"
+            totalRental: "10.00"
+        skuBuyOutSupport: 1
+        depositPrice: 0
+        inventory: "100"
+        memo: null
+        marketPrice: "100"
+        platformSpecValue: null
+        specAll:
+          - opeSpecId: 1
+            platformSpecName: "颜色"
+            platformSpecValue: "1"
+          - opeSpecId: 2
+            platformSpecName: "规格"
+            platformSpecValue: "到期归还/续租/购买"
+          - opeSpecId: 3
+            platformSpecName: "品牌"
+            platformSpecValue: "3"
+        uuid: ${uuid_2}
+        salePrice: "130.00"
+        sort: 2
+    specs:
+      - name: "颜色"
+        opeSpecId: 1
+        values:
+          - name: "1"
+      - opeSpecId: 2
+        name: "套餐"
+        values:
+          - name: "三个月起租--随租随还"
+          - name: "到期归还/续租/购买"
+    serviceTel: null
+    renewalSwitch: 0
+    categoryIds:
+      - 8
+      - 1230
+    title: ${product_name}
+    speFirstName: "规格1"
+    colorSpecs:
+      name: "颜色"
+      opeSpecId: 1
+      values:
+        - name: "1"
+    speSecName: "规格2"
+    specSecond:
+      opeSpecId: 2
+      name: "套餐"
+      values:
+        - name: "三个月起租--随租随还"
+        - name: "到期归还/续租/购买"
+    productColorPicture: []
+    address:
+      - "110000"
+      - "110100"
+      - "110101"
+    customLeaseTerm: "1"
+    speThirdName: "规格3"
+    spethird:
+      opeSpecId: 3
+      platformSpecName: "品牌"
+      platformSpecValue: ""
+      values:
+        - name: "3"
+    shopId: null
+    isBuyout: 1
+    productType: "zulinkuaijie"
+    id: 0
+    categoryId: 1230          # 修复1：补全 categoryId 字段，值为 1230
+    channelGroupCode: ${channel_group_code}   # 修复2：取消注释，传入渠道组编码
+    draft: ""
+    isTable: true
+    source: "3"
+  expected_status: 200
+  validate_data:
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data"
+      operator: "=="
+      value: true

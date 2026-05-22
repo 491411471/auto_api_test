@@ -1,0 +1,4 @@
+路径: data.records[*].status
+操作符: ==
+期望值: 09
+实际值: None

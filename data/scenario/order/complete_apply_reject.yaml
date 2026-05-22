@@ -1,0 +1,82 @@
+# 审核拒绝业务流
+flow_name: "订单完结申请-审核拒绝"
+description: "商家提交完结申请 → 运营审核拒绝"
+
+merchant:
+  query_order_sql: |
+    SELECT o.order_id
+    FROM llxz_order.ct_user_orders o
+    WHERE o.shop_id = '${shop_id}'
+      AND o.channel_id IN ('004', '007', '008', '009', '011', '085')
+      AND o.channel_provenance NOT IN (6, 8)
+      AND o.status = '06'
+      AND NOT EXISTS (SELECT 1
+        FROM llxz_order.ct_shop_order_complete_apply_log l
+        WHERE l.order_id = o.order_id
+      )
+    ORDER BY o.create_time DESC
+    LIMIT 1;
+  upload_image:
+    endpoint: "/hzsx/busShop/doUpLoadwebp"
+    method: POST
+    file_field: "file"
+    test_image_path: "data/scenario/images/test_image.png"
+
+  submit_apply:
+    endpoint: "/hzsx/order/completeApply/shopOrderCompleteApply"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+      remark: "自动化测试完结申请（将被拒绝）"
+      voucher: ["${voucher_url}"]
+      settlementType: "01"
+      damageAmount: 0
+      lossAmount: 0
+      penaltyAmount: 0
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+admin:
+  query_apply:
+    endpoint: "/hzsx/order/completeApply/queryOrderCompleteApplyLog"
+    method: POST
+    body_template:
+      page: 1
+      rows: 10
+      orderId: "${order_id}"
+      status: "00"
+      leaseTermType: ""
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+
+  reject:
+    endpoint: "/hzsx/order/completeApply/verifyOrderCompleteApply"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+      applyId: "${apply_id}"
+      status: "02"                     # 02 表示拒绝
+      refusalCause: "自动化测试拒绝：凭证不清晰"
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+# 验证申请记录状态变为 06
+expected_apply_status: "06"

@@ -1,0 +1,4 @@
+路径: data.records
+操作符: length_gt
+期望值: 0
+实际值: []

@@ -1,0 +1,4 @@
+路径: $.data.records[0].customizeLabelDtos[0].labelName
+操作符: ==
+期望值: 芝麻严选
+实际值: None

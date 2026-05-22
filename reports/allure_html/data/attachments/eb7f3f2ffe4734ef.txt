@@ -1,0 +1,1 @@
+{'shop_id': '71008738021cd3393bacbac182bd6a86af0b5c87', 'random_remark': 'zJXnw8KNB9SDkeu'}

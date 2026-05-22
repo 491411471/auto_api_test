@@ -1,0 +1,127 @@
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+order_stages_tests:
+  # 用例1：验证每期期数
+  - case_id: OS_001
+    title: "验证订单分期每期期数"
+    description: "从数据库获取该订单所有分期期数，与接口返回的逐期比对"
+    method: POST
+    endpoint: "/hzsx/business/order/queryOrderStagesDetail"
+    sql:
+      query: |
+        WITH order_counts AS (
+        SELECT 
+        order_id,
+        COUNT(*) OVER (PARTITION BY order_id) as stage_count,
+        ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY create_time DESC) as rn
+        FROM llxz_order.ct_order_by_stages
+        WHERE shop_id = '${shop_id}')
+        SELECT order_id
+        FROM order_counts
+        WHERE stage_count > 1 AND rn = 1
+        LIMIT 1;
+      column: order_id
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    # 基础断言（确保接口成功）
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # 用例2：验证每期租金
+  - case_id: OS_002
+    title: "验证订单分期每期租金"
+    description: "从数据库获取该订单每期租金，与接口返回的逐期比对"
+    method: POST
+    endpoint: "/hzsx/business/order/queryOrderStagesDetail"
+    sql:
+      query: |
+        WITH order_counts AS (
+        SELECT 
+        order_id,
+        COUNT(*) OVER (PARTITION BY order_id) as stage_count,
+        ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY create_time DESC) as rn
+        FROM llxz_order.ct_order_by_stages
+        WHERE shop_id = '${shop_id}')
+        SELECT order_id
+        FROM order_counts
+        WHERE stage_count > 1 AND rn = 1
+        LIMIT 1;
+      column: order_id
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # 用例3：验证每期状态
+  - case_id: OS_003
+    title: "验证订单分期每期状态"
+    description: "从数据库获取该订单每期状态，与接口返回的逐期比对"
+    method: POST
+    endpoint: "/hzsx/business/order/queryOrderStagesDetail"
+    sql:
+      query: |
+        WITH order_counts AS (
+        SELECT 
+        order_id,
+        COUNT(*) OVER (PARTITION BY order_id) as stage_count,
+        ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY create_time DESC) as rn
+        FROM llxz_order.ct_order_by_stages
+        WHERE shop_id = '${shop_id}')
+        SELECT order_id
+        FROM order_counts
+        WHERE stage_count > 1 AND rn = 1
+        LIMIT 1;
+      column: order_id
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  - case_id: OS_004
+    title: "验证订单分期租期起止日期"
+    description: "检查每个分期的 rentStartDt 和 rentEndDt 格式正确、同期间隔合理、前后期连续"
+    method: POST
+    endpoint: "/hzsx/business/order/queryOrderStagesDetail"
+    sql:
+      query: |
+        WITH order_counts AS (
+        SELECT 
+        order_id,
+        COUNT(*) OVER (PARTITION BY order_id) as stage_count,
+        ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY create_time DESC) as rn
+        FROM llxz_order.ct_order_by_stages
+        WHERE shop_id = '${shop_id}')
+        SELECT order_id
+        FROM order_counts
+        WHERE stage_count > 1 AND rn = 1
+        LIMIT 1;
+      column: order_id
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true

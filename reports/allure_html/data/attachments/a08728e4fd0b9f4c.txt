@@ -1,0 +1,1 @@
+{'total_rent': Decimal('183.38'), 'paid_rent': Decimal('0.00'), 'unpaid_rent': Decimal('183.38')}

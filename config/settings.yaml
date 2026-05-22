@@ -1,0 +1,51 @@
+# 当前激活的环境（可选值: test, prod）
+active: "test"
+
+# 当前激活的终端类型（可选值: merchant, admin）
+active_endpoint: "merchant"
+
+environments:
+  # 测试环境
+  test:
+    shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"  # 商家端测试环境公用
+    base_url: "https://test.llxzu.com"
+    # 商家端配置
+    merchant:
+      auth_type: "api_token"
+      auth_config:
+        key: "token"
+        value: "52trngcbxa2m8shjcl3wpxckv8hoydmg"
+        xianyu_token: "idul55n7yune1fow9qrnr04x1sqqaprr"  # 测试环境闲鱼店铺token（需要单独获取）
+      timeout: 15
+      max_retries: 3
+      request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制
+    # 运营端配置
+    admin:
+      auth_type: "api_token"
+      auth_config:
+        key: "token"
+        value: "d3gj83m7ieoytmnxxozhn88450tcsnvs"
+      timeout: 15
+      max_retries: 3
+      request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制
+
+  # 生产环境
+  prod:
+    base_url: "https://llxzu.com"   # 如生产环境 URL
+    merchant:
+      auth_type: "api_token"
+      auth_config:
+        key: "token"
+        value: "3ani4fxcoky1oy92825gg21wlu6qd2tz"
+        xianyu_token: "请替换为真实的闲鱼店铺token"  # 生产环境闲鱼店铺token（需要单独获取）
+      timeout: 10
+      max_retries: 2
+      request_interval: 1.5  # 请求间隔时间（秒），防止触发"连续点击"限制
+    admin:
+      auth_type: "api_token"
+      auth_config:
+        key: "token"
+        value: "vvoupa4kz02622gx59cg2n35ossokien"
+      timeout: 10
+      max_retries: 2
+      request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制

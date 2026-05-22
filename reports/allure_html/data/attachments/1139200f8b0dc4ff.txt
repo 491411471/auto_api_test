@@ -1,0 +1,4 @@
+路径: $.finalSuccess
+操作符: ==
+期望值: True
+实际值: True

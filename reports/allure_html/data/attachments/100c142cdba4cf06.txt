@@ -1,0 +1,4 @@
+路径: data.records[*].productName
+操作符: all_contain
+期望值: 手机
+实际值: None

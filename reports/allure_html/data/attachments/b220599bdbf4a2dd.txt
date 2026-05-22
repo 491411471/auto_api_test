@@ -1,0 +1,4 @@
+SELECT total_rent, status
+FROM llxz_order.ct_order_by_stages
+WHERE order_id = '008IO202605212057386587926597632T'
+LIMIT 1

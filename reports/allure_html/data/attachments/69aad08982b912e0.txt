@@ -1,0 +1,34 @@
+请求参数: {'requestSource': 'businessNewOfListHeaderStatus'}
+SQL: SELECT COUNT(DISTINCT re.order_id) AS total_count
+FROM (
+SELECT DISTINCT bs.order_id
+FROM llxz_order.ct_order_by_stages bs
+LEFT JOIN llxz_order.ct_user_orders uo ON bs.order_id = uo.order_id
+WHERE bs.repayment_date >= CURDATE()
+    AND bs.repayment_date < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+    AND uo.STATUS IN ('06', '09')
+    AND NOT EXISTS (
+        SELECT 1
+        FROM llxz_order.ct_order_by_stages bse
+        WHERE bse.order_id = bs.order_id AND bse.STATUS = '4'
+    )
+    AND uo.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+
+UNION ALL
+
+SELECT DISTINCT bs.order_id
+FROM llxz_order.ct_order_by_stages bs
+LEFT JOIN llxz_order.ct_user_orders uo ON bs.order_id = uo.order_id
+LEFT JOIN llxz_order.ct_order_by_stages_part sp ON bs.id = sp.periods_id
+WHERE sp.create_time >= CURDATE()
+    AND sp.create_time < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+    AND bs.STATUS IN ('1', '2')
+    AND uo.STATUS IN ('06', '09')
+    AND sp.STATUS = '3'
+    AND NOT EXISTS (
+        SELECT 1
+        FROM llxz_order.ct_order_by_stages bse
+        WHERE bse.order_id = bs.order_id AND bse.STATUS = '4'
+    )
+    AND uo.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+    ) re;

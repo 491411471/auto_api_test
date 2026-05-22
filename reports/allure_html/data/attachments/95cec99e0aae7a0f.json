@@ -1,0 +1,10 @@
+{
+  "businessType": 1,
+  "queryType": "queryPageList",
+  "requestSource": "businessNewOfListHeaderStatus",
+  "isQueryHistory": false,
+  "pageNumber": 1,
+  "pageSize": 10,
+  "discountType": "1",
+  "guangGaoId": ""
+}

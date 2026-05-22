@@ -1,0 +1,6 @@
+SELECT o.order_id 
+FROM llxz_order.ct_user_orders o
+INNER JOIN llxz_order.ct_shop_cash_pledge c 
+  ON o.order_id = c.order_id 
+WHERE o.shop_id = "71008738021cd3393bacbac182bd6a86af0b5c87"
+LIMIT 1

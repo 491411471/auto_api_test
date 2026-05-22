@@ -1,0 +1,461 @@
+# 全局变量（公共配置）
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+# 公共端点配置（复用锚点）
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/business/order/shopMakeOrder"
+
+.common_body: &common_body
+  orderId: "${order_id}"
+  isMembership: 1
+  repairOrderConfig:
+    id: "${repair_id}"
+    price: "${repair_price}"
+    settlementProportion: "${repair_settlement}"
+    beizhu: "自动化补押金测试"
+
+# 重试配置
+retry_config:
+  max_attempts: 3
+  interval_seconds: 2
+  error_keywords:
+    - "该订单已存在补订单用途[{name}]"
+    - "订单中已存在{name}，请勿重复补订单"
+    - "请勿重复提交补订单"
+    - "订单状态不允许补订单"
+    - "价格上限不能超过{price}元"
+    - "订单比率出错了，请刷新页面重试"
+
+# 商家端接口配置
+merchant:
+  # 查询可补订单SQL
+  query_order_sql: &query_order_sql
+    SELECT order_id, product_id
+    FROM llxz_order.ct_user_orders
+    WHERE status IN ('13', '06', '04')
+      AND channel_provenance NOT IN (6, 8)
+      AND shop_id = '${shop_id}'
+      AND create_time >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+    ORDER BY create_time DESC
+    LIMIT 1
+
+  # 获取补订单用途列表
+  get_repair_order_list:
+    endpoint: "/hzsx/repairOrder/selectRepairOrderList"
+    method: GET
+    params_template:
+      pageNumber: 1
+      pageSize: 1000
+      shopId: "${shop_id}"
+      channelGroupCode: "001"
+      name: ""
+      productId: "${product_id}"
+    expected_status: 200
+    validate:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records"
+        operator: "length_gt"
+        value: 0
+
+  # 提交补订单
+  submit_repair_order:
+    endpoint: "/hzsx/business/order/shopMakeOrder"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "${repair_id}"
+        price: "${repair_price}"
+        settlementProportion: "${repair_settlement}"
+        beizhu: "${remark}"
+    expected_status: 200
+    validate:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "not_empty"
+        value: null
+
+  # 查询补订单记录
+  query_repair_order_list:
+    endpoint: "/hzsx/business/order/queryRepairOrderList"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+      pageNumber: 1
+      pageSize: 10
+    expected_status: 200
+    validate:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+# 补订单测试用例
+repair_order_tests:
+  # ==================== 正常流程测试 ====================
+  - case_id: RO_001
+    title: "正常提交补订单"
+    description: "填写所有必填项且数据合法"
+    <<: *common_endpoint
+    body:
+      <<: *common_body
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "not_empty"
+        value: null
+
+  # ==================== 必填项校验测试 ====================
+  - case_id: RO_002
+    title: "缺少订单ID"
+    description: "未提供订单ID直接提交"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      isMembership: 1
+      repairOrderConfig:
+        id: "1"
+        price: "100.00"
+        settlementProportion: "0.8"
+        beizhu: "缺少订单ID测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "订单id不能为空"
+
+  - case_id: RO_003
+    title: "缺少isMembership参数"
+    description: "未提供isMembership参数"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      repairOrderConfig:
+        id: "1994"
+        price: "7.00"
+        settlementProportion: "0.8"
+        beizhu: "缺少isMembership测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "Required request body is missing"
+
+  - case_id: RO_004
+    title: "缺少repairOrderConfig"
+    description: "未提供repairOrderConfig参数"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig: null
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "Required request body is missing"
+
+  - case_id: RO_005
+    title: "repairOrderConfig缺少id"
+    description: "repairOrderConfig中缺少id参数"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        price: "100.00"
+        settlementProportion: "0.8"
+        beizhu: "缺少id测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "repairOrderConfig.id不能为空"
+
+  - case_id: RO_006
+    title: "repairOrderConfig缺少price"
+    description: "repairOrderConfig中缺少price参数"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "1"
+        settlementProportion: "0.9"
+        beizhu: "缺少price测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "repairOrderConfig.price不能为空"
+
+  - case_id: RO_007
+    title: "repairOrderConfig缺少settlementProportion"
+    description: "repairOrderConfig中缺少settlementProportion参数"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "1"
+        price: "100.00"
+        beizhu: "缺少settlementProportion测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "repairOrderConfig.settlementProportion不能为空"
+
+  # ==================== 数值边界值校验 ====================
+  - case_id: RO_008
+    title: "价格为0"
+    description: "价格不能小于等于0"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "1"
+        price: "0"
+        settlementProportion: "80"
+        beizhu: "价格为0测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "价格必须大于0"
+
+  - case_id: RO_009
+    title: "价格为负数"
+    description: "价格不能为负数"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "1"
+        price: "-100.00"
+        settlementProportion: "80"
+        beizhu: "价格为负数测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "价格必须大于0"
+
+  - case_id: RO_010
+    title: "结算比例超过100%"
+    description: "结算比例不能大于100"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "1"
+        price: "100.00"
+        settlementProportion: "101"
+        beizhu: "结算比例超限测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "结算比例不能大于100"
+
+  - case_id: RO_011
+    title: "结算比例为0"
+    description: "结算比例不能为0"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "1"
+        price: "100.00"
+        settlementProportion: "0"
+        beizhu: "结算比例为0测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "结算比例必须大于0"
+
+  # ==================== 常规字段校验 ====================
+  - case_id: RO_012
+    title: "备注超长"
+    description: "备注内容超过数据库字段限制（假设限制500字符）"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "1"
+        price: "100.00"
+        settlementProportion: "80"
+        beizhu: "这是一个超长备注测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "备注过长"
+
+  - case_id: RO_013
+    title: "isMembership参数非法"
+    description: "isMembership参数只能是0或1"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 2
+      repairOrderConfig:
+        id: "1"
+        price: "100.00"
+        settlementProportion: "80"
+        beizhu: "isMembership非法测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "isMembership参数非法"
+
+  # ==================== 业务规则校验 ====================
+  - case_id: RO_014
+    title: "重复提交相同用途"
+    description: "同一订单重复提交相同用途的补订单"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "${repair_id}"
+        price: "${repair_price}"
+        settlementProportion: "${repair_settlement}"
+        beizhu: "重复提交测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "该订单已存在补订单用途"
+
+  - case_id: RO_015
+    title: "订单状态不允许补订单"
+    description: "订单状态为已完成，不允许补订单"
+    <<: *common_endpoint
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    json:
+      orderId: "${completed_order_id}"
+      isMembership: 1
+      repairOrderConfig:
+        id: "1"
+        price: "100.00"
+        settlementProportion: "80"
+        beizhu: "已完成订单补单测试"
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorMessage"
+        operator: "contains"
+        value: "订单状态不允许补订单"

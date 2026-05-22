@@ -1,0 +1,17 @@
+{
+  "rpcResult": "SUCCESS",
+  "httpStatus": 200,
+  "responseType": "SUCCESS",
+  "errorCode": null,
+  "errorMessage": null,
+  "data": true,
+  "parentIdemSerialId": null,
+  "traceId": "7d543da62c355534",
+  "businessSuccess": true,
+  "businessFail": false,
+  "rpcTimeout": false,
+  "finalSuccess": true,
+  "finalFail": false,
+  "rpcFail": false,
+  "rpcSuccess": true
+}

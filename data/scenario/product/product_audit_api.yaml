@@ -1,0 +1,55 @@
+variables:
+  # 审核通过状态
+  audit_pass_state: 2
+  # 同步商品标志
+  syn_product: 0
+
+
+product_audit_tests:
+  - case_id: "PA_001"
+    title: "运营端商品审核通过"
+    description: "将指定商品审核状态设置为通过（auditState=2）"
+    method: POST
+    endpoint: "/hzsx/examineProduct/productAudit"
+    # 需要前置 SQL 动态获取商品 id 和 productSpecId
+    sql:
+      - query: |
+          SELECT id, product_id 
+          FROM llxz_product.ct_product 
+          WHERE name = '${product_name}' 
+          ORDER BY create_time DESC 
+          LIMIT 1
+        columns: [id, product_id]
+      - query: |
+          SELECT id 
+          FROM llxz_product.ct_product_spec 
+          WHERE item_id = '${product_id}' 
+          LIMIT 1
+        column: spec_id
+    body:
+      auditState: 2
+      synProduct: 0
+      id: ${id}
+      repairOrderIds: ""
+      commitments: ""
+      aliPayImages: []
+      stringList: []
+      rentDaysDTOS:
+        - days: "10"
+          customLease: 0
+          productSpecId: ${spec_id}
+        - days: "10"
+          customLease: 0
+          productSpecId: ${spec_id}
+      addedServiceList: []
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"

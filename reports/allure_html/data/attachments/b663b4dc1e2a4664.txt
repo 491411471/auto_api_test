@@ -1,0 +1,5 @@
+SELECT total_rent,
+COALESCE(SUM(CASE WHEN status = '2' THEN current_periods_rent END), 0) AS paid_rent,
+MAX(total_rent) - COALESCE(SUM(CASE WHEN status = '2' THEN current_periods_rent END), 0) AS unpaid_rent
+FROM llxz_order.ct_order_by_stages
+WHERE order_id = '008IO202605212057386587926597632T'

@@ -1,0 +1,4 @@
+路径: data.records
+操作符: type
+期望值: list
+实际值: []

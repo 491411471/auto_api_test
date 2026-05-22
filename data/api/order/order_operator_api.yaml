@@ -1,0 +1,100 @@
+# 浏览历史查询接口测试用例
+# 全局变量（公共配置）
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+order_operator_tests:
+  - case_id: BH_001
+    title: "浏览记录-正向用例（传入有效订单ID）"
+    description: "传入有效的订单ID，应成功返回浏览历史数据"
+    method: POST
+    endpoint: "/hzsx/ope/order/selectBrowsingHistory"
+    body_type: "form-urlencoded"      # 声明使用表单格式
+    params:
+      orderId: "${order_id}"
+    sql:
+      query: "SELECT order_id FROM llxz_order.ct_user_orders  WHERE shop_id='${shop_id}' AND channel_provenance != 6 and channel_provenance != 8 and status='06' order by create_time DESC limit 1;"
+      column: order_id
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.finalSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  - case_id: BH_002
+    title: "浏览记录-异常用例（ordrId为空字符串）"
+    description: "ordrId传空字符串，应返回系统错误（错误码999999）"
+    method: POST
+    endpoint: "/hzsx/ope/order/selectBrowsingHistory"
+    json:
+      ordrId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SYS_ERR"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.finalSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorCode"
+        operator: "=="
+        value: "999999"
+
+  - case_id: BH_003
+    title: "修改订单备注（动态数据）"
+    method: POST
+    endpoint: "/hzsx/ope/order/orderRemark"
+    sql: # 新增：从数据库查询有效订单号
+      query: |
+        SELECT order_id 
+        FROM llxz_order.ct_user_orders
+        WHERE shop_id = "${shop_id}"       # shop_id 由 config_manager 自动提供
+        LIMIT 1
+      column: order_id                    # 查询结果存入变量 order_id
+      multiple: false                    # 单行结果
+    json:
+      orderId: ${order_id}                # 使用 SQL 查询到的订单号
+      orderType: "01"
+      remark: ${random_remark}           # 随机备注，由测试代码生成并注入
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+
+
+#  - case_id: BH_004
+#    title: "浏览历史查询-异常用例（ordrId为不存在的订单）"
+#    description: "传入系统中不存在的订单ID，应返回失败"
+#    <<: *common_endpoint
+#    method: POST
+#    path: "/hzsx/ope/order/selectBrowsingHistory"
+#    json:
+#      ordrId: "INVALID_ORDER_ID_999999"
+#    expected_status: 200
+#    validate_data:
+#      - path: "$.responseType"
+#        operator: "in"
+#        value: ["SYS_ERR", "FAIL"]
+#      - path: "$.businessSuccess"
+#        operator: "=="
+#        value: false

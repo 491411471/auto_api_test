@@ -1,0 +1,163 @@
+variables:
+  order_id: "008OI202605132054461722232184832T"
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  uid: "619bc3860e5563dcaf713299856586685040bbfccx7tadydd25z"
+
+order_records_tests:
+  - case_id: OR_001
+    title: "验证成功下单数"
+    description: "检查返回数据中的成功下单数（hisTransactionOrderCount）字段值"
+    method: POST
+    endpoint: "/hzsx/business/order/getAllOrderRecords"
+    sql:
+      query: |
+        SELECT COUNT(*) AS success_order_count 
+        FROM llxz_order.ct_user_orders 
+        WHERE shop_id = '${shop_id}' 
+        AND uid = '${uid}' 
+        AND delete_time IS NULL 
+        AND status IN ('05', '06', '09');
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.hisTransactionOrderCount"
+        operator: ">="
+        value: ${success_order_count}
+        type_check: "int"
+
+  - case_id: OR_002
+    title: "验证身份证累计下单数"
+    description: "检查返回数据中的身份证累计下单数（idcardSubmitOrderCount）字段值"
+    method: POST
+    endpoint: "/hzsx/business/order/getAllOrderRecords"
+    sql:
+      query: |
+        SELECT count(*) as idcard_submit_order_count FROM llxz_order.ct_user_orders WHERE shop_id = '${shop_id}' AND 
+        uid IN ('${uid}') AND delete_time IS NULL
+      column: idcard_submit_order_count
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.idcardSubmitOrderCount"
+        operator: ==
+        value: ${idcard_submit_order_count}
+        type_check: "int"
+
+  - case_id: OR_003
+    title: "验证收货手机成功下单数"
+    description: "检查返回数据中的收货手机成功下单数（phoneTransactionOrderCount）字段值"
+    method: POST
+    endpoint: "/hzsx/business/order/getAllOrderRecords"
+    sql:
+      query: |
+        SELECT COUNT(*) AS phone_transaction_order_count 
+        FROM llxz_order.ct_user_orders 
+        WHERE shop_id = '${shop_id}' 
+        AND uid = '${uid}' 
+        AND delete_time IS NULL 
+        AND status IN ('05', '06', '09');
+      column: phone_transaction_order_count
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.phoneTransactionOrderCount"
+        operator: "=="
+        value: ${phone_transaction_order_count}
+        type_check: "int"
+
+  - case_id: OR_004
+    title: "验证收货手机累计下单数"
+    description: "检查返回数据中的收货手机累计下单数（phoneSubmitOrderCount）字段值"
+    method: POST
+    endpoint: "/hzsx/business/order/getAllOrderRecords"
+    sql:
+      query: |
+        SELECT count(*) as phone_submit_order_count FROM llxz_order.ct_user_orders WHERE shop_id = '${shop_id}' AND 
+        uid IN ('${uid}') AND delete_time IS NULL
+      column: phone_submit_order_count
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.phoneSubmitOrderCount"
+        operator: "=="
+        value: ${phone_submit_order_count}
+        type_check: "int"
+
+  - case_id: OR_005
+    title: "验证在租数"
+    description: "检查返回数据中的在租数（idcardTransactionOrderCount）字段值"
+    method: POST
+    endpoint: "/hzsx/business/order/getAllOrderRecords"
+    sql:
+      query: |
+        SELECT COUNT(*) AS idcard_transaction_order_count 
+        FROM llxz_order.ct_user_orders 
+        WHERE shop_id = '${shop_id}' 
+        AND uid = '${uid}' 
+        AND delete_time IS NULL 
+        AND status IN ('05', '06', '09');
+      column: idcard_transaction_order_count
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.idcardTransactionOrderCount"
+        operator: "=="
+        value: ${idcard_transaction_order_count}
+        type_check: "int"
+
+  - case_id: OR_006
+    title: "验证申请数"
+    description: "检查返回数据中的申请数（hisSubmitOrderCount）字段值"
+    method: POST
+    endpoint: "/hzsx/business/order/getAllOrderRecords"
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.hisSubmitOrderCount"
+        operator: "exists"
+      - path: "$.data.hisSubmitOrderCount"
+        operator: ">="
+        value: 0
+        type_check: "int"

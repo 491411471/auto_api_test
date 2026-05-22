@@ -1,0 +1,96 @@
+# 审核通过业务流
+flow_name: "订单完结申请-审核通过"
+description: "商家提交完结申请 → 运营审核通过"
+
+merchant:
+  # 查询可完结订单的 SQL（需要替换 ${shop_id}）
+  retry_config:
+    max_attempts: 3
+    interval_seconds: 2
+    error_keyword: "支付宝状态推进异常"
+  query_order_sql: |
+    	  SELECT o.order_id
+          FROM llxz_order.ct_user_orders o
+          WHERE o.shop_id = '${shop_id}'
+            AND o.channel_id IN ('004', '007', '008', '009', '011', '085')
+            AND o.channel_provenance NOT IN (6, 8)
+            AND o.status = '06'
+            AND NOT EXISTS (SELECT 1
+              FROM llxz_order.ct_shop_order_complete_apply_log l
+              WHERE l.order_id = o.order_id
+            )
+          ORDER BY o.create_time DESC
+          LIMIT 1;
+
+  # 上传图片配置
+  upload_image:
+    endpoint: "/hzsx/busShop/doUpLoadwebp"
+    method: POST
+    file_field: "file"
+    test_image_path: "data/scenario/images/test_image.png"   # 请替换为实际图片路径
+    expected_status: 200                     # 可选，默认期望200
+    validate: # 新增断言列表
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.responseType"
+          operator: "=="
+          value: "SUCCESS"
+
+  # 提交完结申请配置
+  submit_apply:
+    endpoint: "/hzsx/order/completeApply/shopOrderCompleteApply"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+      remark: "自动化测试完结申请（审核通过）"
+      voucher: ["${voucher_url}"]
+      settlementType: "01"
+      damageAmount: 0
+      lossAmount: 0
+      penaltyAmount: 0
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+admin:
+  # 查询申请记录
+  query_apply:
+    endpoint: "/hzsx/order/completeApply/queryOrderCompleteApplyLog"
+    method: POST
+    body_template:
+      page: 1
+      rows: 10
+      orderId: "${order_id}"
+      status: "00"
+      leaseTermType: ""
+    expected_status: 200
+    validate:
+      - path: "$.data.records[0].orderId"
+        operator: ==
+        value: "${order_id}"
+
+  # 审核通过
+  approve:
+    endpoint: "/hzsx/order/completeApply/verifyOrderCompleteApply"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+      applyId: "${apply_id}"
+      status: "01"                     # 01 表示通过
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+# 最终验证：订单状态变为 09（完结）
+final_order_status: "09"

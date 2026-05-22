@@ -1,0 +1,17 @@
+{
+  "businessType": 1,
+  "queryType": "queryPageList",
+  "requestSource": "businessNewOfListHeaderStatus",
+  "isQueryHistory": false,
+  "pageNumber": 1,
+  "pageSize": 10,
+  "createDate": null,
+  "guangGaoId": "",
+  "discountType": "13",
+  "rentStartBegin": "2026-04-21 00:00:00",
+  "rentStartEnd": "2026-05-21 00:00:00",
+  "startingrentDate": [
+    "2026-04-21T00:00:00.000Z",
+    "2026-05-21T16:00:00.000Z"
+  ]
+}

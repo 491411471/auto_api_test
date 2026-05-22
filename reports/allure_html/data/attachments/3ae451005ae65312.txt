@@ -1,0 +1,1 @@
+{'total_rent': Decimal('183.38'), 'status': '1'}

@@ -1,0 +1,11 @@
+请求参数: {'requestSource': 'businessNewOfListHeaderStatus'}
+SQL: SELECT COUNT(DISTINCT cobs.order_id) AS total_count
+FROM llxz_order.ct_user_orders AS cuo
+INNER JOIN llxz_order.ct_order_by_stages AS cobs ON cobs.order_id = cuo.order_id
+WHERE
+cobs.statement_date >= CURDATE()
+AND cobs.statement_date < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+AND cobs.STATUS IN (1)
+AND cuo.STATUS IN ('06', '07')
+AND cuo.is_violation IN ('01', '03')
+AND cobs.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87';

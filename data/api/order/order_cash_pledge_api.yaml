@@ -1,0 +1,108 @@
+# order_cash_pledge_api.yaml
+# 全局变量（公共配置）
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+cash_pledge_tests:
+  # ---------- 正向用例 ----------
+  - case_id: CP_001
+    title: "获取押金使用明细-正向用例（有效订单）"
+    description: "传入有效的 orderId 和 shopId，应返回该订单的押金使用明细列表"
+    method: GET
+    endpoint: "/hzsx/ope/webShopOrderCashPledge/getCashPledgeUsageDetail"
+    sql:
+      query: |      
+        SELECT o.order_id 
+        FROM llxz_order.ct_user_orders o
+        INNER JOIN llxz_order.ct_shop_cash_pledge_usage c 
+          ON o.order_id = c.order_id 
+        WHERE o.shop_id = "${shop_id}"
+        LIMIT 1
+      column: order_id
+      multiple: false
+    params:
+      orderId: ${order_id}
+      shopId: ${shop_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.data[0].orderId"
+        operator: "=="
+        value: "${order_id}"
+      - path: "$.data[0].shopId"
+        operator: "=="
+        value: "${shop_id}"
+
+
+  # ---------- 异常用例 ----------
+  - case_id: CP_002
+    title: "获取押金使用明细-异常用例（orderId 不存在）"
+    description: "传入一个不存在的 orderId，应返回业务失败或空数据"
+    method: GET
+    endpoint: "/hzsx/ope/webShopOrderCashPledge/getCashPledgeUsageDetail"
+    params:
+      orderId: "INVALID_ORDER_ID_999999"
+      shopId: ${shop_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+      - path: "$.data"
+        operator: "empty"
+        value: 0
+
+  # ---------- 边界用例 ----------
+  - case_id: CP_003
+    title: "获取押金使用明细-边界用例（orderId 为空字符串）"
+    description: "orderId 传空字符串，应返回参数错误"
+    method: GET
+    endpoint: "/hzsx/ope/webShopOrderCashPledge/getCashPledgeUsageDetail"
+    params:
+      orderId: ""
+      shopId: ${shop_id}
+    expected_status: 200   # 或 200 但有业务错误码，根据实际调整
+    validate_data:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.errorCode"
+        operator: "=="
+        value: "HZSX_VALIDATE_ERR"
+
+  # ---------- 数据合理性验证 ----------
+  - case_id: CP_004
+    title: "获取押金使用明细-验证金额字段格式"
+    description: "确保 amount 和 residueAmount 为数字字符串且非负"
+    method: GET
+    endpoint: "/hzsx/ope/webShopOrderCashPledge/getCashPledgeUsageDetail"
+    sql:
+      query: |
+        SELECT o.order_id 
+        FROM llxz_order.ct_user_orders o
+        INNER JOIN llxz_order.ct_shop_cash_pledge c 
+          ON o.order_id = c.order_id 
+        WHERE o.shop_id = "${shop_id}"
+        LIMIT 1
+      column: order_id
+    params:
+      orderId: ${order_id}
+      shopId: ${shop_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.data[0].amount"
+        operator: "regex_match"
+        value: "^\\d+(\\.\\d{1,2})?$"
+      - path: "$.data[0].createTime"
+        operator: "regex_match"
+        value: "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+

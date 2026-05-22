@@ -1,0 +1,44 @@
+perfect_api_test/
+│
+├── common/                     # 公共核心模块
+│   ├── __init__.py
+│   ├── api_client.py           # 支持多种认证、重试、Allure 步骤
+│   ├── logger.py               # 彩色控制台 + 文件日志
+│   └── database.py             # 数据库查询工具（可选）
+│
+├── config/                     # 配置管理
+│   ├── __init__.py
+│   └── settings.yaml           # 多环境配置（dev/test/prod）
+│
+├── data/                       # 测试数据（YAML）
+│   ├── api/
+│   │   └── issue_api.yaml      # 单接口测试数据
+│   └── scenario/
+│       └── issue_flow.yaml     # 业务流程测试数据
+│
+├── testcases/                  # 测试用例
+│   ├── __init__.py
+│   ├── conftest.py             # 全局夹具（fixture）
+│   ├── api/
+│   │   ├── __init__.py
+│   │   └── test_issue_api.py
+│   └── scenario/
+│       ├── __init__.py
+│       └── test_issue_flow.py
+│
+├── utils/                      # 工具函数
+│   ├── __init__.py
+│   ├── data_loader.py          # 加载 YAML 数据
+│   └── assert_utils.py         # 增强断言（支持 JSON 比较）
+│
+├── reports/                    # 测试报告（自动创建）
+│   ├── allure_results/
+│   └── allure_html/
+│
+├── logs/                       # 日志文件（自动创建）
+│   └── api_test.log
+│
+├── requirements.txt            # 依赖清单
+├── pytest.ini                  # pytest 配置
+├── run.py                      # 一键执行（支持多参数）
+└── README.md                   # 超详细使用文档

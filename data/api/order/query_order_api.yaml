@@ -1,0 +1,348 @@
+# 全局变量
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/business/order/queryOrderByCondition"
+
+.common_json: &common_json
+  businessType: 1
+  queryType: "queryPageList"
+  requestSource: "businessNewOfListHeaderStatus"
+  isQueryHistory: false
+  pageNumber: 1
+  pageSize: 10
+
+order_query_tests:
+  - case_id: OQ_001
+    title: "通过订单号精确查询"
+    description: "使用真实存在的订单号进行查询，验证返回唯一记录"
+    <<: *common_endpoint
+    sql:
+      query: "SELECT * FROM llxz_order.ct_user_orders where shop_id='${shop_id}' ORDER BY create_time DESC LIMIT 1"
+      column: "order_id"
+    json:
+      <<: *common_json
+      orderId: "${order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "data.records[0].orderId"
+        operator: "=="
+        value: "${order_id}"
+      - path: "data.total"
+        operator: ">="
+        value: 1
+
+  - case_id: OQ_002
+    title: "通过不存在的订单号查询"
+    description: "使用数据库中不存在的订单号，应返回空列表"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: "008OI999999999999999999999999"
+    expected_status: 200
+    validate_data:
+      - path: "data.records"
+        operator: "=="
+        value: []
+      - path: "data.total"
+        operator: "=="
+        value: 0
+
+  - case_id: OQ_003
+    title: "按订单状态查询（订单完成）"
+    description: "筛选状态为‘订单完成’的订单"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      status: "09"
+    expected_status: 200
+    validate_data:
+      - path: "data.records[*].status"
+        operator: "all_in"
+        value: ["09"]
+
+  - case_id: OQ_004
+    title: "按责任人查询"
+    description: "通过责任人的姓名模糊匹配订单"
+    <<: *common_endpoint
+    sql:
+      query: "select id,name from llxz_user.ct_backstage_user order by id DESC LIMIT 1;"
+      column_1: "id"
+      column_2: "name"
+    json:
+      <<: *common_json
+      guangGaoId: ""
+      orderId: ""
+      responsiblePersonId: "${id}"
+      status: ""
+    expected_status: 200
+    validate_data:
+      - path: "errorCode"
+        operator: "=="
+        value: "None"
+      - path: "errorMessage"
+        operator: "=="
+        value: "None"
+
+  - case_id: OQ_005
+    title: "按收货人手机号查询"
+    description: "严格匹配收货人手机号（11位）"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      guanGaoId: ""
+      telephone: 15705659822
+    expected_status: 200
+    validate_data:
+      - path: "data.records[*].orderAddressDto.realname"
+        operator: "any_contain"
+        value: "陶大帅"
+
+  - case_id: OQ_006
+    title: "按商品名称模糊查询"
+    description: "根据商品名称关键字查询订单"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      guanGaoId: ""
+      productName: "手机"
+      telephone: ""
+    expected_status: 200
+    validate_data:
+      - path: "data.records[*].productName"
+        operator: "all_contain"
+        value: "手机"
+
+  - case_id: OQ_007
+    title: "按下单人姓名查询"
+    description: "按下单人的真实姓名查询"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      guanGaoId: ""
+      userName: "陶玥"
+    expected_status: 200
+    validate_data:
+      - path: "data.records[*].realName"
+        operator: "all_eq"
+        value: "陶玥"
+
+  - case_id: OQ_008
+    title: "按下单人手机号查询"
+    description: "通过下单人手机号精确查询"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      addressUserPhone: "15705659822"
+      guangGaoId: ""
+    expected_status: 200
+    validate_data:
+      - path: "data.records[*].uid"
+        operator: "all_eq"
+        value: "3a5e5a2b822134efbde2fe2292a9995e985bc18evmv4g74rnsfh"
+
+#  - case_id: OQ_009
+#    title: "按发货日期范围查询"
+#    description: "指定开始日期和结束日期（送货时间）"
+#    <<: *common_endpoint
+#    json:
+#      <<: *common_json
+#      userName: "${user_name}"
+#      delivaryCalendar:
+#        - "2026-02-28T16:00:00.000Z"
+#        - "2026-03-30T16:00:00.000Z"
+#      guangGaoId: ""
+#      shopOrderSendTimeStart: "2026-03-01 00:00:00"
+#      shopOrderSendTimeEnd: "2026-03-31 23:59:59"
+#    expected_status: 200
+#    validate_data:
+#      - path: "data.records[*].receiptExpressInfo.deliveryTime"
+#        operator: "all_between"
+#        value: ["2026-04-30 00:00:00", "2026-04-30 23:59:59"]
+
+  - case_id: OQ_010
+    title: "按创建时间范围查询"
+    description: "使用创建时间的起始日期过滤"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      createDate:
+        - "2026-03-31T16:00:00.000Z"
+        - "2026-04-29T16:00:00.000Z"
+      createTimeStart: "2026-04-01 00:00:00"
+      createTimeEnd: "2026-04-30 00:00:00"
+      delivaryCalendar: null
+      guangGaoId: ""
+      userName: ""
+    expected_status: 200
+    validate_data:
+      - path: "data.records"
+        operator: "length_gt"
+        value: 0
+      - path: "data.records[*].placeOrderTime"
+        operator: "all_between"
+        value: ["2026-04-01 00:00:00", "2026-04-30 23:59:59"]
+      - path: "data.total"
+        operator: ">="
+        value: 0
+
+  - case_id: OQ_011
+    title: "组合查询：状态 + 下单人姓名 + 订单编号"
+    description: "多条件组合查询，验证结果交集"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      status: "09"
+      responsiblePersonName: "陶玥"
+      orderId: "008OI202604282049064659034574848T"
+    expected_status: 200
+    validate_data:
+      - path: "data.records[*].status"
+        operator: "=="
+        value: "09"
+      - path: "data.records[*].orderId"
+        operator: "in"
+        value: "008OI202604282049064659034574848T"
+      - path: "data.records[*].realName"
+        operator: "in"
+        value: "陶玥"
+      - path: "data.total"
+        operator: "=="
+        value: 1
+      - path: "errorMessage"
+        operator: "=="
+        value: None
+
+  - case_id: OQ_012
+    title: "分页查询：第二页数据"
+    description: "验证分页参数正常工作"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      pageNumber: 2
+      pageSize: 5
+      addressUserPhone: ""
+      orderId: ""
+    expected_status: 200
+    validate_data:
+      - path: "data.current"
+        operator: "=="
+        value: 2
+      - path: "data.size"
+        operator: "<="
+        value: 5
+      - path: "data.records"
+        operator: "type"
+        value: "list"
+
+  - case_id: OQ_013
+    title: "按创建时间降序排序"
+    description: "默认排序应为 create_time DESC，验证第一条记录时间晚于最后一条"
+    <<: *common_endpoint
+    sql:
+      query: "select DATE_FORMAT(create_time, '%%Y-%%m-%%d %%H:%%i:%%s') as create_time from llxz_order.ct_user_orders where shop_id='${shop_id}' ORDER BY create_time DESC LIMIT 1;"
+      column: create_time
+    json:
+      <<: *common_json
+    expected_status: 200
+    custom_validate: "check_create_time_desc"
+    validate_data:
+      - path: data.records[0].orderAddressDto.createTime
+        operator: "=="
+        value: "${create_time}"
+
+  - case_id: OQ_014
+    title: "空查询条件（不传任何筛选）"
+    description: "查询全部订单，应返回分页数据"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+    expected_status: 200
+    validate_data:
+      - path: "data.records"
+        operator: "type"
+        value: "list"
+      - path: "data.searchCount"
+        operator: "=="
+        value: True
+
+  - case_id: OQ_015
+    title: "订单查询--高分专享"
+    description: "订单查询--高分专享单条件查询"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      discountType: "1"
+      guangGaoId: ""
+    expected_status: 200
+    validate_data:
+      # 使用标准 JSONPath 格式
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.data.records[0].customizeLabelDtos[0].labelName"
+        operator: "=="
+        value: "高分专享"
+
+  - case_id: OQ_016
+    title: "订单查询--芝麻严选"
+    description: "订单查询--芝麻严选单条件查询"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      discountType: "12"
+      guangGaoId: ""
+    expected_status: 200
+    validate_data:
+      # 使用标准 JSONPath 格式
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.data.records[0].customizeLabelDtos[0].labelName"
+        operator: "=="
+        value: "芝麻严选"
+
+  - case_id: OQ_017
+    title: "订单查询--起租日期+续租订单"
+    description: "验证订单查询接口中，起租日期在最近一个月内的续租订单"
+    <<: *common_endpoint
+    method: POST
+    json:
+      <<: *common_json
+      businessType: 1
+      createDate: null
+      guangGaoId: ""
+      isQueryHistory: false
+      discountType: "13"
+      pageNumber: 1
+      pageSize: 10
+      queryType: "queryPageList"
+      rentStartBegin: "${start_date}"
+      rentStartEnd: "${end_date}"
+      requestSource: "businessNewOfListHeaderStatus"
+      startingrentDate:
+        - "${start_date_iso}"
+        - "${end_date_iso}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.data.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.records[0].customizeLabelDtos[0].labelName"
+        operator: "=="
+        value: "续租订单"
+        only_if: "$.data.total > 0"

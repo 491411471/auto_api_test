@@ -1,0 +1,1 @@
+{'shop_id': '71008738021cd3393bacbac182bd6a86af0b5c87', 'common_sql': "SELECT order_id, status\nFROM llxz_order.ct_user_orders\nWHERE shop_id = '${shop_id}'\n  AND channel_provenance NOT IN (6, 8)\nORDER BY create_time DESC\nLIMIT 1\n"}

@@ -1,0 +1,4 @@
+路径: data.records[*].uid
+操作符: all_eq
+期望值: 3a5e5a2b822134efbde2fe2292a9995e985bc18evmv4g74rnsfh
+实际值: None

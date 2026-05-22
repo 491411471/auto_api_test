@@ -1,0 +1,1 @@
+POST /hzsx/business/order/batch_assign_responsible_person

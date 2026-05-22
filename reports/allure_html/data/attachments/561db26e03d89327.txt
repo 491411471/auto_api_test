@@ -1,0 +1,5 @@
+SELECT product_id 
+FROM llxz_product.ct_product 
+WHERE product_id IS NOT NULL and status = 1 
+order by create_time desc
+LIMIT 1

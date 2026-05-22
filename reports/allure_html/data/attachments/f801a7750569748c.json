@@ -1,0 +1,9 @@
+{
+  "auditRemark": "测试订单审核通过",
+  "deliveryMethod": "SELFPICK",
+  "sendTime": null,
+  "orderId": "008OI202605212057178300345618432T",
+  "remark": "测试--订单审核通过",
+  "orderAuditStatus": "01",
+  "isFormBusinessShopOrderAudit": 1
+}

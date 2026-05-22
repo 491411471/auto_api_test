@@ -1,0 +1,97 @@
+
+xianyu_product_create_tests:
+  - name: "新建闲鱼商品-成功"
+    description: "测试新建闲鱼商品，验证接口返回成功"
+    method: "POST"
+    endpoint: "/hzsx/xianyu/product/addXianYuProduct"
+    headers:
+      Content-Type: "application/json"
+    body:
+      categoryIds: [8, "${category_id}"]
+      channelCatIds: [
+        "2e95dca82967a85828d88a08a19453dc",
+        "d685ee67064a2a89ac899d2620c5df2b",
+        "6f760ba74de2d90b6f38848189966e7d",
+        "b1d120432eefd5cc1921b9e373cead75"
+      ]
+      name: "${product_name}"
+      title: "${product_name}"
+      oldNewDegree: 1
+      itemLeaseDTO:
+        inventory: "100"
+        marketPrice: "100"
+        rentalDepositPriceInCent: 0.02
+        memo: ""
+        parts: null
+        earliestLeaseDays: null
+        cycs:
+          - dayOrMonth: "day"
+            days: "10"
+            priceCent: "1"
+            totalRental: "10.00"
+            id: "${uuid_1}"
+      images:
+        - isMain: null
+          src: "${image_url}"
+          uid: 1
+          url: "${image_url}"
+          width: 1080
+          height: 1440
+          xyImageId: "1310908751647321301"
+      detail: "<p>闲鱼--商品详情-${product_name}</p>"
+      address:
+        - "110000"
+        - "110100"
+        - "110101"
+      freightType: "FREE"
+      type: 1
+      addIds: [843]
+      channelCatId: "b1d120432eefd5cc1921b9e373cead75"
+      province: 110000
+      city: 110100
+      draft: ""
+      categoryId: "${category_id}"
+      id: 1679
+    expected:
+      businessSuccess: true
+      data: true
+      rpcResult: "SUCCESS"
+
+xianyu_product_audit_test:
+  - name: "审核产品 - 通过审核（动态ID）"
+    url: "/hzsx/xianyu/product/opeAuditProductPost"
+    method: "POST"
+    headers:
+      Content-Type: "application/json"
+    body:
+      auditState: 2
+      reason: null
+      id: "${product_id_db}"   # 动态替换为从数据库查询的产品ID
+      configIdList: [ ]
+    response:
+      status_code: 200
+      # 中高度断言：验证核心业务成功字段
+      json_paths:
+        - path: "$.rpcResult"
+          expected: "SUCCESS"
+          operator: "eq"
+        - path: "$.responseType"
+          expected: "SUCCESS"
+          operator: "eq"
+        - path: "$.data"
+          expected: true
+          operator: "eq"
+        - path: "$.businessSuccess"
+          expected: true
+          operator: "eq"
+        - path: "$.finalSuccess"
+          expected: true
+          operator: "eq"
+        - path: "$.errorCode"
+          expected: null
+          operator: "is_null"
+        - path: "$.errorMessage"
+          expected: null
+          operator: "is_null"
+        - path: "$.traceId"
+          operator: "not_empty"

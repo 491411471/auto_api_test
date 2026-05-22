@@ -1,0 +1,165 @@
+# 订单状态流转测试（审核 -> 发货 -> 确认收货）
+flow_name: "订单状态流转"
+description: "查询已签约待审核订单 -> 审核通过 -> 获取归还地址 -> 发货 -> 创建PDF -> 运营端查询验证 -> 确认收货--租用中"
+
+# 注意：需要根据实际业务填写正确的 SQL 查询条件
+merchant:
+  # 查询已签约、零零待审核的订单号（需要替换 ${shop_id}）
+  query_order_sql: &query_order_sql
+    select order_id 
+    from llxz_order.ct_user_orders
+    where shop_id = '${shop_id}'
+    and status = '13'
+    and channel_provenance NOT IN (6, 8)
+    and withhold_type is not null
+    limit 1
+
+  # 1. 审核通过（电话审核）
+  telephone_audit:
+    endpoint: "/hzsx/business/order/telephoneAuditOrder"
+    method: POST
+    sql:
+      query: *query_order_sql
+      column: "order_id"
+    body_template:
+      auditRemark: "测试订单审核通过"
+      deliveryMethod: "SELFPICK"
+      sendTime: null
+      orderId: "${order_id}"
+      remark: "测试--订单审核通过"
+      orderAuditStatus: "01"
+      isFormBusinessShopOrderAudit: 1
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # 2. 获取归还地址列表
+  get_back_address_list:
+    endpoint: "/hzsx/busShop/getOrdersBackAddressOptList"
+    method: GET
+    params_template:
+      orderId: "${order_id}"
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "not_empty"
+        value: null
+
+  # 3. 发货
+  order_delivery:
+    endpoint: "/hzsx/business/order/orderDelivery2"
+    method: POST
+    body_template:
+      expressId: ""
+      expressNo: ""
+      color: "黑色"
+      sendWay: "02"
+      type: "bussiness"
+      number: 1
+      modify: false
+      orderId: "${order_id}"
+      generateOrderContract: true
+      deviceInfoDtoList:
+        - code: ""
+          color: "黑色"
+          pictures: []
+      receverInfo: "广东省东莞市中堂镇江南村忠心坊九巷11号江南村村民委员会"
+      deviceInfo: "99新王浩宇测试商品333331/2"
+      returnAddressIdList: []   # 测试时会动态填充
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # 4. 创建 PDF
+  create_pdf:
+    endpoint: "/hzsx/ope/order/creatPdf"
+    method: GET
+    params_template:
+      orderId: "${order_id}"
+      color: "黑色"
+      code: ""
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "not_empty"
+        value: null
+
+  # 5. 运营端查询订单（用于验证状态）
+  ope_query_order:
+    endpoint: "/hzsx/ope/order/queryOpeOrderByCondition"
+    method: POST
+    body_template:
+      pageNumber: 1
+      pageSize: 10
+      queryType: "queryPageList"
+      isQueryHistory: false
+      orderId: "${order_id}"
+      guangGaoId: ""
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records"
+        operator: "not_empty"
+        value: null
+
+  # 6. 运营端确认收货
+  ope_confirm_receipt:
+    endpoint: "/hzsx/ope/order/userConfirmReceipt"
+    method: GET
+    params_template:
+      orderId: "${order_id}"
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+
+  # 7. 验证订单状态是否为“租用中”（确认收货后）
+  verify_renting_status:
+    endpoint: "/hzsx/ope/order/queryOpeOrderByCondition"
+    method: POST
+    body_template:
+      pageNumber: 1
+      pageSize: 10
+      queryType: "queryPageList"
+      isQueryHistory: false
+      orderId: "${order_id}"
+      guangGaoId: ""
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[0].status"
+        operator: "=="
+        value: "06"
+      - path: "$.data.records"
+        operator: "not_empty"
+        value: null

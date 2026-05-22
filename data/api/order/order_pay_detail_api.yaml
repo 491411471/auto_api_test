@@ -1,0 +1,120 @@
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+  # 公用 SQL：获取一个符合条件的订单的 order_id 和 status（订单状态）
+  common_sql: |
+    SELECT order_id, status
+    FROM llxz_order.ct_user_orders
+    WHERE shop_id = '${shop_id}'
+      AND channel_provenance NOT IN (6, 8)
+    ORDER BY create_time DESC
+    LIMIT 1
+
+order_pay_detail_tests:
+  - case_id: PD_001
+    title: "验证总租金字段正确性"
+    description: "检查 oldAllRent 与数据库中的总租金一致"
+    method: GET
+    endpoint: "/hzsx/business/order/queryOrderPayDetail"
+    sql:
+      # 先执行公用 SQL 获取 order_id 和 status
+      - query: ${common_sql}
+        columns: [order_id, status]
+      # 再执行本用例特定 SQL 获取期望总租金
+      - query: |
+          SELECT total_rent, status
+          FROM llxz_order.ct_order_by_stages
+          WHERE order_id = '${order_id}'
+          LIMIT 1
+        columns:
+          - total_rent
+          - status
+    params:
+      orderId: ${order_id}
+      status: ${status}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 核心断言：总租金
+      - path: "$.data.oldAllRent"
+        operator: "=="
+        value: ${total_rent}
+        type_check: "float"
+
+  - case_id: PD_002
+    title: "验证已支付金额正确性"
+    description: "检查 hasPayRent 等于状态为2的账期租金之和"
+    method: GET
+    endpoint: "/hzsx/business/order/queryOrderPayDetail"
+    sql:
+      - query: ${common_sql}
+        columns: [order_id, status]
+      - query: |
+          SELECT COALESCE(SUM(current_periods_rent), 0) AS paid_rent
+          FROM llxz_order.ct_order_by_stages
+          WHERE order_id = '${order_id}' AND status = '2'
+        column: paid_rent
+    params:
+      orderId: ${order_id}
+      status: ${status}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 核心断言1：已支付租金
+      - path: "$.data.hasPayRent"
+        operator: "=="
+        value: ${paid_rent}
+        type_check: "float"
+      # 核心断言2：实际支付金额等于已支付租金
+      - path: "$.data.realPayPrice"
+        operator: "=="
+        value: ${paid_rent}
+        type_check: "float"
+
+  - case_id: PD_003
+    title: "验证未付租金正确性"
+    description: "检查 noPayRent = 总租金 - 已支付租金"
+    method: GET
+    endpoint: "/hzsx/business/order/queryOrderPayDetail"
+    sql:
+      - query: ${common_sql}
+        columns: [order_id, status]
+      # 查询订单的总租金和已支付租金
+      # 通过左连接合并订单主表和分期表数据：
+      # - total_rent: 从订单主表获取总租金
+      # - paid_rent: 从分期表汇总状态为'2'(已支付)的当期租金总和，若无支付记录则返回0
+      - query: |
+          SELECT total_rent,
+          COALESCE(SUM(CASE WHEN status = '2' THEN current_periods_rent END), 0) AS paid_rent,
+          MAX(total_rent) - COALESCE(SUM(CASE WHEN status = '2' THEN current_periods_rent END), 0) AS unpaid_rent
+          FROM llxz_order.ct_order_by_stages
+          WHERE order_id = '${order_id}'
+        columns: [total_rent, paid_rent, unpaid_rent]
+    params:
+      orderId: ${order_id}
+      status: ${status}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 核心断言：未付租金 = 总租金 - 已支付租金
+      - path: "$.data.noPayRent"
+        operator: "=="
+        value: ${unpaid_rent}
+        type_check: "float"
+
+

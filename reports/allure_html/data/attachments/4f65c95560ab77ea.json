@@ -1,0 +1,12 @@
+{
+  "businessType": 1,
+  "queryType": "queryPageList",
+  "requestSource": "businessNewOfListHeaderStatus",
+  "isQueryHistory": false,
+  "pageNumber": 1,
+  "pageSize": 10,
+  "guangGaoId": "",
+  "orderId": "",
+  "responsiblePersonId": 1011236,
+  "status": ""
+}

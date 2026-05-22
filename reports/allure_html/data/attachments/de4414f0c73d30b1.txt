@@ -1,0 +1,2 @@
+请求参数: {}
+SQL: SELECT order_id, product_id FROM llxz_order.ct_user_orders WHERE status IN ('13', '06', '04') AND channel_provenance NOT IN (6, 8) AND shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' AND create_time >= DATE_SUB(NOW(), INTERVAL 30 DAY) ORDER BY create_time DESC LIMIT 1

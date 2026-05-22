@@ -1,0 +1,57 @@
+# 补押金业务流
+flow_name: "补押金流程"
+description: "查询符合条件的订单 → 补押金 → 查询补押金记录并验证金额和订单号"
+
+# 补押金金额（可按需修改）
+deposit_amount: 1
+
+merchant:
+  # 1. 查询符合条件的订单号（SQL）
+  order_list:
+    - 012OI202501101877654340009857024
+    - 012OI202502141890319477141278720
+    - 012OI202502141890327541974175744
+    - 012OI202502251894213818377179136
+    - 012OI202502251894214716759347200
+
+  # 2. 补押金接口
+  add_deposit_order:
+    endpoint: "/hzsx/business/order/addDepositOrder"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+      amount: "${deposit_amount}"
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: false
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+      - path: "$.errorMessage"
+        operator: "=="
+        value: "请勿重复补押金"
+
+  # 3. 查询补押金记录（用于验证）
+  get_deposit_order_list:
+    endpoint: "/hzsx/business/order/getDepositOrderList"
+    method: POST
+    body_template:
+      pageNumber: 1
+      pageSize: 10
+      orderId: "${order_id}"
+      shopId: "${shop_id}"
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records"
+        operator: "not_empty"
+        value: null
+      # 注意：金额和订单号的详细断言在测试代码中完成（因为需要动态比对）
+      # 此处仅确保记录存在，具体值验证在 test 脚本中通过循环或断言实现
