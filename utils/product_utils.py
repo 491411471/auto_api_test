@@ -9,7 +9,8 @@ import os
 from typing import Any, Dict
 import random
 from pathlib import Path
-
+from faker import Faker
+fake = Faker('zh_CN')
 
 def gen_product_name() -> str:
     """
@@ -141,3 +142,41 @@ def replace_placeholders(obj: Any, variables: Dict[str, Any]) -> Any:
     
     else:
         return obj
+
+
+def generate_chinese_name(existing_set=None):
+    """生成较低重复率的名字"""
+    if existing_set is None:
+        return fake.name()
+    while True:
+        name = fake.name()
+        if name not in existing_set:
+            existing_set.add(name)
+            return name
+
+
+from faker import Faker
+
+fake = Faker('zh_CN')
+
+
+def gen_detailed_street_address():
+    """随机生成详细的中文街道地址（包含楼号、楼层、门牌号），带自动化测试前缀"""
+    street = fake.street_address()
+    building = fake.building_number()
+    floor = f"{fake.random_int(min=1, max=30)}层"
+    room = f"{fake.random_int(min=101, max=2804)}室"
+
+    return f"{street}{building}{floor}{room}--自动化测试"
+
+
+# 使用示例
+print(gen_detailed_street_address())
+
+
+# 输出示例：自动化测试中关村大街1号8栋15层1502室
+
+
+def gen_chinese_phone():
+    """生成随机中国手机号"""
+    return fake.phone_number()

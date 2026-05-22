@@ -7,7 +7,7 @@ _ALL_CASES = get_test_data("product_audit_query_api.yaml", "product_audit_tests"
 if not _ALL_CASES:
     raise RuntimeError("无法加载 YAML 数据，请检查文件路径 product_audit_query_api.yaml")
 
-@allure.feature("商家端-商品模块")
+@allure.feature("商家端-商品管理模块")
 @allure.story("商品审核查询与详情")
 class TestProductAuditQuery:
     _global_vars = None

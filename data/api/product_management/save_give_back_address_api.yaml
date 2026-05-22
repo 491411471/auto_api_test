@@ -1,0 +1,58 @@
+variables:
+  channel_group_code: "001"
+  default_address: ["110000", "110100", "110101"]
+  default_province_id: 110000
+  default_city_id: 110100
+  default_area_id: 110101
+
+save_give_back_address_tests:
+  - case_id: "SBA_001"
+    title: "正常新增归还地址-动态生成姓名街道电话"
+    description: "使用动态生成的姓名、街道、电话号码调用保存接口，验证返回成功"
+    method: POST
+    endpoint: "/hzsx/shopAddress/saveShopGiveBackAddress"
+    json:
+      name: "${random_name}"
+      address: ${default_address}
+      street: "${random_street}"
+      freightType: "FREE"
+      telephone: "${random_telephone}"
+      provinceId: ${default_province_id}
+      cityId: ${default_city_id}
+      areaId: ${default_area_id}
+      channelGroupCode: ${channel_group_code}
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # 可选：增加一个异常用例示例（比如缺少必填字段）
+  - case_id: "SBA_002"
+    title: "禁用归还地址--type=0"
+    description: "禁用归还地址--type=0"
+    method: POST
+    endpoint: "/hzsx/shopAddress/updateShopGiveBackAddressesType"
+    sql:
+      query: "select id from llxz_product.ct_shop_give_back_addresses where type =1 order by create_time desc"
+      columns: ["id"]
+    json:
+      id: ${id}
+      type: 0
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
