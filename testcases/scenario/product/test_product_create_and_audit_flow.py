@@ -48,7 +48,7 @@ class TestProductCreateAndAudit:
             
             # 上传测试图片
             image_path = "/data/scenario/images/test_image.png"
-            image_url = upload_test_image(api_client, image_path)
+            image_url,image_id = upload_test_image(api_client, image_path)
             
             # 生成库存日期映射（未来14天）
             inventory_map = generate_inventory_date_map(days=14)

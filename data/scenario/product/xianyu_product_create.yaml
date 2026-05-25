@@ -3,6 +3,7 @@ xianyu_product_create_tests:
   - name: "新建闲鱼商品-成功"
     description: "测试新建闲鱼商品，验证接口返回成功"
     method: "POST"
+#    endpoint: "/hzsx/xianyu/product/addXianYuProduct"
     endpoint: "/hzsx/xianyu/product/addXianYuProduct"
     headers:
       Content-Type: "application/json"
@@ -116,3 +117,26 @@ xianyu_product_offline_test:
       - path: "$.data"
         operator: "=="
         value: true
+
+del_xianyu_product_test:
+  - case_id: "DPI_001"
+    title: "删除闲鱼商品"
+    description: "删除闲鱼商品"
+    method: GET
+    endpoint: "/hzsx/product/busUpdateProductByRecycleDel"
+    params:
+      productId: "${product_id}"
+      channelGroupId: 001
+      type: ${type}
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+

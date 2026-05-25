@@ -36,7 +36,7 @@ def generate_uuid() -> str:
     return str(uuid.uuid4())
 
 
-def upload_test_image(api_client, image_path: str) -> str:
+def upload_test_image(api_client, image_path: str) -> any:
     """
     上传图片并返回 URL
     Args:
@@ -64,24 +64,21 @@ def upload_test_image(api_client, image_path: str) -> str:
     else:
         # 否则是相对路径，拼接项目根目录
         full_path = base_dir / image_path
-    
-    print("full_path:", full_path)
-    print("base_dir:", base_dir)
     # 验证文件是否存在
     if not full_path.exists():
         raise FileNotFoundError(f"图片文件不存在: {full_path}")
 
     # 上传图片
     with open(full_path, 'rb') as f:
-        resp = api_client.post("/hzsx/busShop/doUpLoadwebp", files={'file': f})
-
+        # resp = api_client.post("/hzsx/busShop/doUpLoadwebp", files={'file': f})
+        resp = api_client.post("/hzsx/busShop/doUpLoadwebToXY", files={'file': f})
     data = resp.json()
-
     # 检查业务是否成功
     if data.get('businessSuccess'):
-        image_url = data.get('data', '')
+        image_url = data.get('data', '').get("llImageUrl")
+        image_id = data.get('data', '').get("iamgeId")
         if image_url:
-            return image_url
+            return image_url, image_id
 
     # 上传失败时，打印完整响应以便调试
     error_msg = data.get('errorMessage') or data.get('message') or data.get('error') or '未知错误'
@@ -103,23 +100,6 @@ def generate_inventory_date_map(days: int = 14) -> Dict[str, int]:
 
 
 def replace_placeholders(obj: Any, variables: Dict[str, Any]) -> Any:
-    """
-    递归替换对象中所有字符串里的 ${key} 占位符
-    
-    Args:
-        obj: 待替换的对象（可以是字符串、字典、列表或基本类型）
-        variables: 变量字典，键为占位符名称，值为替换值
-        
-    Returns:
-        Any: 替换后的对象
-        
-    Examples:
-        >>> variables = {"name": "test", "id": 123}
-        >>> replace_placeholders("${name}", variables)
-        'test'
-        >>> replace_placeholders({"key": "${id}"}, variables)
-        {'key': 123}
-    """
     if isinstance(obj, str):
         # 如果整个字符串就是一个占位符，直接返回对应的值（保持原始类型）
         for key, value in variables.items():
@@ -155,11 +135,6 @@ def generate_chinese_name(existing_set=None):
             return name
 
 
-from faker import Faker
-
-fake = Faker('zh_CN')
-
-
 def gen_detailed_street_address():
     """随机生成详细的中文街道地址（包含楼号、楼层、门牌号），带自动化测试前缀"""
     street = fake.street_address()
@@ -168,13 +143,6 @@ def gen_detailed_street_address():
     room = f"{fake.random_int(min=101, max=2804)}室"
 
     return f"{street}{building}{floor}{room}--自动化测试"
-
-
-# 使用示例
-print(gen_detailed_street_address())
-
-
-# 输出示例：自动化测试中关村大街1号8栋15层1502室
 
 
 def gen_chinese_phone():
