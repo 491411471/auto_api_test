@@ -29,12 +29,21 @@ class TestCompleteApplyReject:
 
         for attempt in range(1, max_retries + 1):
             logger.info(f"========== 第 {attempt} 次尝试执行审核拒绝流程 ==========")
+            allure.attach(f"第 {attempt} 次尝试", name="重试次数", attachment_type=allure.attachment_type.TEXT)
             variables = base_vars.copy()
 
-            # 商家端完整流程
+            # 商家端完整流程：查询订单 → 上传图片 → 提交申请
             order_id, voucher_url = BaseCompleteApplyFlow.execute_merchant_actions(
                 config, merchant_api_client, db, variables
             )
+
+            # 如果数据库中未找到可完结的订单，跳过整个测试用例
+            if order_id is None:
+                skip_msg = "未查询到可完结的订单，跳过此用例"
+                allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
+                logger.warning(skip_msg)
+                pytest.skip(skip_msg)
+
             apply_id = BaseCompleteApplyFlow.execute_admin_query(config, admin_api_client, order_id)
 
             # 运营审核拒绝
@@ -46,19 +55,33 @@ class TestCompleteApplyReject:
                 resp = admin_api_client.post(reject_cfg['endpoint'], json=body)
                 assert resp.status_code == reject_cfg['expected_status']
                 resp_json = resp.json()
-                print("运营端审核拒绝的接口返回：", resp_json)
                 logger.info(f"审核拒绝响应: {resp_json}")
 
                 # 判断是否需要重试（可选，通常拒绝不会触发支付宝异常，但保留机制）
                 if (resp_json.get('businessSuccess') is False and
                     error_keyword in resp_json.get('errorMessage', '')):
                     error_msg = resp_json.get('errorMessage')
+                    allure.attach(
+                        f"遇到可重试错误: {error_msg}",
+                        name=f"第 {attempt} 次审核失败详情",
+                        attachment_type=allure.attachment_type.TEXT
+                    )
                     logger.warning(f"第 {attempt} 次审核拒绝遇到异常: {error_msg}")
                     if attempt < max_retries:
                         logger.info(f"等待 {retry_interval} 秒后重新执行完整流程...")
+                        allure.attach(
+                            f"等待 {retry_interval} 秒后重试",
+                            name="重试等待",
+                            attachment_type=allure.attachment_type.TEXT
+                        )
                         time.sleep(retry_interval)
                         continue
                     else:
+                        allure.attach(
+                            f"已达最大重试次数 {max_retries}，最终错误: {error_msg}",
+                            name="最终失败原因",
+                            attachment_type=allure.attachment_type.TEXT
+                        )
                         pytest.fail(f"已重试 {max_retries} 次，仍遇到异常，流程终止。最后错误: {error_msg}")
 
                 # 正常断言
@@ -77,7 +100,7 @@ class TestCompleteApplyReject:
                 assert record['status'] == expected_status, f"申请状态应为 {expected_status}，实际为 {record['status']}"
                 logger.info("申请状态已更新为拒绝")
 
+            # 成功完成，跳出重试循环
+            allure.attach("流程执行成功", name="最终结果", attachment_type=allure.attachment_type.TEXT)
             logger.info(f"第 {attempt} 次尝试成功，流程结束")
             break
-        else:
-            pytest.fail("未知错误：重试循环异常退出")

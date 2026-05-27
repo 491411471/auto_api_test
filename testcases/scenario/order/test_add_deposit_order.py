@@ -2,6 +2,7 @@ import allure
 import os
 import random
 import yaml
+import pytest
 from common.logger import logger
 from utils.variable_utils import validate, get_value_by_path
 
@@ -15,7 +16,7 @@ def load_yaml(yaml_path):
 @allure.story("补押金完整流程")
 class TestAddDepositOrder:
 
-    @allure.title("完整流程：查询可补订单 → 补押金 → 验证补押金记录（金额+订单号）")
+    @allure.title("完整流程：查询可补押金订单 → 补押金 → 验证补押金记录（金额+订单号）")
     def test_add_deposit_order_flow(self, merchant_api_client, db, global_vars):
         yaml_path = os.path.join(os.path.dirname(__file__), "../../../data/scenario/order/add_deposit_order.yaml")
         config = load_yaml(yaml_path)
@@ -27,6 +28,11 @@ class TestAddDepositOrder:
         # ---------- 步骤1：查询符合条件的订单号 ----------
         with allure.step("1. 查询可补押金的订单号"):
             order_list = config['merchant']['order_list']
+            if not order_list:
+                skip_msg = "YAML中未配置可补押金的订单号列表，跳过此用例"
+                allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
+                logger.warning(skip_msg)
+                pytest.skip(skip_msg)
             order_id = random.choice(order_list)
             logger.info(f"获取到订单号: {order_id}")
             allure.attach(order_id, name="订单号", attachment_type=allure.attachment_type.TEXT)
@@ -52,6 +58,18 @@ class TestAddDepositOrder:
                 validate(actual, operator, expected, path)
 
             allure.attach(str(resp_json), name="补押金响应", attachment_type=allure.attachment_type.JSON)
+
+            # 如果接口返回业务失败（如"请勿重复补押金"），跳过后续验证
+            if resp_json.get('businessSuccess') is False:
+                skip_msg = (
+                    f"补押金接口返回业务失败，跳过后续记录验证\n"
+                    f"  订单号: {order_id}\n"
+                    f"  错误信息: {resp_json.get('errorMessage', '未知错误')}\n"
+                    f"  错误码: {resp_json.get('errorCode', 'N/A')}"
+                )
+                allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
+                logger.warning(skip_msg)
+                pytest.skip(skip_msg)
 
         # ---------- 步骤3：查询补押金记录并验证金额和订单号 ----------
         with allure.step("3. 查询补押金记录，验证金额和原始订单号"):

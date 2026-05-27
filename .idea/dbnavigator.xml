@@ -14,9 +14,6 @@
       <assistant-state connection-id="virtual-mysql-connection" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
       </assistant-state>
-      <assistant-state connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
-        <tools />
-      </assistant-state>
       <assistant-state connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="3F500E461F5449FE932CE799D4326103" availability="AVAILABLE" acknowledgement="ENGAGED" selected="true">
         <chats>
           <chat id="3F500E461F5449FE932CE799D4326103" title="" session-signature="" timestamp="1778839448561">
@@ -24,6 +21,9 @@
             <context provider="" profile="" model="" action="" interactive="true" />
           </chat>
         </chats>
+        <tools />
+      </assistant-state>
+      <assistant-state connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
       </assistant-state>
     </assistants>
@@ -330,7 +330,21 @@ SELECT *
 FROM llxz_order.ct_user_orders
 WHERE shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' AND channel_provenance != 6 AND channel_provenance != 8
 ORDER BY create_time DESC
-LIMIT 1]]></console>
+LIMIT 1
+
+SELECT DISTINCT cuo.user_name
+FROM llxz_order.ct_user_orders cuo
+INNER JOIN llxz_order.ct_order_by_stages cobs ON cobs.order_id = cuo.order_id
+WHERE cuo.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+  AND cuo.status IN ('06')
+  AND cuo.is_violation = '04'
+  AND (cuo.delete_time IS NULL OR cuo.delete_time <= '2001-01-01 00:00:00')
+  AND cuo.user_name IS NOT NULL
+  AND cobs.statement_date < CURDATE()
+  AND cobs.status = 4              -- 账期状态为待还款
+  AND cobs.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'     -- 限制账期表的 shop_id
+ORDER BY cuo.create_time DESC
+LIMIT 1;]]></console>
       <console name="测试环境数据库 1" type="STANDARD" schema="mysql" session="Main"><![CDATA[-- '订单状态 01:待支付 02:支付中 03:已支付申请关单 04:待发货 05:待确认收货 06:租用中 07:待结算 08:结算待支付 09:订单完成 10:交易关闭 12待归还 13下单待审核 14申请取消 15商家关单'
 SELECT *  FROM llxz_order.ct_user_orders  WHERE order_id='008OI202605132054461722232184832T';
 -- SELECT * FROM llxz_order.ct_user_orders  WHERE shop_id='71008738021cd3393bacbac182bd6a86af0b5c87' and status='13';
@@ -650,6 +664,7 @@ LIMIT 1;]]></console>
     <connection id="26c19248-0e92-47ef-873e-30eec3c1dca2" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" dataset="llxz_order.ct_user_orders" active-filter-id="" />
     <filter-actions connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" dataset="llxz_order.ct_ads_field_label" active-filter-id="" />
   </component>
   <component name="DBNavigator.Project.ExecutionManager">

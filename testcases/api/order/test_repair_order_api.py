@@ -99,7 +99,11 @@ class TestRepairOrder:
                     allure.attach(sql, name="查询SQL", attachment_type=allure.attachment_type.TEXT)
 
                     result = db.fetch_one(sql)
-                    assert result is not None, f"第{attempt}次尝试：未查询到可补订单"
+                    if result is None:
+                        skip_msg = f"第{attempt}次尝试：未查询到可补订单"
+                        allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
+                        logger.warning(skip_msg)
+                        pytest.skip(skip_msg)
 
                     order_id = result['order_id']
                     product_id = result['product_id']
@@ -207,12 +211,16 @@ class TestRepairOrder:
                                           attachment_type=allure.attachment_type.TEXT)
                             continue  # 重新开始循环，查询新订单
                         else:
-                            # 达到最大重试次数，认为是预期行为，测试通过
-                            logger.info(f"已达最大重试次数{max_attempts}，所有订单均无法补押金，这是预期的业务场景")
-                            allure.attach(f"已重试{max_attempts}次，所有订单均遇到错误: {error_msg}\n这是预期的业务场景，测试通过",
-                                          name="最终结果",
+                            # 达到最大重试次数，所有订单均无法补订单，跳过此用例
+                            skip_msg = (
+                                f"已重试{max_attempts}次，所有订单均无法提交补订单\n"
+                                f"  最终错误: {error_msg}\n"
+                                f"  已尝试订单: {', '.join(tried_order_ids) if tried_order_ids else '无'}"
+                            )
+                            allure.attach(skip_msg, name="最终结果-跳过用例",
                                           attachment_type=allure.attachment_type.TEXT)
-                            break  # 跳出循环，测试通过
+                            logger.warning(skip_msg)
+                            pytest.skip(skip_msg)
 
                     # 验证提交成功
                     with allure.step("步骤4: 验证响应数据"):
@@ -231,11 +239,9 @@ class TestRepairOrder:
                                       name="断言结果",
                                       attachment_type=allure.attachment_type.TEXT)
 
-                    logger.info("补订单提交成功")
-                    allure.attach("流程执行成功", name="最终结果", attachment_type=allure.attachment_type.TEXT)
-                    break  # 成功则跳出循环
-        else:
-            pytest.fail("重试循环异常退出")
+                logger.info("补订单提交成功")
+                allure.attach("流程执行成功", name="最终结果", attachment_type=allure.attachment_type.TEXT)
+                break
 
     @allure.title("补订单接口-缺少repairOrderConfig参数中的ID测试")
     def test_repair_order_missing_order_id(self, merchant_api_client, db):

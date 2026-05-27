@@ -95,11 +95,33 @@ def validate(actual: Any, operator: str, expected: Any, path: str = "") -> None:
     between, length_gt, length_ge, length_lt, length_le,
     same_elements, is_none, is_not_none, date_between, datetime_between
     """
-    print("实际值：", actual)
-    print("操作符：", operator)
-    print("期望值：", expected)
-    print("操作路径：", path)
-    print("----------------------------")
+    import allure
+
+    if operator == "exists":
+        logger.info("⚠️注意：exists 操作符仅判断字段是否存在（actual 不为 None），不校验具体值")
+        allure.attach(
+            "⚠️注意：exists 操作符仅判断字段是否存在（actual 不为 None），不校验具体值",
+            name="exists 操作符说明",
+            attachment_type=allure.attachment_type.TEXT
+        )
+
+    log_msg = (
+        f"\n{'#' * 40}\n"
+        f"  操作路径：{path}\n"
+        f"  操作符　：{operator}\n"
+        f"  期望值　：{expected}\n"
+        f"  实际值　：{actual}\n"
+        f"{'#' * 40}"
+    )
+    logger.info(log_msg)
+    allure.attach(
+        f"操作路径：{path}\n"
+        f"操作符　：{operator}\n"
+        f"期望值　：{expected}\n"
+        f"实际值　：{actual}",
+        name="断言详情",
+        attachment_type=allure.attachment_type.TEXT
+    )
 
     # 辅助函数：格式化错误信息
     def format_error(msg: str) -> str:

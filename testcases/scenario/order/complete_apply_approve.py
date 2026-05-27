@@ -32,10 +32,15 @@ class TestCompleteApplyApprove:
             allure.attach(f"第 {attempt} 次尝试", name="重试次数", attachment_type=allure.attachment_type.TEXT)
             variables = base_vars.copy()
 
-            # 商家端完整流程
+            # 商家端完整流程：查询订单 → 上传图片 → 提交申请
             order_id, voucher_url = BaseCompleteApplyFlow.execute_merchant_actions(
                 config, merchant_api_client, db, variables
             )
+
+            # 如果数据库中未找到可完结的订单，跳过整个测试用例
+            if order_id is None:
+                pytest.skip("未查询到可完结的订单，跳过此用例")
+
             apply_id = BaseCompleteApplyFlow.execute_admin_query(config, admin_api_client, order_id)
 
             # 运营审核通过
@@ -53,7 +58,6 @@ class TestCompleteApplyApprove:
                 if (resp_json.get('businessSuccess') is False and
                     error_keyword in resp_json.get('errorMessage', '')):
                     error_msg = resp_json.get('errorMessage')
-                    # 将错误信息写入 Allure 报告
                     allure.attach(
                         f"遇到可重试错误: {error_msg}",
                         name=f"第 {attempt} 次审核失败详情",
@@ -68,9 +72,9 @@ class TestCompleteApplyApprove:
                             attachment_type=allure.attachment_type.TEXT
                         )
                         time.sleep(retry_interval)
-                        continue  # 重新开始循环（从头执行商家端操作）
+                        continue
                     else:
-                        # 已达最大重试次数，标记失败并附加最终错误
+                        # 已达最大重试次数，标记失败
                         allure.attach(
                             f"已达最大重试次数 {max_retries}，最终错误: {error_msg}",
                             name="最终失败原因",
@@ -93,10 +97,7 @@ class TestCompleteApplyApprove:
                 assert new_status == expected_status, f"订单状态应为 {expected_status}，实际为 {new_status}"
                 logger.info(f"订单状态已更新为 {new_status}")
 
-            # 成功完成，跳出循环
+            # 成功完成，跳出重试循环
             allure.attach("流程执行成功", name="最终结果", attachment_type=allure.attachment_type.TEXT)
             logger.info(f"第 {attempt} 次尝试成功，流程结束")
             break
-        else:
-            # 理论上不会执行到这里（因为上面有 pytest.fail）
-            pytest.fail("未知错误：重试循环异常退出")

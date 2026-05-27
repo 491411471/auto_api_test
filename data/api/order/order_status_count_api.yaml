@@ -216,8 +216,7 @@ order_status_tests:
         FROM llxz_order.ct_user_orders
         WHERE (shop_id = '${shop_id}' AND
               channel_id IN ('004', '007', '008', '009', '011', '012', '085') AND rent_start IS NOT NULL AND
-              (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) AND `status` IN ('07') AND return_time IS NOT NULL
-        GROUP BY status;
+              (delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL)) AND `status` IN ('07') AND return_time IS NOT NULL;
       column: "total_count"
     expected_status: 200
     validate_data:
@@ -241,8 +240,7 @@ order_status_tests:
         		AND rent_start IS NOT NULL
         	AND ( delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL ))
         	AND `status` IN ( '06', '07', '08', '12' )
-        	AND is_violation = '04'
-        GROUP BY STATUS;
+        	AND is_violation = '04';
       column: "total_count"
     expected_status: 200
     validate_data:

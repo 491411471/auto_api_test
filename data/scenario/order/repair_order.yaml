@@ -44,7 +44,7 @@ merchant:
         value: true
       - path: "$.data"
         operator: "not_empty"
-        value: 0
+        value: null
 
   # 提交补订单
   submit_repair_order:

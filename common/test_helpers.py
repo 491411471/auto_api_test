@@ -339,11 +339,12 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
         for idx, v in enumerate(case['validate_data']):
             path = v['path']
             operator = v['operator']
-            expected = v['value']
+            # 使用 .get() 兼容无期望值的操作符（如 exists, is_none, empty 等）
+            expected = v.get('value')
 
             # ====== 改进：递归替换所有类型的期望值（不仅是字符串）======
             # 检查期望值中是否包含占位符（支持字符串、字典、列表）
-            if needs_replacement(expected):
+            if expected is not None and needs_replacement(expected):
                 expected = replace_placeholders(expected, variables)
                 logger.debug(f"断言 {idx+1} 期望值替换: {v['value']} -> {expected}")
             # ======================================================
@@ -362,36 +363,38 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
                     assert actual_data is None, f"期望 data 为 None，实际为: {actual_data}"
                 continue
 
-            # 每个断言独立步骤
-            step_title = f"断言 {idx+1}: {path} {operator} {expected}"
+            # 每个断言独立步骤（无期望值时只显示操作符）
+            if expected is not None:
+                step_title = f"断言 {idx+1}: {path} {operator} {expected}"
+            else:
+                step_title = f"断言 {idx+1}: {path} {operator}"
             with allure.step(step_title):
                 actual = get_value_by_path_enhanced(response_data, path)
                 
                 # ====== 类型归一化：根据 type_check 统一 expected 和 actual 的数据类型 ======
                 type_check = v.get('type_check')
-                if type_check == 'float':
-                    try:
-                        if expected is not None:
+                if expected is not None:
+                    if type_check == 'float':
+                        try:
                             expected = float(expected)
-                        if actual is not None:
-                            actual = float(actual)
-                    except (ValueError, TypeError):
-                        pass
-                elif type_check == 'int':
-                    try:
-                        if expected is not None:
+                            if actual is not None:
+                                actual = float(actual)
+                        except (ValueError, TypeError):
+                            pass
+                    elif type_check == 'int':
+                        try:
                             expected = int(expected)
-                        if actual is not None:
-                            actual = int(actual)
-                    except (ValueError, TypeError):
-                        pass
-                elif type_check == 'str':
-                    expected = str(expected) if expected is not None else expected
-                    actual = str(actual) if actual is not None else actual
+                            if actual is not None:
+                                actual = int(actual)
+                        except (ValueError, TypeError):
+                            pass
+                    elif type_check == 'str':
+                        expected = str(expected) if expected is not None else expected
+                        actual = str(actual) if actual is not None else actual
                 # ===========================
                 
                 allure.attach(
-                    f"路径: {path}\n操作符: {operator}\n期望值: {expected}\n实际值: {actual}",
+                    f"路径: {path}\n操作符: {operator}\n期望值: {expected if expected is not None else '(无需期望值)'}\n实际值: {actual}",
                     name="断言详情",
                     attachment_type=allure.attachment_type.TEXT
                 )

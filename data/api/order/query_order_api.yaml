@@ -143,25 +143,6 @@ order_query_tests:
         operator: "all_eq"
         value: "3a5e5a2b822134efbde2fe2292a9995e985bc18evmv4g74rnsfh"
 
-#  - case_id: OQ_009
-#    title: "按发货日期范围查询"
-#    description: "指定开始日期和结束日期（送货时间）"
-#    <<: *common_endpoint
-#    json:
-#      <<: *common_json
-#      userName: "${user_name}"
-#      delivaryCalendar:
-#        - "2026-02-28T16:00:00.000Z"
-#        - "2026-03-30T16:00:00.000Z"
-#      guangGaoId: ""
-#      shopOrderSendTimeStart: "2026-03-01 00:00:00"
-#      shopOrderSendTimeEnd: "2026-03-31 23:59:59"
-#    expected_status: 200
-#    validate_data:
-#      - path: "data.records[*].receiptExpressInfo.deliveryTime"
-#        operator: "all_between"
-#        value: ["2026-04-30 00:00:00", "2026-04-30 23:59:59"]
-
   - case_id: OQ_010
     title: "按创建时间范围查询"
     description: "使用创建时间的起始日期过滤"
@@ -169,11 +150,10 @@ order_query_tests:
     json:
       <<: *common_json
       createDate:
-        - "2026-03-31T16:00:00.000Z"
+        - "2026-04-01T16:00:00.000Z"
         - "2026-04-29T16:00:00.000Z"
       createTimeStart: "2026-04-01 00:00:00"
       createTimeEnd: "2026-04-30 00:00:00"
-      delivaryCalendar: null
       guangGaoId: ""
       userName: ""
     expected_status: 200
@@ -184,9 +164,9 @@ order_query_tests:
       - path: "data.records[*].placeOrderTime"
         operator: "all_between"
         value: ["2026-04-01 00:00:00", "2026-04-30 23:59:59"]
-      - path: "data.total"
-        operator: ">="
-        value: 0
+      - path: "errorMessage"
+        operator: "=="
+        value: null
 
   - case_id: OQ_011
     title: "组合查询：状态 + 下单人姓名 + 订单编号"
@@ -210,7 +190,7 @@ order_query_tests:
         value: "陶玥"
       - path: "data.total"
         operator: "=="
-        value: 1
+        value: "1"
       - path: "errorMessage"
         operator: "=="
         value: None
