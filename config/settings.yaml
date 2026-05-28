@@ -9,12 +9,21 @@ environments:
   test:
     shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"  # 商家端测试环境公用
     base_url: "https://test.llxzu.com"
+
+    # 动态登录配置（auto_login=true 时自动调用登录接口获取 token，忽略下方硬编码 value）
+    auto_login: true
+
     # 商家端配置
     merchant:
+      login:
+        mobile: "13811680671"
+        smsLoginVerifyCode: "1"
+        loginTimestamp: "34638162506202382"
+        source: "SHOP"  # 商家端必须传 source
       auth_type: "api_token"
       auth_config:
         key: "token"
-        value: "zwx7902ikvrpf3w0bjtlnvjl5jbaugna"
+        value: "hqpl38f44oqyqwl2ubkjx6rc1vsu1u9o"  # auto_login=false 时使用的兑底 token
         xianyu_token: "7o9l1heqqtancxyhjhl6d4lsp7iw2cb4"  # 测试环境闲鱼店铺token（需要单独获取）
       timeout: 15
       max_retries: 3
@@ -22,10 +31,15 @@ environments:
 
     # 运营端配置
     admin:
+      login:
+        mobile: "13811680671"
+        smsLoginVerifyCode: "1"
+        loginTimestamp: "84514182506202932"
+        # 运营端登录不需要 source 字段
       auth_type: "api_token"
       auth_config:
         key: "token"
-        value: "ypd1iboqgmuw0daue30y1jpnr1lr52m0"
+        value: "ypd1iboqgmuw0daue30y1jpnr1lr52m0"  # auto_login=false 时使用的兑底 token
       timeout: 15
       max_retries: 3
       request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制
@@ -33,6 +47,7 @@ environments:
   # 生产环境
   prod:
     base_url: "https://llxzu.com"   # 如生产环境 URL
+    auto_login: false  # 生产环境暂不启用动态登录，使用下方硬编码 token
     merchant:
       auth_type: "api_token"
       auth_config:

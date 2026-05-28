@@ -28,9 +28,12 @@ class TestRepairOrder:
         retry_cfg = config.get('retry_config', {})
         max_retries = retry_cfg.get('max_attempts', 3)
         retry_interval = retry_cfg.get('interval_seconds', 2)
-        error_keywords = retry_cfg.get('error_keywords', [])
-        if not error_keywords and 'error_keyword' in retry_cfg:
-            error_keywords = [retry_cfg['error_keyword']]
+        # 可重试的错误关键词（换订单/用途重试）
+        retry_keywords = retry_cfg.get('retry_keywords', [])
+        if not retry_keywords and 'error_keywords' in retry_cfg:
+            retry_keywords = retry_cfg.get('error_keywords', [])
+        # 跳过的错误关键词（不满足补订单条件，直接跳过用例）
+        skip_keywords = retry_cfg.get('skip_keywords', [])
 
         tried_repair_ids = set()
         tried_order_ids = set()
@@ -170,7 +173,23 @@ class TestRepairOrder:
 
                 # 错误检查逻辑
                 error_msg = resp_json.get('errorMessage') or ''
-                is_retryable_error = any(keyword.format(name=repair_name) in error_msg for keyword in error_keywords)
+                
+                # 检查是否为可跳过错误（不满足补订单条件）
+                is_skip_error = any(keyword in error_msg for keyword in skip_keywords)
+                if is_skip_error:
+                    skip_reason = f"不满足补订单条件: {error_msg}"
+                    allure.attach(
+                        f"跳过原因: {skip_reason}\n\n"
+                        f"错误类型: {resp_json.get('responseType', 'N/A')}\n"
+                        f"错误信息: {error_msg}",
+                        name="用例跳过",
+                        attachment_type=allure.attachment_type.TEXT
+                    )
+                    logger.warning(skip_reason)
+                    pytest.skip(skip_reason)
+                
+                # 检查是否为可重试错误（换订单/用途重试）
+                is_retryable_error = any(keyword.format(name=repair_name) in error_msg for keyword in retry_keywords)
 
                 if resp_json.get('businessSuccess') is False and is_retryable_error:
                     allure.attach(f"遇到可重试错误: {error_msg}",

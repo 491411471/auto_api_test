@@ -5,6 +5,8 @@ from typing import Any, Dict, Optional
 
 import yaml
 
+from common.token_provider import TokenProvider
+
 
 class ConfigManager:
     """统一配置管理器，支持动态切换环境与终端类型"""
@@ -67,15 +69,61 @@ class ConfigManager:
             raise ValueError(f"环境 {env} 下未找到终端类型: {endpoint_type}")
         return endpoint_data
 
+    def _resolve_token(self, env_data: Dict, endpoint: str, auth_config: Dict) -> Dict:
+        """
+        动态解析 token：若 auto_login=true 且端级 login 配置存在，
+        则调用登录接口获取最新 token，覆盖硬编码 value。
+        """
+        if not env_data.get("auto_login", False):
+            return auth_config
+
+        # 从端级配置获取 login 参数（merchant.login 或 admin.login）
+        try:
+            endpoint_data = self.get_endpoint_config(env_name=None, endpoint=endpoint)
+        except ValueError:
+            return auth_config
+
+        login_config = endpoint_data.get("login")
+        if not login_config:
+            return auth_config
+
+        base_url = env_data.get("base_url")
+        if not base_url:
+            return auth_config
+
+        # endpoint -> userType 映射
+        user_type_map = {"merchant": "SHOP", "admin": "OPE"}
+        user_type = user_type_map.get(endpoint)
+        if not user_type:
+            return auth_config
+
+        try:
+            dynamic_token = TokenProvider.get_token(base_url, user_type, login_config)
+            # 复制一份避免污染原始配置
+            auth_config = dict(auth_config)
+            auth_config["value"] = dynamic_token
+        except Exception as e:
+            from common.logger import logger
+            logger.warning(
+                f"动态获取 {endpoint} token 失败，回退使用配置文件中的硬编码 token: {e}"
+            )
+
+        return auth_config
+
     def get_api_client_config(self, env_name: str = None, endpoint: str = None) -> Dict[str, Any]:
-        """返回构建 APIClient 所需的参数字典"""
+        """返回构建 APIClient 所需的参数字典（支持动态 token）"""
         endpoint_data = self.get_endpoint_config(env_name, endpoint)
         env_data = self.get_env_config(env_name)
         defaults = self._config.get("defaults", {})
+
+        # 动态解析 token（auto_login=true 时自动登录获取）
+        auth_config = endpoint_data.get("auth_config") or {}
+        auth_config = self._resolve_token(env_data, endpoint or self._get_active_endpoint(), auth_config)
+
         return {
             "base_url": env_data.get("base_url"),
             "auth_type": endpoint_data.get("auth_type"),
-            "auth_config": endpoint_data.get("auth_config"),
+            "auth_config": auth_config,
             "timeout": endpoint_data.get("timeout", defaults.get("timeout", 15)),
             "max_retries": endpoint_data.get("max_retries", defaults.get("max_retries", 3)),
             "request_interval": endpoint_data.get("request_interval", defaults.get("request_interval", 1.0)),

@@ -6,10 +6,13 @@ description: "查询可补订单 → 获取用途数据 → 提交补订单 → 
 retry_config:
   max_attempts: 3
   interval_seconds: 5
-  # 支持多种错误关键词（满足任一即触发重试）
-  error_keywords:
+  # 可重试的错误关键词（满足任一即触发重试，换另一个订单/用途）
+  retry_keywords:
     - "订单中已存在{name}，请勿重复补订单"
     - "订单中已存在闲鱼指定商家，请勿重复补订单"
+  # 跳过的错误关键词（满足任一即跳过该用例，不重试）
+  skip_keywords:
+    - "存在重复的补订单"
 
 # 商家端相关配置
 merchant:
@@ -64,8 +67,8 @@ merchant:
         operator: "=="
         value: true
       - path: "$.errorMessage"
-        operator: "not_empty"
-        value: 0
+        operator: "=="
+        value: null
 
   # 查询补订单记录（用于最终验证）
   query_repair_order_list:

@@ -22,7 +22,7 @@ class APIClient:
       - 请求间隔控制（防止连续点击错误）
     """
 
-    def __init__(self, base_url, auth_type=None, auth_config=None, timeout=15, max_retries=3, request_interval=1.0):
+    def __init__(self, base_url, auth_type=None, auth_config=None, timeout=60, max_retries=3, request_interval=1.0):
         logger.info("实际值和期望值输出....")
         self.base_url = base_url.rstrip('/')
         self.timeout = timeout
