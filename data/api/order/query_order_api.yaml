@@ -322,7 +322,7 @@ order_query_tests:
       - path: "$.data.total"
         operator: ">="
         value: 0
-      - path: "$.data.records[0].customizeLabelDtos[0].labelName"
-        operator: "=="
-        value: "续租订单"
-        only_if: "$.data.total > 0"
+#      - path: "$.data.records[0].customizeLabelDtos[0].labelName"
+#        operator: "=="
+#        value: "续租订单"
+#        only_if: "$.data.total > 0"

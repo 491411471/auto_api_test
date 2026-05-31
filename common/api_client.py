@@ -1,6 +1,7 @@
 
 import json
 import time
+from typing import Any, Dict, Optional
 
 import allure
 import requests
@@ -22,14 +23,22 @@ class APIClient:
       - 请求间隔控制（防止连续点击错误）
     """
 
-    def __init__(self, base_url, auth_type=None, auth_config=None, timeout=60, max_retries=3, request_interval=1.0):
+    def __init__(
+        self, 
+        base_url: str, 
+        auth_type: Optional[str] = None, 
+        auth_config: Optional[Dict[str, Any]] = None, 
+        timeout: int = 60, 
+        max_retries: int = 3, 
+        request_interval: float = 1.0
+    ) -> None:
         logger.info("实际值和期望值输出....")
         self.base_url = base_url.rstrip('/')
         self.timeout = timeout
         self.max_retries = max_retries
         self.request_interval = request_interval  # 请求间隔时间（秒）
         self.session = requests.Session()
-        self._last_request_time = 0  # 上次请求时间戳
+        self._last_request_time = 0.0  # 上次请求时间戳
 
         # 配置认证
         if auth_type == 'api_token' and auth_config:
@@ -78,12 +87,15 @@ class APIClient:
                 time.sleep(sleep_time)
             self._last_request_time = time.time()
 
+        last_exception = None
         for attempt in range(self.max_retries):
             try:
                 self._log_request(method, url, **kwargs)
                 logger.info(f"请求参数：{kwargs}")
                 logger.info(f"请求方法：{method}")
                 logger.info(f"请求URL：{url}")
+                logger.info(f"请求超时设置: {self.timeout}秒 (尝试 {attempt+1}/{self.max_retries})")
+                
                 resp = self.session.request(method, url, timeout=self.timeout, **kwargs)
                 self._log_response(resp)
                 resp.raise_for_status()
@@ -109,7 +121,28 @@ class APIClient:
                     pass
                 
                 return resp
+            except requests.exceptions.Timeout as e:
+                last_exception = e
+                logger.error(f"请求超时 (尝试 {attempt+1}/{self.max_retries}): {method} {url}, 超时设置: {self.timeout}秒, 错误: {e}")
+                if attempt < self.max_retries - 1:
+                    wait_time = 5 * (attempt + 1)  # 超时后等待更长时间：5秒、10秒、15秒
+                    logger.warning(f"超时后等待 {wait_time} 秒后重试")
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"请求最终超时，已重试{self.max_retries}次: {method} {url}")
+                    raise
+            except requests.exceptions.ConnectionError as e:
+                last_exception = e
+                logger.error(f"连接错误 (尝试 {attempt+1}/{self.max_retries}): {method} {url}, 错误: {e}")
+                if attempt < self.max_retries - 1:
+                    wait_time = 3 * (attempt + 1)
+                    logger.warning(f"等待 {wait_time} 秒后重试")
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"连接错误，已重试{self.max_retries}次: {method} {url}")
+                    raise
             except Exception as e:
+                last_exception = e
                 if attempt == self.max_retries - 1:
                     logger.error(f"请求最终失败: {method} {url}, 错误: {e}")
                     raise
@@ -118,7 +151,18 @@ class APIClient:
                 time.sleep(wait)
 
     # 公开方法
-    def get(self, path, params=None, **kwargs):
+    def get(self, path: str, params: Optional[Dict[str, Any]] = None, **kwargs: Any) -> requests.Response:
+        """
+        发送 GET 请求
+        
+        Args:
+            path: 请求路径
+            params: URL 查询参数
+            **kwargs: 其他请求参数
+            
+        Returns:
+            响应对象
+        """
         url = f"{self.base_url}/{path.lstrip('/')}"
         """
         在报告中生成一个可折叠的步骤块，标题为 "GET http://xxx"，点击可展开查看该步骤内部的详细内容（如请求参数、响应、断言等）
@@ -128,17 +172,20 @@ class APIClient:
         with allure.step(f"GET {url}"):
             return self._request_with_retry('GET', url, params=params, **kwargs)
 
-    def post(self, path, json=None, data=None, **kwargs):
+    def post(self, path: str, json: Optional[Dict[str, Any]] = None, data: Optional[Any] = None, **kwargs: Any) -> requests.Response:
+        """发送 POST 请求"""
         url = f"{self.base_url}/{path.lstrip('/')}"
         with allure.step(f"POST {url}"):
             return self._request_with_retry('POST', url, json=json, data=data, **kwargs)
 
-    def put(self, path, json=None, data=None, **kwargs):
+    def put(self, path: str, json: Optional[Dict[str, Any]] = None, data: Optional[Any] = None, **kwargs: Any) -> requests.Response:
+        """发送 PUT 请求"""
         url = f"{self.base_url}/{path.lstrip('/')}"
         with allure.step(f"PUT {url}"):
             return self._request_with_retry('PUT', url, json=json, data=data, **kwargs)
 
-    def delete(self, path, **kwargs):
+    def delete(self, path: str, **kwargs: Any) -> requests.Response:
+        """发送 DELETE 请求"""
         url = f"{self.base_url}/{path.lstrip('/')}"
         with allure.step(f"DELETE {url}"):
             return self._request_with_retry('DELETE', url, **kwargs)

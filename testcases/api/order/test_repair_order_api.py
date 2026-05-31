@@ -182,9 +182,32 @@ class TestRepairOrder:
 
                     allure.attach(str(resp_json), name="接口响应", attachment_type=allure.attachment_type.JSON)
 
-                    # 检查是否为可重试的错误
+                    # 检查是否为业务约束条件（应跳过而非失败）
                     error_msg = resp_json.get('errorMessage') or ''
 
+                    # 业务约束关键词（这些是正常的业务限制，不是技术错误）
+                    business_constraint_keywords = [
+                        "补订单累计金额已超出上限",
+                        "订单状态不允许补订单",
+                    ]
+
+                    is_business_constraint = any(keyword in error_msg for keyword in business_constraint_keywords)
+
+                    # 如果是业务约束条件，跳过此用例
+                    if is_business_constraint:
+                        skip_reason = f"触发业务约束条件: {error_msg}"
+                        logger.info(f"[业务约束] {skip_reason}")
+                        allure.attach(
+                            f"跳过原因: 触发业务约束条件（非技术错误）\n"
+                            f"错误类型: {resp_json.get('responseType', 'N/A')}\n"
+                            f"错误信息: {error_msg}\n\n"
+                            f"说明: 这是正常的业务限制，不是接口故障",
+                            name="用例跳过-业务约束",
+                            attachment_type=allure.attachment_type.TEXT
+                        )
+                        pytest.skip(skip_reason)
+
+                    # 检查是否为可重试的错误
                     # 动态替换错误关键词中的 {name} 和 {price} 占位符
                     dynamic_keywords = []
                     for kw in error_keywords:

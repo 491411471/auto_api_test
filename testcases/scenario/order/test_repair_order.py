@@ -161,7 +161,31 @@ class TestRepairOrder:
 
                 logger.info(f"提交补订单响应: {resp_json}")
 
-                # 如果业务失败，记录详细错误信息
+                # 错误检查逻辑
+                error_msg = resp_json.get('errorMessage') or ''
+                
+                # 1. 优先检查是否为业务约束条件（应跳过而非失败）
+                business_constraint_keywords = [
+                    "补订单累计金额已超出上限",
+                    "订单状态不允许补订单",
+                ]
+                
+                is_business_constraint = any(keyword in error_msg for keyword in business_constraint_keywords)
+                
+                if is_business_constraint:
+                    skip_reason = f"触发业务约束条件: {error_msg}"
+                    logger.info(f"[业务约束] {skip_reason}")
+                    allure.attach(
+                        f"跳过原因: 触发业务约束条件（非技术错误）\n\n"
+                        f"错误类型: {resp_json.get('responseType', 'N/A')}\n"
+                        f"错误信息: {error_msg}\n\n"
+                        f"说明: 这是正常的业务限制，不是接口故障",
+                        name="用例跳过-业务约束",
+                        attachment_type=allure.attachment_type.TEXT
+                    )
+                    pytest.skip(skip_reason)
+                
+                # 2. 如果业务失败，记录详细错误信息（仅用于日志和报告）
                 if not resp_json.get('businessSuccess'):
                     error_detail = (
                         f"补订单提交业务失败\n"
@@ -170,9 +194,6 @@ class TestRepairOrder:
                         f"  错误信息: {resp_json.get('errorMessage', '未知错误')}"
                     )
                     allure.attach(error_detail, "业务错误详情", attachment_type=allure.attachment_type.TEXT)
-
-                # 错误检查逻辑
-                error_msg = resp_json.get('errorMessage') or ''
                 
                 # 检查是否为可跳过错误（不满足补订单条件）
                 is_skip_error = any(keyword in error_msg for keyword in skip_keywords)

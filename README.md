@@ -25,3 +25,21 @@ python run.py --api          # 只运行单接口用例
 python run.py --scenario     # 只运行流程用例
 python run.py -n 4           # 4 进程并行执行
 python run.py -m smoke       # 只执行冒烟用例
+
+
+框架中：execute_test_case函数的执行流程：
+1. 合并变量（全局 + 用例私有）
+   ↓
+2. 第一次变量替换
+   ↓
+3. 处理SQL动态数据（执行sql配置，注入order_id）
+   ↓
+4. 第二次变量替换
+   ↓
+5. 发送HTTP请求（根据method字段：GET或POST）
+   ↓
+6. 执行基础断言（validate配置）
+   ↓
+7. 执行后置SQL（post_sql配置）
+   ↓
+8. 执行自定义断言（记录数量、note一致性）

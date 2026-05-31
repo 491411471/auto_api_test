@@ -113,6 +113,7 @@ def get_test_data(data_file: str, data_key: str = None, debug: bool = False) -> 
         print(f"警告: 无法找到 YAML 文件: {data_file}")
         return [] if data_key else {}
     data = _load_yaml_cached(file_path, debug=debug)
+    print("data:",data)
     if data_key is None:
         return data
     return data.get(data_key, [])

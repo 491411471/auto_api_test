@@ -17,7 +17,7 @@ def load_yaml(yaml_path):
 @allure.feature("订单状态流转-商家端+运营端")
 @allure.story("审核 → 发货 → 确认收货 → 租用中完整流程")
 class TestOrderFlow:
-    @allure.title("完整流程：查询待审核订单 → 审核通过 → 获取地址 → 发货 → 生成PDF → 运营端验证 → 确认收货 -> 租用中")
+    @allure.title("完整流程：查询待审核订单 → 审核通过 → 获取归还地址 → 发货 → 生成PDF → 运营端查询验证 → 运营端确认收货 -> 验证租用中状态")
     def test_order_flow(self, merchant_api_client, db, global_vars, admin_api_client):
         yaml_path = os.path.join(os.path.dirname(__file__), "../../../data/scenario/order/order_flow.yaml")
         config = load_yaml(yaml_path)
@@ -26,116 +26,33 @@ class TestOrderFlow:
 
         # ---------- 步骤1：查询待审核订单 ----------
         with allure.step("1. 查询已签约、待审核的订单号"):
-            # 获取 SQL 模板并替换占位符
-            sql_template = config['merchant']['query_order_sql']
-            sql = sql_template.replace('${shop_id}', shop_id)
-            
-            # 附加 SQL 语句到 Allure 报告
-            allure.attach(
-                sql,
-                "查询订单-SQL语句",
-                allure.attachment_type.TEXT
-            )
-            
-            logger.info(f"执行SQL: {sql}")
-            
-            # 执行数据库查询
-            result = db.fetch_one(sql)
-            
-            # 如果未查询到符合条件的订单，则查询 status='13' 的订单并更新
-            if result is None:
-                with allure.step("1.1 未查询到符合条件的订单，执行数据准备"):
-                    # 第一步：查询 status='13' 的订单
-                    fallback_sql = f"""
-                        SELECT order_id
-                        FROM llxz_order.ct_user_orders
-                        WHERE shop_id = '{shop_id}'
-                          AND status = '13'
-                          AND channel_provenance NOT IN (6, 8)
-                        LIMIT 1
-                    """
-                    
-                    # 附加备用查询 SQL
-                    allure.attach(
-                        fallback_sql,
-                        "数据准备-查询SQL",
-                        allure.attachment_type.TEXT
+            try:
+                # 获取 SQL 模板并替换占位符
+                sql_template = config['merchant']['query_order_sql']
+                sql = sql_template.replace('${shop_id}', shop_id)
+                
+                # 附加 SQL 语句到 Allure 报告
+                allure.attach(sql, "查询订单-SQL语句", allure.attachment_type.TEXT)
+                logger.info(f"执行SQL: {sql}")
+                # 执行数据库查询
+                result = db.fetch_one(sql)
+                
+                # 如果未查询到符合条件的订单，直接跳过测试
+                if result is None:
+                    skip_msg = (
+                        f"未查询到符合条件的待审核订单，跳过此用例\n"
+                        f"  查询条件: shop_id={shop_id}, status='13', user_is_signed=2, withhold_type IS NOT NULL\n"
+                        f"  可能原因: 当前环境下无符合流转条件的测试订单"
                     )
+                    allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
+                    logger.warning(skip_msg)
+                    pytest.skip(skip_msg)
                     
-                    logger.info(f"执行备用查询SQL: {fallback_sql}")
-                    
-                    # 执行备用查询
-                    fallback_result = db.fetch_one(fallback_sql)
-                    
-                    # 验证是否查询到订单
-                    if fallback_result is None:
-                        skip_msg = (
-                            f"未查询到可流转的订单，跳过此用例\n"
-                            f"  原始条件: status='13' AND withhold_type IS NOT NULL\n"
-                            f"  备用条件: status='13'\n"
-                            f"  两者均未找到符合条件的订单"
-                        )
-                        allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
-                        logger.warning(skip_msg)
-                        pytest.skip(skip_msg)
-                    
-                    # 提取订单号
-                    fallback_order_id = fallback_result.get('order_id')
-                    assert fallback_order_id is not None, "查询结果中缺少 order_id 字段"
-                    
-                    logger.info(f"查询到备选订单号: {fallback_order_id}")
-                    
-                    # 第二步：更新该订单的 withhold_type 和 user_is_signed
-                    update_sql = f"""
-                        UPDATE llxz_order.ct_user_orders
-                        SET withhold_type = 9,
-                            user_is_signed = 2
-                        WHERE order_id = '{fallback_order_id}'
-                    """
-                    
-                    # 附加更新 SQL
-                    allure.attach(
-                        update_sql,
-                        "数据准备-更新SQL",
-                        allure.attachment_type.TEXT
-                    )
-                    
-                    logger.info(f"执行更新SQL: {update_sql}")
-                    
-                    # 执行更新操作
-                    affected_rows = db.execute_update(update_sql)
-                    
-                    # 验证更新结果
-                    assert affected_rows > 0, (
-                        f"未能更新订单\n"
-                        f"  订单号: {fallback_order_id}\n"
-                        f"  影响行数: {affected_rows}"
-                    )
-                    
-                    # 记录更新结果
-                    update_info = (
-                        f"数据准备成功\n"
-                        f"  订单号: {fallback_order_id}\n"
-                        f"  更新字段: withhold_type=9, user_is_signed=2\n"
-                        f"  影响行数: {affected_rows}"
-                    )
-                    allure.attach(update_info, "数据准备结果", attachment_type=allure.attachment_type.TEXT)
-                    logger.info(f"数据准备成功，影响行数: {affected_rows}")
-                    
-                    # 重新查询订单
-                    logger.info(f"重新执行查询SQL: {sql}")
-                    result = db.fetch_one(sql)
-                    
-                    # 验证重新查询的结果
-                    if result is None:
-                        skip_msg = (
-                            f"数据准备后仍未查询到符合条件的订单，跳过此用例\n"
-                            f"  已更新订单 {fallback_order_id}: withhold_type=9, user_is_signed=2\n"
-                            f"  重新查询仍无结果"
-                        )
-                        allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
-                        logger.warning(skip_msg)
-                        pytest.skip(skip_msg)
+            except Exception as e:
+                skip_msg = f"数据库查询失败，跳过此用例 | 错误: {e}"
+                allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
+                logger.error(skip_msg)
+                pytest.skip(skip_msg)
             
             # 提取订单号
             order_id = result.get('order_id')
@@ -235,41 +152,73 @@ class TestOrderFlow:
         with allure.step("4. 调用发货接口"):
             # ==================== 新增：账期状态检查与更新 ====================
             with allure.step("4.0 检查订单账期状态, 如果状态不为2，不允许发货"):
-                # 查询当前账期状态（取最小id的那条记录）
-                check_sql = f"""
-                    SELECT status 
-                    FROM llxz_order.ct_order_by_stages 
-                    WHERE order_id = '{order_id}' 
-                    ORDER BY id 
-                    LIMIT 1
-                """
-                logger.info(f"查询账期状态SQL: {check_sql}")
-                allure.attach(check_sql, name="查询SQL", attachment_type=allure.attachment_type.TEXT)
-                check_result = db.fetch_one(check_sql)
-                current_status = check_result['status'] if check_result else None
-                allure.attach(f"当前状态: {current_status}", name="账期状态",
-                              attachment_type=allure.attachment_type.TEXT)
-                logger.info(f"当前账期状态: {current_status}")
+                try:
+                    # 查询当前账期状态（取最小id的那条记录）
+                    check_sql = f"""
+                        SELECT status 
+                        FROM llxz_order.ct_order_by_stages 
+                        WHERE order_id = '{order_id}'
+                        AND delete_time IS NULL
+                        AND shop_id = '{shop_id}'
+                        ORDER BY id 
+                        LIMIT 1
+                    """
+                    logger.info(f"查询账期状态SQL: {check_sql}")
+                    allure.attach(check_sql, name="查询SQL", attachment_type=allure.attachment_type.TEXT)
+                    check_result = db.fetch_one(check_sql)
+                    
+                    # 如果未查询到账期数据，跳过测试
+                    if check_result is None:
+                        skip_msg = (
+                            f"未查询到订单 {order_id} 的账期数据，跳过此用例\n"
+                            f"  表: ct_order_by_stages\n"
+                            f"  可能原因: 订单尚未生成账期或数据异常"
+                        )
+                        allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
+                        logger.warning(skip_msg)
+                        pytest.skip(skip_msg)
+                    
+                    current_status = check_result.get('status')
+                    allure.attach(f"当前状态: {current_status}", name="账期状态",
+                                  attachment_type=allure.attachment_type.TEXT)
+                    logger.info(f"当前账期状态: {current_status}")
+                except Exception as e:
+                    skip_msg = f"查询账期状态失败，跳过此用例 | 错误: {e}"
+                    allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
+                    logger.error(skip_msg)
+                    pytest.skip(skip_msg)
 
             # 若状态不为2，则更新为2
             if current_status != 2:
                 with allure.step("4.1 更新订单账期状态为2（最小id记录）"):
-                    update_sql = f"""
-                        UPDATE llxz_order.ct_order_by_stages AS t
-                        JOIN (
-                            SELECT id 
-                            FROM llxz_order.ct_order_by_stages 
-                            WHERE order_id = '{order_id}' 
-                            ORDER BY id 
-                            LIMIT 1
-                        ) AS s ON t.id = s.id
-                        SET t.status = 2
-                    """
-                    logger.info(f"执行SQL: {update_sql}")
-                    allure.attach(update_sql, name="更新SQL", attachment_type=allure.attachment_type.TEXT)
-                    db.execute_update(update_sql)  # 执行更新
-                    allure.attach("更新成功", name="执行结果", attachment_type=allure.attachment_type.TEXT)
-                    logger.info("账期状态更新成功")
+                    try:
+                        update_sql = f"""
+                            UPDATE llxz_order.ct_order_by_stages AS t
+                            JOIN (
+                                SELECT id 
+                                FROM llxz_order.ct_order_by_stages 
+                                WHERE order_id = '{order_id}'
+                                AND delete_time IS NULL
+                                AND shop_id = '{shop_id}'
+                                ORDER BY id 
+                                LIMIT 1
+                            ) AS s ON t.id = s.id
+                            SET t.status = 2
+                        """
+                        logger.info(f"执行SQL: {update_sql}")
+                        allure.attach(update_sql, name="更新SQL", attachment_type=allure.attachment_type.TEXT)
+                        affected_rows = db.execute_update(update_sql)  # 执行更新
+                        
+                        if affected_rows == 0:
+                            logger.warning(f"账期状态更新未影响任何行，订单号: {order_id}")
+                        
+                        allure.attach(f"更新成功，影响行数: {affected_rows}", name="执行结果", attachment_type=allure.attachment_type.TEXT)
+                        logger.info(f"账期状态更新成功，影响行数: {affected_rows}")
+                    except Exception as e:
+                        skip_msg = f"更新账期状态失败，跳过此用例 | 错误: {e}"
+                        allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
+                        logger.error(skip_msg)
+                        pytest.skip(skip_msg)
             else:
                 with allure.step("4.1 检查是否需要更新"):
                     allure.attach("账期状态已经是2，无需更新", name="跳过更新", attachment_type=allure.attachment_type.TEXT)

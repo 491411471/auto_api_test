@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+API 客户端配置管理器
+基于统一配置管理器，提供 APIClient 所需的配置参数
+"""
 import os
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -6,10 +10,12 @@ from typing import Any, Dict, Optional
 import yaml
 
 from common.token_provider import TokenProvider
+from config.unified_config import config as unified_config
+from common.logger import logger
 
 
 class ConfigManager:
-    """统一配置管理器，支持动态切换环境与终端类型"""
+    """API 客户端配置管理器（兼容旧接口，基于统一配置）"""
     _instance = None
 
     def __new__(cls):
@@ -22,62 +28,39 @@ class ConfigManager:
         if self._initialized:
             return
         self._initialized = True
-        self._config = None
-        self._load_config()
-
-    def _load_config(self):
-        config_path = Path(__file__).parent.parent / "config" / "settings.yaml"
-        encodings = ['utf-8-sig', 'utf-8', 'gbk']
-        for enc in encodings:
-            try:
-                with open(config_path, 'r', encoding=enc) as f:
-                    self._config = yaml.safe_load(f)
-                    return
-            except UnicodeDecodeError:
-                continue
-        raise ValueError(f"无法解析配置文件: {config_path}")
+        logger.info("ConfigManager 初始化完成（基于统一配置）")
 
     def _get_active_env(self) -> str:
-        """获取当前激活的环境（优先使用环境变量 TEST_ENV）"""
+        """获取当前激活的环境"""
+        # 优先使用环境变量
         env = os.environ.get("TEST_ENV")
         if env:
             return env
-        return self._config.get("active", "test")
+        
+        # 从统一配置获取
+        return unified_config.get("active", "test")
 
     def _get_active_endpoint(self) -> str:
-        """获取当前激活的终端类型（优先使用环境变量 TEST_ENDPOINT）"""
+        """获取当前激活的终端类型"""
         endpoint = os.environ.get("TEST_ENDPOINT")
         if endpoint:
             return endpoint
-        return self._config.get("active_endpoint", "merchant")
+        
+        return unified_config.get("active_endpoint", "merchant")
 
     def get_env_config(self, env_name: str = None) -> Dict[str, Any]:
-        """获取指定环境的完整配置，若未指定则使用 active 环境"""
-        env = env_name or self._get_active_env()
-        env_data = self._config.get("environments", {}).get(env)
-        if not env_data:
-            raise ValueError(f"未知的环境: {env}")
-        return env_data
+        """获取指定环境的完整配置"""
+        return unified_config.get_environment_config(env_name)
 
     def get_endpoint_config(self, env_name: str = None, endpoint: str = None) -> Dict[str, Any]:
         """获取指定环境和终端类型的配置"""
-        env = env_name or self._get_active_env()
-        endpoint_type = endpoint or self._get_active_endpoint()
-        env_data = self.get_env_config(env)
-        endpoint_data = env_data.get(endpoint_type)
-        if not endpoint_data:
-            raise ValueError(f"环境 {env} 下未找到终端类型: {endpoint_type}")
-        return endpoint_data
+        return unified_config.get_endpoint_config(env_name, endpoint)
 
     def _resolve_token(self, env_data: Dict, endpoint: str, auth_config: Dict) -> Dict:
-        """
-        动态解析 token：若 auto_login=true 且端级 login 配置存在，
-        则调用登录接口获取最新 token，覆盖硬编码 value。
-        """
+        """动态解析 token"""
         if not env_data.get("auto_login", False):
             return auth_config
 
-        # 从端级配置获取 login 参数（merchant.login 或 admin.login）
         try:
             endpoint_data = self.get_endpoint_config(env_name=None, endpoint=endpoint)
         except ValueError:
@@ -91,7 +74,6 @@ class ConfigManager:
         if not base_url:
             return auth_config
 
-        # endpoint -> userType 映射
         user_type_map = {"merchant": "SHOP", "admin": "OPE"}
         user_type = user_type_map.get(endpoint)
         if not user_type:
@@ -99,11 +81,9 @@ class ConfigManager:
 
         try:
             dynamic_token = TokenProvider.get_token(base_url, user_type, login_config)
-            # 复制一份避免污染原始配置
             auth_config = dict(auth_config)
             auth_config["value"] = dynamic_token
         except Exception as e:
-            from common.logger import logger
             logger.warning(
                 f"动态获取 {endpoint} token 失败，回退使用配置文件中的硬编码 token: {e}"
             )
@@ -111,12 +91,18 @@ class ConfigManager:
         return auth_config
 
     def get_api_client_config(self, env_name: str = None, endpoint: str = None) -> Dict[str, Any]:
-        """返回构建 APIClient 所需的参数字典（支持动态 token）"""
+        """返回构建 APIClient 所需的参数字典"""
         endpoint_data = self.get_endpoint_config(env_name, endpoint)
         env_data = self.get_env_config(env_name)
-        defaults = self._config.get("defaults", {})
+        
+        # 从统一配置获取默认值
+        defaults = {
+            "timeout": unified_config.get("defaults.timeout", 60),
+            "max_retries": unified_config.get("defaults.max_retries", 3),
+            "request_interval": unified_config.get("defaults.request_interval", 1.0)
+        }
 
-        # 动态解析 token（auto_login=true 时自动登录获取）
+        # 动态解析 token
         auth_config = endpoint_data.get("auth_config") or {}
         auth_config = self._resolve_token(env_data, endpoint or self._get_active_endpoint(), auth_config)
 
@@ -124,20 +110,20 @@ class ConfigManager:
             "base_url": env_data.get("base_url"),
             "auth_type": endpoint_data.get("auth_type"),
             "auth_config": auth_config,
-            "timeout": endpoint_data.get("timeout", defaults.get("timeout", 15)),
-            "max_retries": endpoint_data.get("max_retries", defaults.get("max_retries", 3)),
-            "request_interval": endpoint_data.get("request_interval", defaults.get("request_interval", 1.0)),
+            "timeout": endpoint_data.get("timeout", defaults["timeout"]),
+            "max_retries": endpoint_data.get("max_retries", defaults["max_retries"]),
+            "request_interval": endpoint_data.get("request_interval", defaults["request_interval"]),
         }
 
     def get_xianyu_api_client_config(self, env_name: str = None) -> Dict[str, Any]:
-        """返回构建闲鱼 APIClient 所需的参数字典（使用 xianyu_token）"""
+        """返回构建闲鱼 APIClient 所需的参数字典"""
         merchant_cfg = self.get_api_client_config(env_name, endpoint='merchant')
         xianyu_token = merchant_cfg.get('auth_config', {}).get('xianyu_token')
         return {
             "base_url": merchant_cfg['base_url'],
             "auth_type": 'api_token',
             "auth_config": {'token': xianyu_token},
-            "timeout": merchant_cfg.get('timeout', 15),
+            "timeout": merchant_cfg.get('timeout', 60),
             "max_retries": merchant_cfg.get('max_retries', 3),
             "request_interval": merchant_cfg.get('request_interval', 1.0),
         }
