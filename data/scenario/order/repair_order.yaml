@@ -60,7 +60,7 @@ merchant:
         id: "${repair_id}"
         price: "${repair_price}"
         settlementProportion: "${repair_settlement}"
-        beizhu: "自动化补押金测试"
+        beizhu: "自动化补订单测试"
     expected_status: 200
     validate:
       - path: "$.businessSuccess"

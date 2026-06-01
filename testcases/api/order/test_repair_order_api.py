@@ -29,6 +29,7 @@ def load_yaml(yaml_path):
 @allure.story("补订单接口测试")
 class TestRepairOrder:
     _global_vars = None
+    _repair_order_id = None
     @classmethod
     def _load_global_vars(cls):
         if cls._global_vars is None:

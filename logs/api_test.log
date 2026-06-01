@@ -13506,3 +13506,595 @@ LIMIT 1
 ########################################
 2026-05-31 15:01:27,619 - common.logger - INFO - 测试通过: OQ_003 - 按订单状态查询（订单完成）
 2026-05-31 15:01:27,905 - common.logger - INFO - API客户端关闭
+2026-05-31 17:41:44,705 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 17:41:44,707 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 17:41:44,845 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 17:41:44,846 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 17:41:46,485 - common.logger - INFO - [Token] SHOP token 获取成功: wq8vhc4x552cnwzr...
+2026-05-31 17:41:46,490 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 17:41:46,491 - common.logger - INFO - [Token] 使用缓存 token (SHOP): wq8vhc4x55...
+2026-05-31 17:41:46,492 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 17:41:46,493 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'wq8vhc4x552cnwzrt4piivkcua90kl3u'}
+2026-05-31 17:41:46,494 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 17:41:46,583 - common.logger - INFO - 测试订单: 008OI202605302060606721000108032T
+2026-05-31 17:41:46,584 - common.logger - INFO - 生成联系人数量: 2
+2026-05-31 17:41:46,585 - common.logger - INFO - 生成的联系人内容:
+曹红18651932713朋友
+金鑫15682153550亲戚
+2026-05-31 17:41:46,588 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605302060606721000108032T', 'content': '曹红18651932713朋友\n金鑫15682153550亲戚'}, 'data': None}
+2026-05-31 17:41:46,588 - common.logger - INFO - 请求方法：POST
+2026-05-31 17:41:46,589 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 17:41:46,589 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 17:41:47,300 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'SUCCESS', 'errorCode': None, 'errorMessage': None, 'data': {'msg': '添加成功：\n1. [曹红、朋友、186****2713] 新记录，已成功添加 \n2. [金鑫、156****3550] 新记录，已成功添加 \n', 'success': True, 'list': [{'id': 929, 'userName': '曹红', 'telphone': 'mm:8c3544282c081749f319c673fa2298c7bc8c', 'orderId': '008OI202605302060606721000108032T', 'contractType': '朋友', 'msg': '新记录，已成功添加', 'success': True}, {'id': 930, 'userName': '金鑫', 'telphone': 'mm:d98186d4365bf54c805a96609d6107708675', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}]}, 'parentIdemSerialId': None, 'traceId': 'a89a456a773ca011', 'businessSuccess': True, 'businessFail': False, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': True, 'finalFail': False, 'rpcFail': False}
+2026-05-31 17:41:47,301 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：True
+########################################
+2026-05-31 17:41:47,303 - common.logger - INFO - 
+########################################
+  操作路径：data.success
+  操作符　：==
+  期望值　：True
+  实际值　：True
+########################################
+2026-05-31 17:41:47,305 - common.logger - INFO - 
+########################################
+  操作路径：data.list
+  操作符　：length_gt
+  期望值　：0
+  实际值　：[{'id': 929, 'userName': '曹红', 'telphone': 'mm:8c3544282c081749f319c673fa2298c7bc8c', 'orderId': '008OI202605302060606721000108032T', 'contractType': '朋友', 'msg': '新记录，已成功添加', 'success': True}, {'id': 930, 'userName': '金鑫', 'telphone': 'mm:d98186d4365bf54c805a96609d6107708675', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}]
+########################################
+2026-05-31 17:41:47,307 - common.logger - INFO - 成功识别到 2 个紧急联系人
+2026-05-31 17:41:47,389 - common.logger - INFO - 商家端 API 客户端关闭
+2026-05-31 17:50:45,470 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 17:50:45,473 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 17:50:45,606 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 17:50:45,607 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 17:50:46,973 - common.logger - INFO - [Token] SHOP token 获取成功: 7lyns5l9tgylyegy...
+2026-05-31 17:50:46,976 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 17:50:46,976 - common.logger - INFO - [Token] 使用缓存 token (SHOP): 7lyns5l9tg...
+2026-05-31 17:50:46,977 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 17:50:46,977 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': '7lyns5l9tgylyegyezerei0o3ia0gpbo'}
+2026-05-31 17:50:46,978 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 17:50:47,055 - common.logger - INFO - 测试订单: 008OI202605302060606721000108032T
+2026-05-31 17:50:47,056 - common.logger - INFO - 生成联系人数量: 2
+2026-05-31 17:50:47,056 - common.logger - INFO - 生成的联系人内容:
+孙刚13804527186亲戚
+农娜15994900202家人
+2026-05-31 17:50:47,060 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605302060606721000108032T', 'content': '孙刚13804527186亲戚\n农娜15994900202家人'}, 'data': None}
+2026-05-31 17:50:47,060 - common.logger - INFO - 请求方法：POST
+2026-05-31 17:50:47,061 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 17:50:47,061 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 17:50:47,658 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'SUCCESS', 'errorCode': None, 'errorMessage': None, 'data': {'msg': '最多只能添加5条紧急联系人，这次成功添加1条：\n1. [孙刚、138****7186] 新记录，已成功添加 \n2. [农娜、159****0202] 超出5条，未添加 \n', 'success': False, 'list': [{'id': 931, 'userName': '孙刚', 'telphone': 'mm:1dd2f1977d64b143fb8b3996ee25d5bebdc6', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}, {'id': None, 'userName': '农娜', 'telphone': 'mm:0d64470308b8824c260bb472662fe6702211', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '超出5条，未添加', 'success': False}]}, 'parentIdemSerialId': None, 'traceId': '7c0721168786a379', 'businessSuccess': True, 'businessFail': False, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': True, 'finalFail': False, 'rpcFail': False}
+2026-05-31 17:50:47,660 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：True
+########################################
+2026-05-31 17:50:47,662 - common.logger - INFO - 
+########################################
+  操作路径：data.success
+  操作符　：==
+  期望值　：True
+  实际值　：False
+########################################
+2026-05-31 17:50:47,749 - common.logger - INFO - 商家端 API 客户端关闭
+2026-05-31 17:52:46,827 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 17:52:46,830 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 17:52:46,938 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 17:52:46,938 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 17:52:48,406 - common.logger - INFO - [Token] SHOP token 获取成功: e20hgvsxr8fmgos2...
+2026-05-31 17:52:48,409 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 17:52:48,410 - common.logger - INFO - [Token] 使用缓存 token (SHOP): e20hgvsxr8...
+2026-05-31 17:52:48,410 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 17:52:48,411 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'e20hgvsxr8fmgos2ltdwi7266284za9c'}
+2026-05-31 17:52:48,411 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 17:52:48,494 - common.logger - INFO - 测试订单: 008OI202605302060606721000108032T
+2026-05-31 17:52:48,494 - common.logger - INFO - 生成联系人数量: 2
+2026-05-31 17:52:48,495 - common.logger - INFO - 生成的联系人内容:
+王帆15095713937同事
+常玉兰15538114395亲戚
+2026-05-31 17:52:48,498 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605302060606721000108032T', 'content': '王帆15095713937同事\n常玉兰15538114395亲戚'}, 'data': None}
+2026-05-31 17:52:48,499 - common.logger - INFO - 请求方法：POST
+2026-05-31 17:52:48,499 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 17:52:48,500 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 17:52:48,898 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'FLOW_ERR', 'errorCode': '9999', 'errorMessage': '已存在5条信息,不可添加', 'data': None, 'parentIdemSerialId': '0531175249:null:nupNarXBcalC', 'traceId': 'a0a46fd3bc25d750', 'businessSuccess': False, 'businessFail': True, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': False, 'finalFail': True, 'rpcFail': False}
+2026-05-31 17:52:48,899 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：False
+########################################
+2026-05-31 17:52:49,000 - common.logger - INFO - 商家端 API 客户端关闭
+2026-05-31 17:54:26,615 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 17:54:26,617 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 17:54:26,722 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 17:54:26,723 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 17:54:28,075 - common.logger - INFO - [Token] SHOP token 获取成功: vzm2du3xjopv0ne4...
+2026-05-31 17:54:28,078 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 17:54:28,079 - common.logger - INFO - [Token] 使用缓存 token (SHOP): vzm2du3xjo...
+2026-05-31 17:54:28,080 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 17:54:28,081 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'vzm2du3xjopv0ne47ojvk1qkw0yzs1p0'}
+2026-05-31 17:54:28,081 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 17:54:28,191 - common.logger - INFO - 测试订单: 008OI202605302060606721000108032T
+2026-05-31 17:54:28,192 - common.logger - INFO - 生成联系人数量: 2
+2026-05-31 17:54:28,192 - common.logger - INFO - 生成的联系人内容:
+张玉珍15793494965家人
+万倩18938522831家人
+2026-05-31 17:54:28,196 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605302060606721000108032T', 'content': '张玉珍15793494965家人\n万倩18938522831家人'}, 'data': None}
+2026-05-31 17:54:28,196 - common.logger - INFO - 请求方法：POST
+2026-05-31 17:54:28,197 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 17:54:28,197 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 17:54:28,979 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'SUCCESS', 'errorCode': None, 'errorMessage': None, 'data': {'msg': '添加成功：\n1. [张玉珍、157****4965] 新记录，已成功添加 \n2. [万倩、189****2831] 新记录，已成功添加 \n', 'success': True, 'list': [{'id': 932, 'userName': '张玉珍', 'telphone': 'mm:683bea3a4df1494a916806b5864b77893670', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}, {'id': 933, 'userName': '万倩', 'telphone': 'mm:73c669e02bc33849b03b5951aef8eb5511d4', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}]}, 'parentIdemSerialId': None, 'traceId': 'f7ddcecde789ece9', 'businessSuccess': True, 'businessFail': False, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': True, 'finalFail': False, 'rpcFail': False}
+2026-05-31 17:54:28,980 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：True
+########################################
+2026-05-31 17:54:28,982 - common.logger - INFO - 
+########################################
+  操作路径：data.errorMessage
+  操作符　：==
+  期望值　：None
+  实际值　：None
+########################################
+2026-05-31 17:54:28,984 - common.logger - INFO - 
+########################################
+  操作路径：data.list
+  操作符　：length_gt
+  期望值　：0
+  实际值　：[{'id': 932, 'userName': '张玉珍', 'telphone': 'mm:683bea3a4df1494a916806b5864b77893670', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}, {'id': 933, 'userName': '万倩', 'telphone': 'mm:73c669e02bc33849b03b5951aef8eb5511d4', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}]
+########################################
+2026-05-31 17:54:28,986 - common.logger - INFO - 成功识别到 2 个紧急联系人
+2026-05-31 17:54:29,075 - common.logger - INFO - 商家端 API 客户端关闭
+2026-05-31 18:01:47,344 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 18:01:47,346 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 18:01:47,459 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 18:01:47,460 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 18:01:49,080 - common.logger - INFO - [Token] SHOP token 获取成功: cxev8vxb6cya4kdj...
+2026-05-31 18:01:49,082 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 18:01:49,083 - common.logger - INFO - [Token] 使用缓存 token (SHOP): cxev8vxb6c...
+2026-05-31 18:01:49,084 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 18:01:49,084 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'cxev8vxb6cya4kdjimt3ezk6cdb97vya'}
+2026-05-31 18:01:49,084 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 18:01:49,175 - common.logger - INFO - 测试订单: 008OI202605302060606721000108032T
+2026-05-31 18:01:49,176 - common.logger - INFO - 生成联系人数量: 2
+2026-05-31 18:01:49,177 - common.logger - INFO - 生成的联系人内容:
+杜萍14729838203家人
+苏桂珍18282576614亲戚
+2026-05-31 18:01:49,181 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605302060606721000108032T', 'content': '杜萍14729838203家人\n苏桂珍18282576614亲戚'}, 'data': None}
+2026-05-31 18:01:49,181 - common.logger - INFO - 请求方法：POST
+2026-05-31 18:01:49,182 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 18:01:49,182 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 18:01:49,822 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'SUCCESS', 'errorCode': None, 'errorMessage': None, 'data': {'msg': '添加成功：\n1. [杜萍、147****8203] 新记录，已成功添加 \n2. [苏桂珍、182****6614] 新记录，已成功添加 \n', 'success': True, 'list': [{'id': 937, 'userName': '杜萍', 'telphone': 'mm:0b38826485f5424ba2096e63794d12186e08', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}, {'id': 938, 'userName': '苏桂珍', 'telphone': 'mm:10223889677846418e1a0b54eac6c7151a73', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}]}, 'parentIdemSerialId': None, 'traceId': '131999ab0b731d77', 'businessSuccess': True, 'businessFail': False, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': True, 'finalFail': False, 'rpcFail': False}
+2026-05-31 18:01:49,823 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：True
+########################################
+2026-05-31 18:01:49,825 - common.logger - INFO - 
+########################################
+  操作路径：data.errorMessage
+  操作符　：==
+  期望值　：None
+  实际值　：None
+########################################
+2026-05-31 18:01:49,826 - common.logger - INFO - 
+########################################
+  操作路径：data.list
+  操作符　：length_gt
+  期望值　：0
+  实际值　：[{'id': 937, 'userName': '杜萍', 'telphone': 'mm:0b38826485f5424ba2096e63794d12186e08', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}, {'id': 938, 'userName': '苏桂珍', 'telphone': 'mm:10223889677846418e1a0b54eac6c7151a73', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}]
+########################################
+2026-05-31 18:01:49,827 - common.logger - INFO - 成功识别到 2 个紧急联系人
+2026-05-31 18:01:49,828 - common.logger - INFO - 联系人1: id=937, userName=杜萍, contractType=None, telphone=mm:0b38826485f5424ba2096e63794d12186e08
+2026-05-31 18:01:49,828 - common.logger - INFO - 联系人2: id=938, userName=苏桂珍, contractType=None, telphone=mm:10223889677846418e1a0b54eac6c7151a73
+2026-05-31 18:01:49,830 - common.logger - INFO - 处理联系人 - 原始数据: {'id': 937, 'userName': '杜萍', 'telphone': 'mm:0b38826485f5424ba2096e63794d12186e08', 'orderId': '008OI202605302060606721000108032T', 'contractType': None, 'msg': '新记录，已成功添加', 'success': True}
+2026-05-31 18:01:49,830 - common.logger - INFO -   - contractType (中文): None
+2026-05-31 18:01:49,904 - common.logger - INFO - 商家端 API 客户端关闭
+2026-05-31 18:04:07,516 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 18:04:07,518 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 18:04:07,632 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 18:04:07,633 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 18:04:08,981 - common.logger - INFO - [Token] SHOP token 获取成功: 34n9upcttzklonpo...
+2026-05-31 18:04:08,983 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 18:04:08,983 - common.logger - INFO - [Token] 使用缓存 token (SHOP): 34n9upcttz...
+2026-05-31 18:04:08,984 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 18:04:08,984 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': '34n9upcttzklonpoks38w2uah1n7n70m'}
+2026-05-31 18:04:08,984 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 18:04:09,071 - common.logger - INFO - 测试订单: 008OI202605302060606721000108032T
+2026-05-31 18:04:09,072 - common.logger - INFO - 生成联系人数量: 2
+2026-05-31 18:04:09,072 - common.logger - INFO - 生成的联系人内容:
+林秀梅13954699874亲戚
+尤冬梅15913215557同事
+2026-05-31 18:04:09,075 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605302060606721000108032T', 'content': '林秀梅13954699874亲戚\n尤冬梅15913215557同事'}, 'data': None}
+2026-05-31 18:04:09,076 - common.logger - INFO - 请求方法：POST
+2026-05-31 18:04:09,076 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 18:04:09,076 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 18:04:09,455 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'FLOW_ERR', 'errorCode': '9999', 'errorMessage': '已存在5条信息,不可添加', 'data': None, 'parentIdemSerialId': '0531180410:null:EKTAnis3zU6G', 'traceId': 'f03a283d3e041eb7', 'businessSuccess': False, 'businessFail': True, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': False, 'finalFail': True, 'rpcFail': False}
+2026-05-31 18:04:09,456 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：False
+########################################
+2026-05-31 18:04:09,522 - common.logger - INFO - 商家端 API 客户端关闭
+2026-05-31 18:04:46,469 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 18:04:46,471 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 18:04:46,589 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 18:04:46,590 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 18:04:48,777 - common.logger - INFO - [Token] SHOP token 获取成功: ue0e999okqj03veq...
+2026-05-31 18:04:48,781 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 18:04:48,782 - common.logger - INFO - [Token] 使用缓存 token (SHOP): ue0e999okq...
+2026-05-31 18:04:48,783 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 18:04:48,784 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'ue0e999okqj03veqe08r4dsb049we93h'}
+2026-05-31 18:04:48,785 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 18:04:48,869 - common.logger - INFO - 测试订单: 008OI202605302060606721000108032T
+2026-05-31 18:04:48,869 - common.logger - INFO - 生成联系人数量: 2
+2026-05-31 18:04:48,870 - common.logger - INFO - 生成的联系人内容:
+王静13680482425亲属
+罗雷14542600246朋友
+2026-05-31 18:04:48,874 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605302060606721000108032T', 'content': '王静13680482425亲属\n罗雷14542600246朋友'}, 'data': None}
+2026-05-31 18:04:48,875 - common.logger - INFO - 请求方法：POST
+2026-05-31 18:04:48,875 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 18:04:48,876 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 18:04:49,441 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'FLOW_ERR', 'errorCode': '9999', 'errorMessage': '已存在5条信息,不可添加', 'data': None, 'parentIdemSerialId': '0531180450:null:f2ennrXwnC1K', 'traceId': '5ab66eb93e4f8dcc', 'businessSuccess': False, 'businessFail': True, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': False, 'finalFail': True, 'rpcFail': False}
+2026-05-31 18:04:49,442 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：False
+########################################
+2026-05-31 18:04:49,530 - common.logger - INFO - 商家端 API 客户端关闭
+2026-05-31 18:06:44,753 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 18:06:44,755 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 18:06:44,875 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 18:06:44,875 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 18:06:46,337 - common.logger - INFO - [Token] SHOP token 获取成功: zpsv3zp35dd9m55w...
+2026-05-31 18:06:46,339 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 18:06:46,340 - common.logger - INFO - [Token] 使用缓存 token (SHOP): zpsv3zp35d...
+2026-05-31 18:06:46,340 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 18:06:46,341 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'zpsv3zp35dd9m55w1uekf5ei0ddb8tk9'}
+2026-05-31 18:06:46,341 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 18:06:46,416 - common.logger - INFO - 测试订单: 008OI202605292060185877064773632T
+2026-05-31 18:06:46,417 - common.logger - INFO - 生成联系人数量: 1
+2026-05-31 18:06:46,418 - common.logger - INFO - 生成的联系人内容:
+游岩15527521467同事
+2026-05-31 18:06:46,421 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605292060185877064773632T', 'content': '游岩15527521467同事'}, 'data': None}
+2026-05-31 18:06:46,421 - common.logger - INFO - 请求方法：POST
+2026-05-31 18:06:46,421 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 18:06:46,422 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 18:06:46,933 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'SUCCESS', 'errorCode': None, 'errorMessage': None, 'data': {'msg': '添加成功：\n1. [游岩、同事、155****1467] 新记录，已成功添加 \n', 'success': True, 'list': [{'id': 939, 'userName': '游岩', 'telphone': 'mm:4f59d45f1b4704470c685207d63f5e6ea5a3', 'orderId': '008OI202605292060185877064773632T', 'contractType': '同事', 'msg': '新记录，已成功添加', 'success': True}]}, 'parentIdemSerialId': None, 'traceId': '1bb5c7ae788013bd', 'businessSuccess': True, 'businessFail': False, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': True, 'finalFail': False, 'rpcFail': False}
+2026-05-31 18:06:46,934 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：True
+########################################
+2026-05-31 18:06:46,937 - common.logger - INFO - 
+########################################
+  操作路径：data.errorMessage
+  操作符　：==
+  期望值　：None
+  实际值　：None
+########################################
+2026-05-31 18:06:46,939 - common.logger - INFO - 
+########################################
+  操作路径：data.list
+  操作符　：length_gt
+  期望值　：0
+  实际值　：[{'id': 939, 'userName': '游岩', 'telphone': 'mm:4f59d45f1b4704470c685207d63f5e6ea5a3', 'orderId': '008OI202605292060185877064773632T', 'contractType': '同事', 'msg': '新记录，已成功添加', 'success': True}]
+########################################
+2026-05-31 18:06:46,940 - common.logger - INFO - 成功识别到 1 个紧急联系人
+2026-05-31 18:06:46,941 - common.logger - INFO - 联系人1: id=939, userName=游岩, contractType=同事, telphone=mm:4f59d45f1b4704470c685207d63f5e6ea5a3
+2026-05-31 18:06:46,944 - common.logger - INFO - 处理联系人 - 原始数据: {'id': 939, 'userName': '游岩', 'telphone': 'mm:4f59d45f1b4704470c685207d63f5e6ea5a3', 'orderId': '008OI202605292060185877064773632T', 'contractType': '同事', 'msg': '新记录，已成功添加', 'success': True}
+2026-05-31 18:06:46,945 - common.logger - INFO -   - contractType (中文): 同事
+2026-05-31 18:06:46,945 - common.logger - INFO -   - contractType (英文): colleague
+2026-05-31 18:06:49,421 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605292060185877064773632T', 'orderList': [{'id': 939, 'userName': '游岩', 'telphone': 'mm:4f59d45f1b4704470c685207d63f5e6ea5a3', 'wechat': None, 'orderId': '008OI202605292060185877064773632T', 'contractType': 'colleague', 'contractTypeName': '同事', 'passCheck': 0, 'createId': None, 'createTime': None, 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}]}, 'data': None}
+2026-05-31 18:06:49,422 - common.logger - INFO - 请求方法：POST
+2026-05-31 18:06:49,423 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/saveEmergenceContractContent
+2026-05-31 18:06:49,423 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 18:06:49,897 - common.logger - INFO - 保存紧急联系人响应: {'code': '-1', 'errorMsg': 'AUTH_FAILED'}
+2026-05-31 18:06:49,898 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：None
+########################################
+2026-05-31 18:06:50,100 - common.logger - INFO - 商家端 API 客户端关闭
+2026-05-31 18:11:33,355 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 18:11:33,357 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 18:11:33,467 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 18:11:33,467 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 18:11:34,801 - common.logger - INFO - [Token] SHOP token 获取成功: kfpkeou5kve5riea...
+2026-05-31 18:11:34,804 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 18:11:34,805 - common.logger - INFO - [Token] 使用缓存 token (SHOP): kfpkeou5kv...
+2026-05-31 18:11:34,806 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 18:11:34,806 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'kfpkeou5kve5rieau3g457pjdy0p9bst'}
+2026-05-31 18:11:34,807 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 18:11:34,994 - common.logger - INFO - 测试订单: 008OI202605292060185877064773632T
+2026-05-31 18:11:34,995 - common.logger - INFO - 生成联系人数量: 1
+2026-05-31 18:11:34,996 - common.logger - INFO - 生成的联系人内容:
+吴兰英13051977739亲属
+2026-05-31 18:11:34,999 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605292060185877064773632T', 'content': '吴兰英13051977739亲属'}, 'data': None}
+2026-05-31 18:11:35,000 - common.logger - INFO - 请求方法：POST
+2026-05-31 18:11:35,000 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 18:11:35,000 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 18:11:35,493 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'SUCCESS', 'errorCode': None, 'errorMessage': None, 'data': {'msg': '添加成功：\n1. [吴兰英、亲属、130****7739] 新记录，已成功添加 \n', 'success': True, 'list': [{'id': 943, 'userName': '吴兰英', 'telphone': 'mm:cb861465738d874e773a80f9edf04bf5f629', 'orderId': '008OI202605292060185877064773632T', 'contractType': '亲属', 'msg': '新记录，已成功添加', 'success': True}]}, 'parentIdemSerialId': None, 'traceId': 'd1e3affaa810a573', 'businessSuccess': True, 'businessFail': False, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': True, 'finalFail': False, 'rpcFail': False}
+2026-05-31 18:11:35,494 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：True
+########################################
+2026-05-31 18:11:35,495 - common.logger - INFO - 
+########################################
+  操作路径：data.errorMessage
+  操作符　：==
+  期望值　：None
+  实际值　：None
+########################################
+2026-05-31 18:11:35,497 - common.logger - INFO - 
+########################################
+  操作路径：data.list
+  操作符　：length_gt
+  期望值　：0
+  实际值　：[{'id': 943, 'userName': '吴兰英', 'telphone': 'mm:cb861465738d874e773a80f9edf04bf5f629', 'orderId': '008OI202605292060185877064773632T', 'contractType': '亲属', 'msg': '新记录，已成功添加', 'success': True}]
+########################################
+2026-05-31 18:11:35,499 - common.logger - INFO - 成功识别到 1 个紧急联系人
+2026-05-31 18:11:35,500 - common.logger - INFO - 联系人1: id=943, userName=吴兰英, contractType=亲属, telphone=mm:cb861465738d874e773a80f9edf04bf5f629
+2026-05-31 18:11:35,502 - common.logger - INFO - 处理联系人 - 原始数据: {'id': 943, 'userName': '吴兰英', 'telphone': 'mm:cb861465738d874e773a80f9edf04bf5f629', 'orderId': '008OI202605292060185877064773632T', 'contractType': '亲属', 'msg': '新记录，已成功添加', 'success': True}
+2026-05-31 18:11:35,503 - common.logger - INFO -   - contractType (中文): 亲属
+2026-05-31 18:11:35,504 - common.logger - INFO -   - contractType (英文): family
+2026-05-31 18:11:38,000 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605292060185877064773632T', 'orderList': [{'id': 943, 'userName': '吴兰英', 'telphone': 'mm:cb861465738d874e773a80f9edf04bf5f629', 'wechat': None, 'orderId': '008OI202605292060185877064773632T', 'contractType': 'family', 'contractTypeName': '亲属', 'passCheck': 0, 'createId': None, 'createTime': None, 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}]}, 'data': None}
+2026-05-31 18:11:38,002 - common.logger - INFO - 请求方法：POST
+2026-05-31 18:11:38,003 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/saveEmergenceContractContent
+2026-05-31 18:11:38,005 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 18:11:38,121 - common.logger - INFO - 保存紧急联系人响应: {'code': '-1', 'errorMsg': 'AUTH_FAILED'}
+2026-05-31 18:11:38,121 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：None
+########################################
+2026-05-31 18:11:38,199 - common.logger - INFO - 商家端 API 客户端关闭
+2026-05-31 18:29:14,729 - common.logger - INFO - 统一配置管理器初始化完成
+2026-05-31 18:29:14,732 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-05-31 18:29:14,854 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-05-31 18:29:14,855 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-05-31 18:29:16,588 - common.logger - INFO - [Token] SHOP token 获取成功: abck0je27bllk3lb...
+2026-05-31 18:29:16,593 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-05-31 18:29:16,594 - common.logger - INFO - [Token] 使用缓存 token (SHOP): abck0je27b...
+2026-05-31 18:29:16,595 - common.logger - INFO - 实际值和期望值输出....
+2026-05-31 18:29:16,596 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'abck0je27bllk3lbj565w13w792ejzla'}
+2026-05-31 18:29:16,597 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-05-31 18:29:16,874 - common.logger - INFO - 测试订单: 008OI202605292060185877064773632T
+2026-05-31 18:29:16,875 - common.logger - INFO - 生成联系人数量: 1
+2026-05-31 18:29:16,875 - common.logger - INFO - 生成的联系人内容:
+欧丽娟15399872071朋友
+2026-05-31 18:29:16,880 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605292060185877064773632T', 'content': '欧丽娟15399872071朋友'}, 'data': None}
+2026-05-31 18:29:16,881 - common.logger - INFO - 请求方法：POST
+2026-05-31 18:29:16,881 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-05-31 18:29:16,882 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 18:29:17,647 - common.logger - INFO - 识别紧急联系人响应: {'rpcResult': 'SUCCESS', 'httpStatus': 200, 'responseType': 'SUCCESS', 'errorCode': None, 'errorMessage': None, 'data': {'msg': '添加成功：\n1. [朋友、朋友、153****2071] 新记录，已成功添加 \n', 'success': True, 'list': [{'id': 945, 'userName': '朋友', 'telphone': 'mm:55dcbad323b1b04f9d7a43d119cc9e4d7fc0', 'orderId': '008OI202605292060185877064773632T', 'contractType': '朋友', 'msg': '新记录，已成功添加', 'success': True}]}, 'parentIdemSerialId': None, 'traceId': '3792e24913088d72', 'businessSuccess': True, 'businessFail': False, 'rpcSuccess': True, 'rpcTimeout': False, 'finalSuccess': True, 'finalFail': False, 'rpcFail': False}
+2026-05-31 18:29:17,648 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：True
+########################################
+2026-05-31 18:29:17,649 - common.logger - INFO - 
+########################################
+  操作路径：data.errorMessage
+  操作符　：==
+  期望值　：None
+  实际值　：None
+########################################
+2026-05-31 18:29:17,650 - common.logger - INFO - 
+########################################
+  操作路径：data.list
+  操作符　：length_gt
+  期望值　：0
+  实际值　：[{'id': 945, 'userName': '朋友', 'telphone': 'mm:55dcbad323b1b04f9d7a43d119cc9e4d7fc0', 'orderId': '008OI202605292060185877064773632T', 'contractType': '朋友', 'msg': '新记录，已成功添加', 'success': True}]
+########################################
+2026-05-31 18:29:17,651 - common.logger - INFO - 成功识别到 1 个紧急联系人
+2026-05-31 18:29:17,651 - common.logger - INFO - 联系人1: id=945, userName=朋友, contractType=朋友, telphone=mm:55dcbad323b1b04f9d7a43d119cc9e4d7fc0
+2026-05-31 18:29:17,653 - common.logger - INFO - 处理联系人 - 原始数据: {'id': 945, 'userName': '朋友', 'telphone': 'mm:55dcbad323b1b04f9d7a43d119cc9e4d7fc0', 'orderId': '008OI202605292060185877064773632T', 'contractType': '朋友', 'msg': '新记录，已成功添加', 'success': True}
+2026-05-31 18:29:17,653 - common.logger - INFO -   - contractType (中文): 朋友
+2026-05-31 18:29:17,653 - common.logger - INFO -   - contractType (英文): friend
+2026-05-31 18:29:19,881 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202605292060185877064773632T', 'orderList': [{'id': 945, 'userName': '朋友', 'telphone': 'mm:55dcbad323b1b04f9d7a43d119cc9e4d7fc0', 'wechat': None, 'orderId': '008OI202605292060185877064773632T', 'contractType': 'friend', 'contractTypeName': '朋友', 'passCheck': 0, 'createId': None, 'createTime': '2026-05-31 18:29:17', 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}]}, 'data': None}
+2026-05-31 18:29:19,882 - common.logger - INFO - 请求方法：POST
+2026-05-31 18:29:19,883 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/saveEmergenceContractContent
+2026-05-31 18:29:19,884 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-05-31 18:29:20,027 - common.logger - INFO - 保存紧急联系人响应: {'code': '-1', 'errorMsg': 'AUTH_FAILED'}
+2026-05-31 18:29:20,029 - common.logger - INFO - 
+########################################
+  操作路径：businessSuccess
+  操作符　：==
+  期望值　：True
+  实际值　：None
+########################################
+2026-05-31 18:29:20,121 - common.logger - INFO - 商家端 API 客户端关闭
+2026-06-01 10:29:15,096 - common.logger - INFO - 统一配置管理器初始化完成
+2026-06-01 10:29:15,098 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-06-01 10:29:15,331 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-06-01 10:29:15,332 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-06-01 10:29:16,896 - common.logger - INFO - [Token] SHOP token 获取成功: q8qwjphh0gs6pqi7...
+2026-06-01 10:29:16,900 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-06-01 10:29:16,901 - common.logger - INFO - [Token] 使用缓存 token (SHOP): q8qwjphh0g...
+2026-06-01 10:29:16,902 - common.logger - INFO - 实际值和期望值输出....
+2026-06-01 10:29:16,903 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': 'q8qwjphh0gs6pqi7srxsat3njbkfqn4l'}
+2026-06-01 10:29:16,903 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-06-01 10:29:17,007 - common.logger - INFO - 生成联系人数量: 2
+2026-06-01 10:29:17,008 - common.logger - INFO - 生成的联系人内容:
+钟淑华13972375918亲属
+石东14537833830同事
+2026-06-01 10:29:17,011 - common.logger - INFO - 开始测试用例: 识别新增紧急联系人信息
+2026-06-01 10:29:17,012 - common.logger - INFO - 最终使用的 variables: {'shop_id': '71008738021cd3393bacbac182bd6a86af0b5c87', 'base_url': 'https://test.llxzu.com', 'content': '钟淑华13972375918亲属\n石东14537833830同事'}
+2026-06-01 10:29:17,013 - common.logger - INFO - 第一次替换后的请求参数: {}
+2026-06-01 10:29:17,013 - common.logger - INFO - 第一次替换后的 SQL: SELECT o.order_id
+FROM llxz_order.ct_user_orders o
+LEFT JOIN llxz_user.ct_user_emergency e ON o.order_id = e.order_id
+WHERE e.order_id IS NULL
+  AND o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+LIMIT 1;
+
+2026-06-01 10:29:17,014 - common.logger - INFO - ========== 第 1/1 次执行用例 ==========
+2026-06-01 10:29:17,015 - common.logger - INFO - 执行 SQL: SELECT o.order_id
+FROM llxz_order.ct_user_orders o
+LEFT JOIN llxz_user.ct_user_emergency e ON o.order_id = e.order_id
+WHERE e.order_id IS NULL
+  AND o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+LIMIT 1;
+
+2026-06-01 10:29:17,060 - common.logger - INFO - 从数据库获取的变量: {'order_id': '008OI202102265176689687780286464'}
+2026-06-01 10:29:17,062 - common.logger - INFO - 最终替换后的请求参数: {}
+2026-06-01 10:29:17,063 - common.logger - INFO - 最终替换后的 SQL: SELECT o.order_id
+FROM llxz_order.ct_user_orders o
+LEFT JOIN llxz_user.ct_user_emergency e ON o.order_id = e.order_id
+WHERE e.order_id IS NULL
+  AND o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+LIMIT 1;
+
+2026-06-01 10:29:17,066 - common.logger - INFO - 请求参数：{'json': None, 'data': None, 'params': {}}
+2026-06-01 10:29:17,067 - common.logger - INFO - 请求方法：POST
+2026-06-01 10:29:17,068 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-06-01 10:29:17,069 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-06-01 10:29:17,588 - common.logger - INFO - 响应状态码: 200
+2026-06-01 10:29:17,592 - common.logger - INFO - 解析后的 JSON 摘要: {"rpcResult": "SUCCESS", "httpStatus": 200, "responseType": "SYS_ERR", "errorCode": "999999", "errorMessage": "Required request body is missing: public com.hzsx.rent.common.model.dto.base.CommonRespon...
+2026-06-01 10:29:17,594 - common.logger - INFO - 测试通过: ECF_001 - 识别新增紧急联系人信息
+2026-06-01 10:29:17,595 - common.logger - INFO - 步骤1执行成功，查询到订单ID: 008OI202102265176689687780286464
+2026-06-01 10:29:17,596 - common.logger - INFO - 测试订单: 008OI202102265176689687780286464
+2026-06-01 10:29:20,067 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202102265176689687780286464', 'content': '钟淑华13972375918亲属\n石东14537833830同事'}, 'data': None}
+2026-06-01 10:29:20,068 - common.logger - INFO - 请求方法：POST
+2026-06-01 10:29:20,069 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-06-01 10:29:20,070 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-06-01 10:29:20,568 - common.logger - INFO - 成功识别到 2 个紧急联系人
+2026-06-01 10:29:20,569 - common.logger - INFO - 联系人1: id=946, userName=钟淑华, contractType=亲属, telphone=mm:8a6301dc5daff9445e195698a4a249b2d319
+2026-06-01 10:29:20,570 - common.logger - INFO - 联系人2: id=947, userName=石东, contractType=同事, telphone=mm:d2b0ec89369a48467b3814902d6ee120b9a4
+2026-06-01 10:29:20,571 - common.logger - INFO - 开始测试用例: 保存新增紧急联系人
+2026-06-01 10:29:20,572 - common.logger - INFO - 最终使用的 variables: {'shop_id': '71008738021cd3393bacbac182bd6a86af0b5c87', 'base_url': 'https://test.llxzu.com', 'content': '钟淑华13972375918亲属\n石东14537833830同事', 'order_id': '008OI202102265176689687780286464', 'order_list': [{'id': 946, 'userName': '钟淑华', 'telphone': 'mm:8a6301dc5daff9445e195698a4a249b2d319', 'wechat': None, 'orderId': '008OI202102265176689687780286464', 'contractType': 'family', 'contractTypeName': '亲属', 'passCheck': 0, 'createId': None, 'createTime': '2026-06-01 10:29:20', 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}, {'id': 947, 'userName': '石东', 'telphone': 'mm:d2b0ec89369a48467b3814902d6ee120b9a4', 'wechat': None, 'orderId': '008OI202102265176689687780286464', 'contractType': 'colleague', 'contractTypeName': '同事', 'passCheck': 0, 'createId': None, 'createTime': '2026-06-01 10:29:20', 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}]}
+2026-06-01 10:29:20,574 - common.logger - INFO - 第一次替换后的请求参数: {}
+2026-06-01 10:29:20,575 - common.logger - INFO - 第一次替换后的 SQL: 
+2026-06-01 10:29:20,576 - common.logger - INFO - ========== 第 1/1 次执行用例 ==========
+2026-06-01 10:29:20,577 - common.logger - INFO - 最终替换后的请求参数: {}
+2026-06-01 10:29:20,578 - common.logger - INFO - 最终替换后的 SQL: 
+2026-06-01 10:29:23,069 - common.logger - INFO - 请求参数：{'json': None, 'data': None, 'params': {}}
+2026-06-01 10:29:23,071 - common.logger - INFO - 请求方法：POST
+2026-06-01 10:29:23,072 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/saveEmergenceContractContent
+2026-06-01 10:29:23,073 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-06-01 10:29:23,311 - common.logger - INFO - 响应状态码: 200
+2026-06-01 10:29:23,313 - common.logger - INFO - 解析后的 JSON 摘要: {"code": "-1", "errorMsg": "AUTH_FAILED"}...
+2026-06-01 10:29:23,314 - common.logger - INFO - 测试通过: ECF_002 - 保存新增紧急联系人
+2026-06-01 10:29:23,314 - common.logger - INFO - 步骤2执行成功，保存了 2 个紧急联系人
+2026-06-01 10:29:23,315 - common.logger - INFO - 开始测试用例: 查看新增的紧急联系人
+2026-06-01 10:29:23,315 - common.logger - INFO - 最终使用的 variables: {'shop_id': '71008738021cd3393bacbac182bd6a86af0b5c87', 'base_url': 'https://test.llxzu.com', 'content': '钟淑华13972375918亲属\n石东14537833830同事', 'order_id': '008OI202102265176689687780286464', 'order_list': [{'id': 946, 'userName': '钟淑华', 'telphone': 'mm:8a6301dc5daff9445e195698a4a249b2d319', 'wechat': None, 'orderId': '008OI202102265176689687780286464', 'contractType': 'family', 'contractTypeName': '亲属', 'passCheck': 0, 'createId': None, 'createTime': '2026-06-01 10:29:20', 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}, {'id': 947, 'userName': '石东', 'telphone': 'mm:d2b0ec89369a48467b3814902d6ee120b9a4', 'wechat': None, 'orderId': '008OI202102265176689687780286464', 'contractType': 'colleague', 'contractTypeName': '同事', 'passCheck': 0, 'createId': None, 'createTime': '2026-06-01 10:29:20', 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}]}
+2026-06-01 10:29:23,316 - common.logger - INFO - 第一次替换后的请求参数: {}
+2026-06-01 10:29:23,317 - common.logger - INFO - 第一次替换后的 SQL: 
+2026-06-01 10:29:23,318 - common.logger - INFO - ========== 第 1/1 次执行用例 ==========
+2026-06-01 10:29:23,318 - common.logger - INFO - 最终替换后的请求参数: {}
+2026-06-01 10:29:23,318 - common.logger - INFO - 最终替换后的 SQL: 
+2026-06-01 10:29:26,069 - common.logger - INFO - 请求参数：{'json': None, 'data': None, 'params': {}}
+2026-06-01 10:29:26,070 - common.logger - INFO - 请求方法：POST
+2026-06-01 10:29:26,071 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/getEmergenceContracts
+2026-06-01 10:29:26,072 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-06-01 10:29:26,225 - common.logger - INFO - 响应状态码: 200
+2026-06-01 10:29:26,227 - common.logger - INFO - 解析后的 JSON 摘要: {"rpcResult": "SUCCESS", "httpStatus": 200, "responseType": "SYS_ERR", "errorCode": "999999", "errorMessage": "Required request body is missing: public com.hzsx.rent.common.model.dto.base.CommonRespon...
+2026-06-01 10:29:26,228 - common.logger - INFO - 测试通过: ECF_003 - 查看新增的紧急联系人
+2026-06-01 10:29:26,228 - common.logger - INFO - 步骤3执行成功，查询到已保存的紧急联系人
+2026-06-01 10:29:26,229 - common.logger - INFO - 紧急联系人管理流程执行成功，订单ID: 008OI202102265176689687780286464
+2026-06-01 10:29:26,246 - common.logger - INFO - 商家端 API 客户端关闭
+2026-06-01 10:36:41,791 - common.logger - INFO - 统一配置管理器初始化完成
+2026-06-01 10:36:41,794 - common.logger - INFO - ConfigManager 初始化完成（基于统一配置）
+2026-06-01 10:36:41,975 - common.logger - INFO - 当前测试环境: test, 终端: merchant
+2026-06-01 10:36:41,975 - common.logger - INFO - [Token] 调用登录接口获取 SHOP token: https://test.llxzu.com/hzsx/user/loginV2
+2026-06-01 10:36:43,516 - common.logger - INFO - [Token] SHOP token 获取成功: 42z4hvyk56cyoapc...
+2026-06-01 10:36:43,518 - common.logger - INFO - API 基础地址: https://test.llxzu.com
+2026-06-01 10:36:43,518 - common.logger - INFO - [Token] 使用缓存 token (SHOP): 42z4hvyk56...
+2026-06-01 10:36:43,518 - common.logger - INFO - 实际值和期望值输出....
+2026-06-01 10:36:43,519 - common.logger - INFO - API客户端初始化 | base_url=https://test.llxzu.com | auth_type=api_token | timeout=120 | headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'token': '42z4hvyk56cyoapc0t0v5wpbf4ol866v'}
+2026-06-01 10:36:43,519 - common.logger - INFO - 商家端 API 客户端初始化完成
+2026-06-01 10:36:44,012 - common.logger - INFO - 开始测试用例: 识别新增紧急联系人信息
+2026-06-01 10:36:44,013 - common.logger - INFO - 最终使用的 variables: {'shop_id': '71008738021cd3393bacbac182bd6a86af0b5c87', 'base_url': 'https://test.llxzu.com', 'content': '李慧13780096758亲属\n丁冬梅13766089748同事'}
+2026-06-01 10:36:44,014 - common.logger - INFO - 第一次替换后的请求参数: {}
+2026-06-01 10:36:44,014 - common.logger - INFO - 第一次替换后的 SQL: SELECT o.order_id
+FROM llxz_order.ct_user_orders o
+LEFT JOIN llxz_user.ct_user_emergency e ON o.order_id = e.order_id
+WHERE e.order_id IS NULL
+  AND o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+LIMIT 1;
+
+2026-06-01 10:36:44,015 - common.logger - INFO - ========== 第 1/1 次执行用例 ==========
+2026-06-01 10:36:44,017 - common.logger - INFO - 执行 SQL: SELECT o.order_id
+FROM llxz_order.ct_user_orders o
+LEFT JOIN llxz_user.ct_user_emergency e ON o.order_id = e.order_id
+WHERE e.order_id IS NULL
+  AND o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+LIMIT 1;
+
+2026-06-01 10:36:44,040 - common.logger - INFO - 从数据库获取的变量: {'order_id': '008OI202103025187976964913389568'}
+2026-06-01 10:36:44,042 - common.logger - INFO - 最终替换后的请求参数: {}
+2026-06-01 10:36:44,043 - common.logger - INFO - 最终替换后的 SQL: SELECT o.order_id
+FROM llxz_order.ct_user_orders o
+LEFT JOIN llxz_user.ct_user_emergency e ON o.order_id = e.order_id
+WHERE e.order_id IS NULL
+  AND o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+LIMIT 1;
+
+2026-06-01 10:36:44,047 - common.logger - INFO - 请求参数：{'json': None, 'data': None, 'params': {}}
+2026-06-01 10:36:44,048 - common.logger - INFO - 请求方法：POST
+2026-06-01 10:36:44,048 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-06-01 10:36:44,049 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-06-01 10:36:44,388 - common.logger - INFO - 响应状态码: 200
+2026-06-01 10:36:44,391 - common.logger - INFO - 解析后的 JSON 摘要: {"rpcResult": "SUCCESS", "httpStatus": 200, "responseType": "SYS_ERR", "errorCode": "999999", "errorMessage": "Required request body is missing: public com.hzsx.rent.common.model.dto.base.CommonRespon...
+2026-06-01 10:36:44,392 - common.logger - INFO - 测试通过: ECF_001 - 识别新增紧急联系人信息
+2026-06-01 10:36:47,048 - common.logger - INFO - 请求参数：{'json': {'orderId': '008OI202103025187976964913389568', 'content': '李慧13780096758亲属\n丁冬梅13766089748同事'}, 'data': None}
+2026-06-01 10:36:47,050 - common.logger - INFO - 请求方法：POST
+2026-06-01 10:36:47,051 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/addEmergenceContractContent
+2026-06-01 10:36:47,052 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-06-01 10:36:47,412 - common.logger - INFO - 开始测试用例: 保存新增紧急联系人
+2026-06-01 10:36:47,414 - common.logger - INFO - 最终使用的 variables: {'shop_id': '71008738021cd3393bacbac182bd6a86af0b5c87', 'base_url': 'https://test.llxzu.com', 'content': '李慧13780096758亲属\n丁冬梅13766089748同事', 'order_id': '008OI202103025187976964913389568', 'order_list': [{'id': 948, 'userName': '李慧', 'telphone': 'mm:607cc81f69697746c75ac368a2d673908e65', 'wechat': None, 'orderId': '008OI202103025187976964913389568', 'contractType': 'family', 'contractTypeName': '亲属', 'passCheck': 0, 'createId': None, 'createTime': '2026-06-01 10:36:47', 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}, {'id': 949, 'userName': '丁冬梅', 'telphone': 'mm:f36d52a6976cf74dcb4a6e78f4722af0edae', 'wechat': None, 'orderId': '008OI202103025187976964913389568', 'contractType': 'colleague', 'contractTypeName': '同事', 'passCheck': 0, 'createId': None, 'createTime': '2026-06-01 10:36:47', 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}]}
+2026-06-01 10:36:47,417 - common.logger - INFO - 第一次替换后的请求参数: {}
+2026-06-01 10:36:47,417 - common.logger - INFO - 第一次替换后的 SQL: 
+2026-06-01 10:36:47,419 - common.logger - INFO - ========== 第 1/1 次执行用例 ==========
+2026-06-01 10:36:47,420 - common.logger - INFO - 最终替换后的请求参数: {}
+2026-06-01 10:36:47,421 - common.logger - INFO - 最终替换后的 SQL: 
+2026-06-01 10:36:50,048 - common.logger - INFO - 请求参数：{'json': None, 'data': None, 'params': {}}
+2026-06-01 10:36:50,050 - common.logger - INFO - 请求方法：POST
+2026-06-01 10:36:50,051 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/saveEmergenceContractContent
+2026-06-01 10:36:50,052 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-06-01 10:36:50,271 - common.logger - INFO - 响应状态码: 200
+2026-06-01 10:36:50,273 - common.logger - INFO - 解析后的 JSON 摘要: {"code": "-1", "errorMsg": "AUTH_FAILED"}...
+2026-06-01 10:36:50,274 - common.logger - INFO - 测试通过: ECF_002 - 保存新增紧急联系人
+2026-06-01 10:36:50,274 - common.logger - INFO - 开始测试用例: 查看新增的紧急联系人
+2026-06-01 10:36:50,275 - common.logger - INFO - 最终使用的 variables: {'shop_id': '71008738021cd3393bacbac182bd6a86af0b5c87', 'base_url': 'https://test.llxzu.com', 'content': '李慧13780096758亲属\n丁冬梅13766089748同事', 'order_id': '008OI202103025187976964913389568', 'order_list': [{'id': 948, 'userName': '李慧', 'telphone': 'mm:607cc81f69697746c75ac368a2d673908e65', 'wechat': None, 'orderId': '008OI202103025187976964913389568', 'contractType': 'family', 'contractTypeName': '亲属', 'passCheck': 0, 'createId': None, 'createTime': '2026-06-01 10:36:47', 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}, {'id': 949, 'userName': '丁冬梅', 'telphone': 'mm:f36d52a6976cf74dcb4a6e78f4722af0edae', 'wechat': None, 'orderId': '008OI202103025187976964913389568', 'contractType': 'colleague', 'contractTypeName': '同事', 'passCheck': 0, 'createId': None, 'createTime': '2026-06-01 10:36:47', 'cause': None, 'remark': None, 'isOpenEye': False, 'telphoneOpenNum': '', 'havePermission': True}]}
+2026-06-01 10:36:50,275 - common.logger - INFO - 第一次替换后的请求参数: {}
+2026-06-01 10:36:50,276 - common.logger - INFO - 第一次替换后的 SQL: 
+2026-06-01 10:36:50,276 - common.logger - INFO - ========== 第 1/1 次执行用例 ==========
+2026-06-01 10:36:50,276 - common.logger - INFO - 最终替换后的请求参数: {}
+2026-06-01 10:36:50,277 - common.logger - INFO - 最终替换后的 SQL: 
+2026-06-01 10:36:53,048 - common.logger - INFO - 请求参数：{'json': None, 'data': None, 'params': {}}
+2026-06-01 10:36:53,049 - common.logger - INFO - 请求方法：POST
+2026-06-01 10:36:53,049 - common.logger - INFO - 请求URL：https://test.llxzu.com/hzsx/user/getEmergenceContracts
+2026-06-01 10:36:53,050 - common.logger - INFO - 请求超时设置: 120秒 (尝试 1/3)
+2026-06-01 10:36:53,242 - common.logger - INFO - 响应状态码: 200
+2026-06-01 10:36:53,246 - common.logger - INFO - 解析后的 JSON 摘要: {"rpcResult": "SUCCESS", "httpStatus": 200, "responseType": "SYS_ERR", "errorCode": "999999", "errorMessage": "Required request body is missing: public com.hzsx.rent.common.model.dto.base.CommonRespon...
+2026-06-01 10:36:53,249 - common.logger - INFO - 测试通过: ECF_003 - 查看新增的紧急联系人
+2026-06-01 10:36:53,269 - common.logger - INFO - 商家端 API 客户端关闭
