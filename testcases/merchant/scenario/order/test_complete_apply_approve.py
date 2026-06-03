@@ -9,7 +9,7 @@ from .base_complete_apply import BaseCompleteApplyFlow
 def load_yaml(yaml_path):
     with open(yaml_path, 'r', encoding='utf-8') as f:
         return yaml.safe_load(f)
-
+@allure.epic("商家端")
 @allure.feature("订单完结申请-商家端+运营端")
 @allure.story("审核通过流程")
 class TestCompleteApplyApprove:

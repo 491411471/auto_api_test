@@ -6,8 +6,8 @@ _DATA_FILE = "data/merchant/api/order/order_pay_detail_api.yaml"
 _ALL_CASES = get_test_data(_DATA_FILE, "order_pay_detail_tests")
 if not _ALL_CASES:
     raise RuntimeError(f"无法加载 YAML 数据，请检查文件路径 {_DATA_FILE}")
-
-@allure.feature("商家端-订单模块")
+@allure.epic("商家端")
+@allure.feature("商家端-订单支付详情")
 @allure.story("订单支付详情部分字段验证")
 class TestOrderPayDetailApi:
     _global_vars = None

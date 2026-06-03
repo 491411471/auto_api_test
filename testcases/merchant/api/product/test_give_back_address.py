@@ -7,7 +7,7 @@ from utils.product_utils import gen_chinese_phone, gen_detailed_street_address, 
 _ALL_CASES = get_test_data("save_give_back_address_api.yaml", "save_give_back_address_tests")
 if not _ALL_CASES:
     raise RuntimeError("无法加载 YAML 数据，请检查文件路径 save_give_back_address_api.yaml")
-
+@allure.epic("商家端")
 @allure.feature("商家端-商品管理模块")
 @allure.story("归还地址")
 class TestProductAuditQuery:

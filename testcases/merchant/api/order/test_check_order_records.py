@@ -8,7 +8,7 @@ _DATA_FILE = "data/merchant/api/order/check_order_records_api.yaml"
 _ALL_CASES = get_test_data(_DATA_FILE, "order_records_tests")
 if not _ALL_CASES:
     raise RuntimeError("无法加载 YAML 数据，请检查文件路径 check_order_records_api.yaml")
-
+@allure.epic("商家端")
 @allure.feature("商家端-订单模块")
 @allure.story("订单记录查询")
 class TestOrderRecordsApi:

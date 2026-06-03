@@ -13,7 +13,8 @@ def load_yaml(yaml_path):
         return yaml.safe_load(f)
 
 
-@allure.feature("补押金-商家端")
+@allure.epic("商家端")
+@allure.feature("补押金")
 @allure.story("完整补押金流程")
 class TestRepairOrder:
 

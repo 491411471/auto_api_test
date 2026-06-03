@@ -25,7 +25,7 @@ merchant:
     validate:
       - path: "$.businessSuccess"
         operator: "=="
-        value: false
+        value: true
       - path: "$.rpcResult"
         operator: "=="
         value: "SUCCESS"
@@ -33,8 +33,8 @@ merchant:
         operator: "=="
         value: 200
       - path: "$.errorMessage"
-        operator: "=="
-        value: "请勿重复补押金"
+        operator: "is_none"
+        value: null
 
   # 3. 查询补押金记录（用于验证）
   get_deposit_order_list:

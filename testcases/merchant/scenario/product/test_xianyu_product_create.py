@@ -43,8 +43,8 @@ def attach_error_detail(error_msg: str, context: str):
     """统一错误信息附件处理"""
     allure.attach(error_msg, context, attachment_type=allure.attachment_type.TEXT)
 
-
-@allure.feature("商家端-闲鱼商品管理")
+@allure.epic("商家端")
+@allure.feature("闲鱼商品管理")
 @allure.story("新建闲鱼商品")
 class TestXianYuProductCreate:
 

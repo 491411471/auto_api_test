@@ -28,6 +28,7 @@ def load_request_template(yaml_path: str) -> dict:
     return data['product_create_tests']
 
 # ==================== 测试类 ====================
+@allure.epic("商家端")
 @allure.feature("商家端-商品管理")
 @allure.story("新增商品 → 运营端审核通过 → 验证审核状态")
 class TestProductCreateAndAudit:
@@ -35,7 +36,7 @@ class TestProductCreateAndAudit:
     @allure.title("完整流程：新增短租商品 → 调用审核接口通过 → 验证商品审核状态为2")
     def test_create_product_and_audit_pass(self, api_client, db, admin_api_client):
         # 获取项目根目录
-        project_root = Path(__file__).resolve().parent.parent.parent.parent
+        project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
         # ---------- 步骤1：生成动态变量 ----------
         with allure.step("生成动态测试数据"):
@@ -169,7 +170,7 @@ class TestProductCreateAndAudit:
         # ---------- 步骤5：调用审核通过接口 ----------
         with allure.step("加载审核接口请求模板"):
             # 构建审核 YAML 文件路径
-            audit_yaml_path = project_root / "data" / "scenario" / "product" / "product_audit_api.yaml"
+            audit_yaml_path = project_root / "data" / "merchant" / "scenario" / "product" / "product_audit_api.yaml"
             
             # 验证文件是否存在
             if not audit_yaml_path.exists():

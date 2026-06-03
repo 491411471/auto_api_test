@@ -180,7 +180,7 @@ order_query_tests:
     expected_status: 200
     validate_data:
       - path: "data.records[*].status"
-        operator: "=="
+        operator: "all_eq"
         value: "09"
       - path: "data.records[*].orderId"
         operator: "in"

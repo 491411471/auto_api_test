@@ -181,7 +181,7 @@ def run_tests(env='test', endpoint=None, api_only=False, scenario_only=False, ma
 
     # 显示测试结果摘要
     print("\n" + "=" * 50)
-    color_print(f"  执行耗时: {elapsed:.2f} 分", 'cyan')
+    color_print(f"  执行耗时: {elapsed:.2f}/60 （分钟)", 'cyan')
     if stats['total'] > 0:
         color_print(f" 总用例数: {stats['total']}", 'blue')
         color_print(f" 通过: {stats['passed']}", 'green')

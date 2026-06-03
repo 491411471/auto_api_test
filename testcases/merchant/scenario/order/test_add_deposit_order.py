@@ -1,4 +1,5 @@
 import allure
+import json
 import os
 import random
 import yaml
@@ -11,8 +12,8 @@ def load_yaml(yaml_path):
     with open(yaml_path, 'r', encoding='utf-8') as f:
         return yaml.safe_load(f)
 
-
-@allure.feature("补押金-商家端")
+@allure.epic("商家端")
+@allure.feature("补押金")
 @allure.story("补押金完整流程")
 class TestAddDepositOrder:
 
@@ -49,6 +50,13 @@ class TestAddDepositOrder:
             resp_json = resp.json()
             logger.info(f"补押金响应: {resp_json}")
 
+            # 先将响应添加到 allure 报告（确保断言失败时仍可见）
+            allure.attach(
+                json.dumps(resp_json, ensure_ascii=False, indent=2),
+                name="补押金响应",
+                attachment_type=allure.attachment_type.JSON,
+            )
+
             # 执行通用断言
             for check in add_cfg['validate']:
                 path = check['path'].lstrip('$').lstrip('.')
@@ -56,20 +64,6 @@ class TestAddDepositOrder:
                 operator = check['operator']
                 expected = check['value']
                 validate(actual, operator, expected, path)
-
-            allure.attach(str(resp_json), name="补押金响应", attachment_type=allure.attachment_type.JSON)
-
-            # 如果接口返回业务失败（如"请勿重复补押金"），跳过后续验证
-            if resp_json.get('businessSuccess') is False:
-                skip_msg = (
-                    f"补押金接口返回业务失败，跳过后续记录验证\n"
-                    f"  订单号: {order_id}\n"
-                    f"  错误信息: {resp_json.get('errorMessage', '未知错误')}\n"
-                    f"  错误码: {resp_json.get('errorCode', 'N/A')}"
-                )
-                allure.attach(skip_msg, name="跳过原因", attachment_type=allure.attachment_type.TEXT)
-                logger.warning(skip_msg)
-                pytest.skip(skip_msg)
 
         # ---------- 步骤3：查询补押金记录并验证金额和订单号 ----------
         with allure.step("3. 查询补押金记录，验证金额和原始订单号"):

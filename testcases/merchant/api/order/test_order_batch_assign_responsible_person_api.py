@@ -6,8 +6,8 @@ import allure
 import pytest
 from common.test_helpers import execute_test_case
 from utils.data_loader import get_test_data, get_global_variables
-
-@allure.feature("商家端-订单模块")
+@allure.epic("商家端")
+@allure.feature("商家端-订单分配")
 @allure.story("订单分配责任人")
 class TestStatusCount:
     """

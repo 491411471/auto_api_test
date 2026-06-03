@@ -16,7 +16,7 @@ def get_case_by_id(case_id: str):
         if case['case_id'] == case_id:
             return case
     raise ValueError(f"未找到 case_id 为 {case_id} 的测试数据")
-
+@allure.epic("商家端")
 @allure.feature("商家端-订单模块")
 @allure.story("订单其他操作")
 class TestOrderOperatorApi:
