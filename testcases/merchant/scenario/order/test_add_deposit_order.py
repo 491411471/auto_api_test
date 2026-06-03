@@ -18,7 +18,7 @@ class TestAddDepositOrder:
 
     @allure.title("完整流程：查询可补押金订单 → 补押金 → 验证补押金记录（金额+订单号）")
     def test_add_deposit_order_flow(self, merchant_api_client, db, global_vars):
-        yaml_path = os.path.join(os.path.dirname(__file__), "../../../data/scenario/order/add_deposit_order.yaml")
+        yaml_path = os.path.join(os.path.dirname(__file__), "../../../../data/merchant/scenario/order/add_deposit_order.yaml")
         config = load_yaml(yaml_path)
         base_vars = global_vars.copy()
 

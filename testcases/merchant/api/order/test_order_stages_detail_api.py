@@ -4,7 +4,8 @@ from common.test_helpers import execute_test_case
 from utils.data_loader import get_test_data, get_global_variables
 
 # 加载 YAML 中所有用例
-_ALL_CASES = get_test_data("order_stages_detail_api.yaml", "order_stages_tests")
+_DATA_FILE = "data/merchant/api/order/order_stages_detail_api.yaml"
+_ALL_CASES = get_test_data(_DATA_FILE, "order_stages_tests")
 if not _ALL_CASES:
     raise RuntimeError("无法加载 order_stages_detail_api.yaml")
 

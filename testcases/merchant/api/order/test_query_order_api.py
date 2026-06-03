@@ -9,7 +9,7 @@ from utils.data_loader import get_test_data, get_global_variables
 @allure.story("订单查询")
 class TestOrderQuery:
     _global_vars = None
-
+    _DATA_FILE = "data/merchant/api/order/query_order_api.yaml"
     @classmethod
     def _load_global_vars(cls):
         if cls._global_vars is None:

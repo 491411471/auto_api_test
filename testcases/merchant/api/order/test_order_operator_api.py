@@ -6,7 +6,8 @@ from common.test_helpers import execute_test_case
 from utils.data_loader import get_test_data, get_global_variables
 
 # 预先加载所有用例数据（只加载一次）
-_ALL_CASES = get_test_data("order_operator_api.yaml", "order_operator_tests")
+_DATA_FILE = "data/merchant/api/order/order_operator_api.yaml"
+_ALL_CASES = get_test_data(_DATA_FILE, "order_operator_tests")
 if not _ALL_CASES:
     raise RuntimeError("无法加载 YAML 数据，请检查文件路径 order_operator_api.yaml")
 

@@ -58,6 +58,30 @@ def set_allure_language_to_zh(report_dir='reports/allure_html'):
         print(" Allure 报告已经是中文界面")
 
 
+def _resolve_test_paths(api_only: bool, scenario_only: bool, endpoint: str = None) -> list:
+    """根据测试类型和端点类型，解析实际的测试目录路径
+
+    路径规则：testcases/{endpoint}/{api|scenario}
+    若未指定 endpoint，默认扫描所有已知端点（merchant + admin）
+    """
+    base = 'testcases'
+    # 端点列表：endpoint 指定时用单个，否则扫描所有已知端点
+    endpoints = [endpoint] if endpoint else ['merchant', 'admin']
+    # 测试类型：api / scenario / 两者皆选
+    if api_only and not scenario_only:
+        test_types = ['api']
+    elif scenario_only and not api_only:
+        test_types = ['scenario']
+    else:
+        test_types = ['api', 'scenario']
+
+    paths = [f"{base}/{ep}/{tt}" for ep in endpoints for tt in test_types]
+    # 过滤掉不存在的目录，避免 pytest 报路径错误
+    valid_paths = [p for p in paths if os.path.isdir(p)]
+    # 若所有目录都不存在，降级到 testcases 根目录（让 pytest 自行报错）
+    return valid_paths if valid_paths else [base]
+
+
 def color_print(message, color='white'):
     colors = {
         'green': Fore.GREEN, 'red': Fore.RED, 'blue': Fore.BLUE,
@@ -87,25 +111,15 @@ def run_tests(env='test', endpoint=None, api_only=False, scenario_only=False, ma
     except Exception as e:
         print(f"加载配置失败: {e}")
 
-    # 确定测试路径
-    if api_only and scenario_only:
-        test_path = ['testcases/api', 'testcases/scenario']
-    elif api_only:
-        test_path = 'testcases/api'
-    elif scenario_only:
-        test_path = 'testcases/scenario'
-    else:
-        test_path = ['testcases/api', 'testcases/scenario']
+    # 确定测试路径（支持 merchant/admin 端点动态切换）
+    test_paths = _resolve_test_paths(api_only, scenario_only, endpoint)
 
     # 创建报告目录
     os.makedirs('reports/allure_results', exist_ok=True)
     os.makedirs('logs', exist_ok=True)
 
-    # 构建 pytest 命令
-    if isinstance(test_path, list):
-        pytest_args = test_path + ['-v', '--alluredir=./reports/allure_results', '--clean-alluredir']
-    else:
-        pytest_args = [test_path, '-v', '--alluredir=./reports/allure_results', '--clean-alluredir']
+    # 构建 pytest 命令（test_paths 始终为 list）
+    pytest_args = test_paths + ['-v', '--alluredir=./reports/allure_results', '--clean-alluredir']
     pytest_args.append('--json-report')
     pytest_args.append('--json-report-file=reports/test_result.json')
     if mark:
@@ -131,7 +145,7 @@ def run_tests(env='test', endpoint=None, api_only=False, scenario_only=False, ma
 
     # ---------- 准确读取 pytest-json-report 生成的统计信息 ----------
     json_report = 'reports/test_result.json'
-    stats = {'total': 0, 'passed': 0, 'failed': 0, 'error': 0, "elapsed": 0.0}
+    stats = {'total': 0, 'passed': 0, 'failed': 0, 'error': 0, 'skipped': 0, "elapsed": 0.0}
     if os.path.exists(json_report):
         try:
             with open(json_report, 'r', encoding='utf-8') as f:
@@ -142,6 +156,7 @@ def run_tests(env='test', endpoint=None, api_only=False, scenario_only=False, ma
             stats['total'] = summary.get('total', 0)
             stats['passed'] = summary.get('passed', 0)
             stats['failed'] = summary.get('failed', 0)
+            stats['skipped'] = summary.get('skipped', 0)
             stats['elapsed'] = round(elapsed/60, 1)  # 保留一位小数
             # error 在 json-report 中通常对应 'error' 字段，表示用例执行过程中发生未捕获异常的数量
             stats['error'] = summary.get('error', 0)
@@ -171,6 +186,7 @@ def run_tests(env='test', endpoint=None, api_only=False, scenario_only=False, ma
         color_print(f" 总用例数: {stats['total']}", 'blue')
         color_print(f" 通过: {stats['passed']}", 'green')
         color_print(f" 失败: {stats['failed']}", 'red')
+        color_print(f" 跳过: {stats['skipped']}", 'red')
         color_print(f" 错误: {stats['error']}", 'magenta')
         pass_rate = (stats['passed'] / stats['total']) * 100 if stats['total'] else 0
         color_print(f" 通过率: {pass_rate:.1f}%", 'yellow')
@@ -189,6 +205,7 @@ def run_tests(env='test', endpoint=None, api_only=False, scenario_only=False, ma
             report_path=report_url,
             passed=stats['passed'],
             failed=stats['failed'],
+            skipped=stats['skipped'],
             error=stats['error'],
             webhook_url=WECHAT_WEBHOOK,
             wechat_userids=WECHAT_USERID

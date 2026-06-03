@@ -53,3 +53,30 @@ class DatabaseManager:
     def execute_update(self, sql: str, params=None):
         rows = self.cursor.execute(sql, params or ())
         return rows
+
+    def execute_delete(self, sql: str, params=None, autocommit: bool = True) -> int:
+        """
+        执行 DELETE 语句，返回受影响行数。
+        仅允许 DELETE 语句，防止误用导致数据安全事故。
+        autocommit=True 时执行后立即提交，确保变更对其他数据库连接立即可见。
+        """
+        stripped = sql.strip().upper()
+        if not stripped.startswith("DELETE"):
+            raise ValueError(f"execute_delete 仅接受 DELETE 语句，收到: {sql[:80]}")
+        affected_rows = self.cursor.execute(sql, params or ())
+        if autocommit:
+            self.connection.commit()
+        logger.info(f"execute_delete 执行完成，影响行数: {affected_rows}，autocommit={autocommit}，SQL: {sql[:120]}")
+        return affected_rows
+
+    def commit(self):
+        """显式提交当前事务"""
+        if self.connection:
+            self.connection.commit()
+            logger.debug("显式事务提交")
+
+    def rollback(self):
+        """显式回滚当前事务"""
+        if self.connection:
+            self.connection.rollback()
+            logger.debug("显式事务回滚")

@@ -229,6 +229,9 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
                 expr = jsonpath_parse(jsonpath_str)
                 matches = expr.find(obj)
                 if matches:
+                    # 包含通配符 [*] 的路径始终返回列表，即使只有一个匹配
+                    if '[*]' in path:
+                        return [m.value for m in matches]
                     return matches[0].value if len(matches) == 1 else [m.value for m in matches]
             except (JsonPathParserError, JsonPathLexerError) as e:
                 logger.debug(f"JSONPath 解析失败: {jsonpath_str}, 错误: {e}，降级使用自定义解析")

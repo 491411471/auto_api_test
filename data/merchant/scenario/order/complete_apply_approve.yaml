@@ -27,7 +27,7 @@ merchant:
     endpoint: "/hzsx/busShop/doUpLoadwebp"
     method: POST
     file_field: "file"
-    test_image_path: "data/scenario/images/test_image.png"   # 请替换为实际图片路径
+    test_image_path: "data/common/images/test_image.png"   # 请替换为实际图片路径
     expected_status: 200                     # 可选，默认期望200
     validate: # 新增断言列表
         - path: "$.businessSuccess"

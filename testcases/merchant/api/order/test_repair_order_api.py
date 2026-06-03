@@ -1,7 +1,5 @@
 import allure
-import os
 import pytest
-import yaml
 import random
 import time
 from common.logger import logger
@@ -12,17 +10,13 @@ from utils.data_loader import get_test_data, get_global_variables
 # 预先加载所有用例数据（只加载一次）
 _ALL_CASES = get_test_data("repair_order_api.yaml", "repair_order_tests")
 if not _ALL_CASES:
-    raise RuntimeError("无法加载 YAML 数据，请检查文件路径 order_cash_pledge_api.yaml")
+    raise RuntimeError("无法加载 YAML 数据，请检查文件路径 repair_order_api.yaml")
 
 def get_case_by_id(case_id: str):
     for case in _ALL_CASES:
         if case['case_id'] == case_id:
             return case
     raise ValueError(f"未找到 case_id 为 {case_id} 的测试数据")
-
-def load_yaml(yaml_path):
-    with open(yaml_path, 'r', encoding='utf-8') as f:
-        return yaml.safe_load(f)
 
 
 @allure.feature("补订单-商家端")
@@ -38,20 +32,8 @@ class TestRepairOrder:
 
     @pytest.fixture(autouse=True)
     def setup(self):
-        """加载测试数据"""
-        yaml_path = os.path.join(os.path.dirname(__file__),"../../../data/api/order/repair_order_api.yaml")
-
-        # 检查文件是否存在
-        if not os.path.exists(yaml_path):
-            raise FileNotFoundError(f"YAML文件不存在: {yaml_path}")
-
-        try:
-            self.config = load_yaml(yaml_path)
-        except yaml.YAMLError as e:
-            raise ValueError(f"YAML文件格式错误: {yaml_path}\n错误详情: {str(e)}")
-        except Exception as e:
-            raise RuntimeError(f"加载YAML文件失败: {yaml_path}\n错误详情: {str(e)}")
-
+        """加载测试数据（复用模块级已加载的 YAML，避免重复解析）"""
+        self.config = get_test_data("data/merchant/api/order/repair_order_api.yaml")
         yield
 
     @allure.title("补订单接口-正常流程测试")

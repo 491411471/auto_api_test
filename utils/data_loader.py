@@ -21,7 +21,7 @@ def _find_project_root(start_path: Optional[Path] = None, markers: List[str] = N
 
 
 def _find_file_smart(filename: str, debug: bool = False) -> Optional[Path]:
-    """智能查找 YAML 文件"""
+    """智能查找 YAML 文件（增强版 - 支持新旧路径）"""
     def _debug(msg):
         if debug:
             print(f"[DEBUG] {msg}")
@@ -33,11 +33,32 @@ def _find_file_smart(filename: str, debug: bool = False) -> Optional[Path]:
 
     try:
         current_dir = Path(__file__).resolve().parent
-        print("当前路径：",current_dir)
     except NameError:
         current_dir = Path.cwd()
+    
     project_root = _find_project_root(current_dir)
 
+    # 【新增】定义新旧路径映射（优先级：新路径 > 旧路径）
+    path_mappings = {
+        'data/api/order/': 'data/merchant/api/order/',
+        'data/api/product_management/': 'data/merchant/api/product/',
+        'data/api/post_lease_management/': 'data/merchant/api/post_lease/',
+        'data/scenario/order/': 'data/merchant/scenario/order/',
+        'data/scenario/product/': 'data/merchant/scenario/product/',
+        'data/scenario/contract-lifecycle/': 'data/merchant/scenario/contract-lifecycle/',
+        'data/scenario/inventory/': 'data/common/inventory/',
+    }
+
+    # 【新增】策略1：尝试新路径（如果文件已迁移）
+    for old_prefix, new_prefix in path_mappings.items():
+        if old_prefix in filename:
+            new_filename = filename.replace(old_prefix, new_prefix)
+            new_path = project_root / new_filename
+            if new_path.exists():
+                _debug(f"[新路径] 找到: {new_path}")
+                return new_path
+
+    # 【原有】策略2：标准搜索位置
     search_locations = [
         current_dir / filename,
         current_dir / 'data' / filename,
@@ -59,15 +80,37 @@ def _find_file_smart(filename: str, debug: bool = False) -> Optional[Path]:
 
     for loc in search_locations:
         if loc and loc.exists():
-            _debug(f"找到文件: {loc}")
+            _debug(f"[标准路径] 找到: {loc}")
             return loc
 
-    # 递归搜索（深度≤4）
-    for depth in range(1, 5):
+    # 【原有】策略3：递归搜索（深度≤5）
+    for depth in range(1, 6):
         for base in [project_root] + list(project_root.parents[:depth]):
             found = list(base.rglob(filename))
             if found:
-                _debug(f"递归找到: {found[0]}")
+                _debug(f"[递归搜索] 找到: {found[0]}")
+                return found[0]
+    
+    # 【新增】策略4：路径归一化搜索（兼容硬编码相对路径）
+    if '/' in filename or '\\' in filename:
+        # 归一化路径：移除多余的 ../ 和分隔符
+        normalized = filename.replace('\\', '/')
+        while '/../../' in normalized:
+            normalized = normalized.replace('/../../', '/')
+        normalized = normalized.lstrip('./')
+        
+        normalized_path = project_root / normalized
+        if normalized_path.exists():
+            _debug(f"[归一化路径] 找到: {normalized_path}")
+            return normalized_path
+        
+        # 仅用文件名搜索（最后手段）
+        simple_filename = Path(filename).name
+        _debug(f"[文件名搜索] 尝试: {simple_filename}")
+        for base in [project_root] + list(project_root.parents[:2]):
+            found = list(base.rglob(simple_filename))
+            if found:
+                _debug(f"[文件名搜索] 找到: {found[0]}")
                 return found[0]
 
     _debug(f"未找到文件: {filename}")
@@ -113,7 +156,8 @@ def get_test_data(data_file: str, data_key: str = None, debug: bool = False) -> 
         print(f"警告: 无法找到 YAML 文件: {data_file}")
         return [] if data_key else {}
     data = _load_yaml_cached(file_path, debug=debug)
-    print("data:",data)
+    if debug:
+        print(f"[DEBUG] 已加载: {file_path}")
     if data_key is None:
         return data
     return data.get(data_key, [])
@@ -123,7 +167,7 @@ def clear_file_cache():
     global _FILE_CACHE
     _FILE_CACHE.clear()
 
-def get_global_variables(data_file: str, debug: bool = True) -> Dict[str, Any]:
+def get_global_variables(data_file: str, debug: bool = False) -> Dict[str, Any]:
     """
     智能加载 YAML 文件中的顶层 variables 字段
     返回字典，若不存在则返回空字典

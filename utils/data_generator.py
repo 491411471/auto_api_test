@@ -4,6 +4,8 @@ import string
 from datetime import datetime, timedelta
 from typing import Any, List, Optional, Union
 
+from cv2.typing import map_int_and_double
+
 
 def generate_random_value(
         value_type: str,
@@ -87,3 +89,8 @@ def generate_random_value(
 
     else:
         raise ValueError(f"不支持的类型: {value_type}")
+
+
+if __name__ == "__main__":
+
+    print(generate_random_value("phone"))

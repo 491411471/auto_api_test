@@ -41,7 +41,7 @@ order_pay_detail_tests:
         operator: "=="
         value: true
       # 核心断言：总租金
-      - path: "$.data.oldAllRent"
+      - path: "$.data.needPayAllRent"
         operator: "=="
         value: ${total_rent}
         type_check: "float"

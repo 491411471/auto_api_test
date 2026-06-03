@@ -19,7 +19,7 @@ def load_yaml(yaml_path):
 class TestOrderFlow:
     @allure.title("完整流程：查询待审核订单 → 审核通过 → 获取归还地址 → 发货 → 生成PDF → 运营端查询验证 → 运营端确认收货 -> 验证租用中状态")
     def test_order_flow(self, merchant_api_client, db, global_vars, admin_api_client):
-        yaml_path = os.path.join(os.path.dirname(__file__), "../../../data/scenario/order/order_flow.yaml")
+        yaml_path = os.path.join(os.path.dirname(__file__), "../../../../data/merchant/scenario/order/order_flow.yaml")
         config = load_yaml(yaml_path)
         base_vars = global_vars.copy()
         shop_id = base_vars.get('shop_id', '71008738021cd3393bacbac182bd6a86af0b5c87')

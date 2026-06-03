@@ -86,7 +86,7 @@ class TestXianYuProductCreate:
     def _prepare_test_data(self, xianyu_api_client):
         product_name = gen_product_name()
         uuid_1 = generate_uuid()
-        image_url,image_id = upload_test_image(xianyu_api_client, "/data/scenario/images/xianyu.jpg")
+        image_url,image_id = upload_test_image(xianyu_api_client, "/data/common/images/xianyu.jpg")
 
         variables = {
             "product_name": product_name,
@@ -98,7 +98,7 @@ class TestXianYuProductCreate:
         return product_name, variables
 
     def _load_create_template(self, project_root):
-        yaml_path = project_root / "data" / "scenario" / "product" / "xianyu_product_create.yaml"
+        yaml_path = project_root / "data" / "merchant" / "scenario" / "product" / "xianyu_product_create.yaml"
         if not yaml_path.exists():
             raise FileNotFoundError(f"YAML 配置文件不存在: {yaml_path}")
         template = load_xianyu_request_template(str(yaml_path))
@@ -156,7 +156,7 @@ class TestXianYuProductCreate:
         allure.attach("商品审核成功：审核接口调用成功 → 审核状态变为2", "审核阶段结果", attachment_type=allure.attachment_type.TEXT)
 
     def _load_audit_template(self, project_root, p_id):
-        yaml_path = project_root / "data" / "scenario" / "product" / "xianyu_product_create.yaml"
+        yaml_path = project_root / "data" / "merchant" / "scenario" / "product" / "xianyu_product_create.yaml"
         if not yaml_path.exists():
             raise FileNotFoundError(f"审核 YAML 配置文件不存在: {yaml_path}")
         audit_case = load_audit_template(str(yaml_path))
@@ -200,7 +200,7 @@ class TestXianYuProductCreate:
     # ========== 下架操作方法，从YAML读取配置 ==========
     def _offline_xianyu_product(self, xianyu_api_client, project_root, product_id):
         """商家端下架闲鱼商品，配置从 YAML 读取，支持变量替换和动态断言"""
-        yaml_path = project_root / "data" / "scenario" / "product" / "xianyu_product_create.yaml"
+        yaml_path = project_root / "data" / "merchant" / "scenario" / "product" / "xianyu_product_create.yaml"
 
         # 1. 加载模板
         offline_case = load_offline_template(str(yaml_path))
@@ -259,7 +259,7 @@ class TestXianYuProductCreate:
     # ========== 删除闲鱼商品方法 ==========
     def _del_xianyu_product(self, xianyu_api_client, project_root, p_id, p_type):
         """删除闲鱼商品"""
-        yaml_path = project_root / "data" / "scenario" / "product" / "xianyu_product_create.yaml"
+        yaml_path = project_root / "data" / "merchant" / "scenario" / "product" / "xianyu_product_create.yaml"
         del_case = load_del_template(str(yaml_path))
         # 2. 准备动态变量（占位符替换）
         variables = {

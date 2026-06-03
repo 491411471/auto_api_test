@@ -10,6 +10,7 @@ def send_wechat_report(
         report_path: str,
         passed: int,
         failed: int,
+        skipped: int,
         error: int,
         wechat_userids: Optional[List[str]] = None,
         mentioned_mobiles: Optional[List[str]] = None,
@@ -34,7 +35,7 @@ def send_wechat_report(
     <font color="comment">----------------------------</font>
     **测试统计**
 
-    <font color="info">通过:{passed}</font>  <font color="warning">失败:{failed}</font>  <font color="#FF3366">错误:{error}</font>　　
+    <font color="info">通过:{passed}</font>  <font color="warning">失败:{failed}</font>  <font color="#FF3366">错误:{error}</font>  <font color="#87CEFA">跳过:{skipped}</font>　
     **总计:**<font color="comment">{total_cases}</font>    **通过率:**<font color="comment">{pass_rate:.1f}</font>%
 
     <font color="comment">----------------------------</font>

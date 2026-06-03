@@ -47,7 +47,7 @@ class TestProductCreateAndAudit:
             uuid_2 = generate_uuid()
             
             # 上传测试图片
-            image_path = "/data/scenario/images/test_image.png"
+            image_path = "/data/common/images/test_image.png"
             image_url,image_id = upload_test_image(api_client, image_path)
             
             # 生成库存日期映射（未来14天）
@@ -74,7 +74,7 @@ class TestProductCreateAndAudit:
         # ---------- 步骤2：加载商品创建模板并替换 ----------
         with allure.step("加载商品创建请求模板"):
             # 构建 YAML 文件路径
-            yaml_path = project_root / "data" / "scenario" / "product" / "product_create_and_audit_api.yaml"
+            yaml_path = project_root / "data" / "merchant" / "scenario" / "product" / "product_create_and_audit_api.yaml"
             
             # 验证文件是否存在
             if not yaml_path.exists():

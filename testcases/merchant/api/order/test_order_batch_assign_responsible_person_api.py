@@ -14,17 +14,17 @@ class TestStatusCount:
     订单分配责任人
     """
     _global_vars = None
-
+    _DATA_FILE = "data/merchant/api/order/order_batch_assign_responsible_person_api.yaml"
     @classmethod
     def _load_global_vars(cls):
         if cls._global_vars is None:
-            cls._global_vars = get_global_variables("order_batch_assign_responsible_person_api.yaml")
+            cls._global_vars = get_global_variables(cls._DATA_FILE)
         return cls._global_vars.copy()
 
     @pytest.mark.smoke
     @pytest.mark.parametrize(
         "case",
-        get_test_data("order_batch_assign_responsible_person_api.yaml", "order_batch_assign_tests"),
+        get_test_data(_DATA_FILE, "order_batch_assign_tests"),
         ids=lambda case: case['case_id']
     )
     def test_batch_assign_responsible_persiont(self, api_client, db, case):

@@ -281,6 +281,7 @@ def validate(actual: Any, operator: str, expected: Any, path: str = "") -> None:
     elif operator == "all_eq":
         assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
         for item in actual:
+            print("item", item)
             assert item == expected, format_error(f"元素 {item} 不等于 {expected}")
 
     elif operator == "all_between":

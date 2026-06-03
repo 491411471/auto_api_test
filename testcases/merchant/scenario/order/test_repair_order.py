@@ -20,7 +20,7 @@ class TestRepairOrder:
     @allure.title("完整流程:查询可补订单 → 获取用途 → 提交补订单 → 验证记录(含自动重试)")
     def test_repair_order_flow(self, merchant_api_client, db, global_vars):
         yaml_path = os.path.join(os.path.dirname(__file__),
-                                 "../../../data/scenario/order/repair_order.yaml")
+                                 "../../../../data/merchant/scenario/order/repair_order.yaml")
         config = load_yaml(yaml_path)
         base_vars = global_vars.copy()
 
