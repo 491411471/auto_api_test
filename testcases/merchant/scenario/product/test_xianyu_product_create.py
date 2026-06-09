@@ -67,8 +67,8 @@ class TestXianYuProductCreate:
             self._offline_xianyu_product(xianyu_api_client, project_root, product_id)
 
         # ========== 第四阶段：删除商家端闲鱼商品（从YAML读取配置） ==========
-        # with allure.step("阶段四：删除闲鱼商品"):
-        #     self._del_xianyu_product(xianyu_api_client, project_root, p_id, p_type)
+        with allure.step("阶段四：删除闲鱼商品"):
+            self._del_xianyu_product(xianyu_api_client, project_root, p_id, p_type)
 
     # ---------------------- 原有方法（未修改） ----------------------
     def _create_xianyu_product(self, xianyu_api_client, db, project_root):
