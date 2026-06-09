@@ -50,7 +50,8 @@ class TestXianYuProductCreate:
 
     @allure.title("新建闲鱼商品-完整流程验证（含下架）")
     def test_create_xianyu_product_success(self, xianyu_api_client, db, admin_api_client):
-        project_root = Path(__file__).resolve().parent.parent.parent.parent
+        # 项目根目录：向上多一级到仓库根目录（以便找到顶层 data 目录）
+        project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
 
         # ========== 第一阶段：创建闲鱼商品 ==========
         with allure.step("阶段一：创建闲鱼商品"):

@@ -1,6 +1,7 @@
 # 全局变量（公共配置）
 variables:
   shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
 
 # 公共端点配置（复用锚点）
 .common_endpoint: &common_endpoint
@@ -38,6 +39,7 @@ merchant:
     WHERE status IN ('13', '06', '04')
       AND channel_provenance NOT IN (6, 8)
       AND shop_id = '${shop_id}'
+      AND order_id != '${excluded_order_id}'
       AND create_time >= DATE_SUB(NOW(), INTERVAL 30 DAY)
     ORDER BY create_time DESC
     LIMIT 1

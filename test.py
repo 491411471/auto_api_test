@@ -21,4 +21,7 @@ print(gen_chinese_street())  # 输出：海淀区中关村大街1号
 # 使用示例
 if __name__ == '__main__':
 
-    print(gen_chinese_street())
+    import math
+
+    r=math.ceil(74 / 10)
+    print(r)

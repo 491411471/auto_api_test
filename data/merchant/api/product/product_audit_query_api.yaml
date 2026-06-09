@@ -88,7 +88,7 @@ product_audit_tests:
             AND audit_state IN (1,2)
             AND shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
             AND shop_status = 1
-            AND jd_audit_status = 0
+            AND jd_item_id is null
             AND product_of_dou_yin IS NULL
             AND mt_item_id IS NULL
             AND xianyu_item_id IS NULL

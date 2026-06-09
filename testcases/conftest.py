@@ -57,7 +57,6 @@ def api_client():
 def merchant_api_client():
     """商家端 API 客户端（固定使用 merchant 终端配置）"""
     cfg = config_manager.get_api_client_config(endpoint='merchant')
-    print("商家端cfg:",cfg)
     client = APIClient(**cfg)
     logger.info("商家端 API 客户端初始化完成")
     yield client
@@ -68,7 +67,6 @@ def merchant_api_client():
 def admin_api_client():
     """运营端 API 客户端（固定使用 admin 终端配置）"""
     cfg = config_manager.get_api_client_config(endpoint='admin')
-    print("运营端cfg:", cfg)
     client = APIClient(**cfg)
     logger.info("运营端 API 客户端初始化完成")
     yield client

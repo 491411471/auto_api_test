@@ -434,6 +434,201 @@ def _get_sql_display(case: Dict[str, Any]) -> str:
         return str(sql_conf)
 
 
+# ==================== 从响应提取变量（支持多种配置形式） ====================
+def _extract_response_vars(response_data: Any, extract_vars: Any, variables: Dict[str, Any]) -> None:
+    """
+    从响应中提取变量并写入 variables 字典。
+
+    支持的 extract_vars 格式：
+      - None / []: 不做任何事
+      - 列表，元素为字符串或字典
+      - 字符串形式："var_name=path.to.field"（等号分隔）
+      - 字典形式：
+          {"var_name": "order_id", "path": "data.orderId", "default": ""}
+          或简洁形式 {"order_id": "data.orderId"}
+          或支持正则: {"var_name":"x","regex":"orderId\\\":\\\"(\\d+)\\\""}
+
+    path 支持简单的点分层访问及数字索引，如 "data.records[0].id"，以及以 "$" 开头的 JSONPath（如果安装了 jsonpath_ng 则优先使用）。
+    """
+    if not extract_vars:
+        return
+
+    if isinstance(extract_vars, dict):
+        extract_list = [extract_vars]
+    elif isinstance(extract_vars, list):
+        extract_list = extract_vars
+    else:
+        # 允许单个字符串
+        extract_list = [extract_vars]
+
+    with allure.step("从响应中提取变量"):
+        for item in extract_list:
+            try:
+                # 规范化 dict 项为 (var_name, path, extra)
+                var_name = None
+                path = None
+                default = None
+                regex = None
+
+                if isinstance(item, str):
+                    if '=' in item:
+                        var_name, path = item.split('=', 1)
+                        var_name = var_name.strip()
+                        path = path.strip()
+                    else:
+                        # 无法解析的字符串，跳过
+                        logger.debug(f"无法解析的 extract_vars 字符串: {item}")
+                        continue
+                elif isinstance(item, dict):
+                    if 'var_name' in item or 'name' in item:
+                        var_name = item.get('var_name') or item.get('name')
+                        path = item.get('path')
+                        default = item.get('default')
+                        regex = item.get('regex')
+                    elif len(item) == 1:
+                        # 简洁形式 {"order_id": "data.orderId"}
+                        var_name, path = next(iter(item.items()))
+                    else:
+                        # 兼容可能的形式
+                        var_name = item.get('var') or item.get('key')
+                        path = item.get('path')
+                        default = item.get('default')
+                        regex = item.get('regex')
+                else:
+                    logger.debug(f"未知的 extract_vars 项类型: {type(item)}")
+                    continue
+
+                if not var_name:
+                    logger.debug(f"跳过无效的 extract_vars 项: {item}")
+                    continue
+
+                value = None
+
+                # 正则优先（对整个响应文本匹配）
+                if regex:
+                    text = response_data if isinstance(response_data, str) else json.dumps(response_data, ensure_ascii=False)
+                    m = re.search(regex, text)
+                    if m:
+                        value = m.group(1) if m.groups() else m.group(0)
+
+                # JSONPath（若可用）或点路径解析
+                if value is None and path:
+                    # 尝试 JSONPath（当安装 jsonpath_ng 且可能为 jsonpath 表达式时）
+                    used_jsonpath = False
+                    if JSONPATH_AVAILABLE:
+                        jp = path
+                        if not jp.startswith('$'):
+                            jp = '$.' + jp
+                        try:
+                            expr = jsonpath_parse(jp)
+                            matches = expr.find(response_data)
+                            if matches:
+                                # 如果只有一个匹配则取单值，否则取列表
+                                value = matches[0].value if len(matches) == 1 else [m.value for m in matches]
+                                used_jsonpath = True
+                        except Exception:
+                            used_jsonpath = False
+
+                    # 回退为简单点分路径解析
+                    if not used_jsonpath and value is None:
+                        # 清理开头的 $.
+                        clean = path
+                        if clean.startswith('$.'):
+                            clean = clean[2:]
+                        elif clean.startswith('$'):
+                            clean = clean[1:]
+
+                        current = response_data
+                        # 支持点分和索引，如 records[0]
+                        parts = [p for p in re.split(r'\.(?![^\[]*\])', clean) if p]
+                        for part in parts:
+                            if current is None:
+                                break
+                            m = re.match(r'^(?P<key>[^\[]+)?(?:\[(?P<idx>\d+|\*)\])?$', part)
+                            if not m:
+                                # 非标准片段，尝试作为字典键直接取
+                                if isinstance(current, dict):
+                                    current = current.get(part)
+                                else:
+                                    current = None
+                                continue
+
+                            key = m.group('key')
+                            idx = m.group('idx')
+
+                            if key:
+                                if isinstance(current, dict):
+                                    current = current.get(key)
+                                else:
+                                    current = None
+                                    break
+
+                            if idx is not None:
+                                if idx == '*':
+                                    # 通配符，展开所有元素并继续对剩余路径取值
+                                    if not isinstance(current, list):
+                                        current = None
+                                        break
+                                    rest = parts[parts.index(part) + 1:]
+                                    results = []
+                                    for el in current:
+                                        sub_path = '.'.join(rest)
+                                        if sub_path:
+                                            # 递归取剩余路径（简单实现：仅支持单层）
+                                            tmp = el
+                                            for sub in rest:
+                                                if tmp is None:
+                                                    break
+                                                sm = re.match(r'^(?P<k>[^\[]+)?(?:\[(?P<i>\d+|\*)\])?$', sub)
+                                                if not sm:
+                                                    tmp = tmp.get(sub) if isinstance(tmp, dict) else None
+                                                    continue
+                                                kk = sm.group('k')
+                                                ii = sm.group('i')
+                                                if kk and isinstance(tmp, dict):
+                                                    tmp = tmp.get(kk)
+                                                if ii is not None and isinstance(tmp, list):
+                                                    if ii == '*':
+                                                        # 扁平化
+                                                        for t in tmp:
+                                                            results.append(t)
+                                                    else:
+                                                        ii_int = int(ii)
+                                                        if 0 <= ii_int < len(tmp):
+                                                            results.append(tmp[ii_int])
+                                            if tmp is not None and not isinstance(tmp, list):
+                                                results.append(tmp)
+                                    value = results if results else None
+                                    break
+                                else:
+                                    # 索引取值
+                                    if isinstance(current, list):
+                                        idx_int = int(idx)
+                                        if 0 <= idx_int < len(current):
+                                            current = current[idx_int]
+                                        else:
+                                            current = None
+                                    else:
+                                        current = None
+                            # continue loop
+                        else:
+                            # loop exhausted normally
+                            value = current
+
+                # 最终值为空时使用默认值
+                if value is None and default is not None:
+                    value = default
+
+                # 写入 variables
+                variables[var_name] = value
+                allure.attach(str(value), name=f"提取变量: {var_name}", attachment_type=allure.attachment_type.TEXT)
+                logger.info(f"提取变量 {var_name} = {value}")
+
+            except Exception as e:
+                logger.error(f"提取变量失败: {item}, 错误: {e}")
+                allure.attach(str(e), name="提取变量错误", attachment_type=allure.attachment_type.TEXT)
+
+
 # ==================== 主执行函数 ====================
 def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str, Any], retry_config: Dict[str, Any] = None) -> None:
     """完整执行测试用例，所有关键步骤写入 Allure 报告"""
@@ -582,8 +777,13 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
             # 执行断言验证
             assert_status_code(resp.status_code, case['expected_status'])
             validate_response(case, response_data, variables)
-            # 执行后置操作（如 SQL 数据校验）
+
+            # 从响应中提取变量（用于步骤间数据传递，必须在后置 SQL 之前执行）
+            _extract_response_vars(response_data, case.get('extract_vars'), variables)
+
+            # 执行后置操作（如 SQL 数据校验，可使用 extract_vars 提取的变量）
             process_post_operations(case, db, variables)
+
             break  # 断言通过则跳出循环
 
     logger.info(f"测试通过: {case['case_id']} - {case['title']}")

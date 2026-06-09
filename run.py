@@ -132,7 +132,7 @@ def run_tests(env='test', endpoint=None, api_only=False, scenario_only=False, ma
     color_print(f" 执行命令: pytest {' '.join(pytest_args)}", 'yellow')
     start_time = time.time()
     exit_code = pytest.main(pytest_args)
-    elapsed = time.time() - start_time
+    elapsed = (time.time() - start_time) / 60
 
     # 生成 Allure HTML 报告
     print("\n 正在生成 Allure HTML 报告...")
@@ -157,7 +157,7 @@ def run_tests(env='test', endpoint=None, api_only=False, scenario_only=False, ma
             stats['passed'] = summary.get('passed', 0)
             stats['failed'] = summary.get('failed', 0)
             stats['skipped'] = summary.get('skipped', 0)
-            stats['elapsed'] = round(elapsed/60, 1)  # 保留一位小数
+            stats['elapsed'] = round(elapsed, 1)  # 保留一位小数
             # error 在 json-report 中通常对应 'error' 字段，表示用例执行过程中发生未捕获异常的数量
             stats['error'] = summary.get('error', 0)
             # 可选：记录 skipped, xfailed, xpassed 等扩展信息（暂不使用）
@@ -181,7 +181,7 @@ def run_tests(env='test', endpoint=None, api_only=False, scenario_only=False, ma
 
     # 显示测试结果摘要
     print("\n" + "=" * 50)
-    color_print(f"  执行耗时: {elapsed:.2f}/60 （分钟)", 'cyan')
+    color_print(f"  执行耗时: {elapsed:.2f} （分钟)", 'cyan')
     if stats['total'] > 0:
         color_print(f" 总用例数: {stats['total']}", 'blue')
         color_print(f" 通过: {stats['passed']}", 'green')

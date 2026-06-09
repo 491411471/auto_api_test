@@ -116,9 +116,33 @@ class ConfigManager:
         }
 
     def get_xianyu_api_client_config(self, env_name: str = None) -> Dict[str, Any]:
-        """返回构建闲鱼 APIClient 所需的参数字典"""
+        """返回构建闲鱼 APIClient 所需的参数字典（支持动态登录获取 token，回退到硬编码 xianyu_token）"""
         merchant_cfg = self.get_api_client_config(env_name, endpoint='merchant')
-        xianyu_token = merchant_cfg.get('auth_config', {}).get('xianyu_token')
+        env_data = self.get_env_config(env_name)
+
+        xianyu_token = None
+
+        # 1. 优先通过动态登录获取闲鱼 token（auto_login=true 且配置了 xianyu_login）
+        if env_data.get("auto_login", False):
+            endpoint_data = self.get_endpoint_config(env_name, endpoint='merchant')
+            xianyu_login = endpoint_data.get('xianyu_login')
+            if xianyu_login:
+                base_url = env_data.get('base_url')
+                try:
+                    xianyu_token = TokenProvider.get_token_with_key(
+                        base_url, 'SHOP', xianyu_login, cache_key='XIANYU'
+                    )
+                    logger.info(f"闲鱼 token 动态获取成功: {xianyu_token[:10]}...")
+                except Exception as e:
+                    logger.warning(f"闲鱼 token 动态获取失败，回退到硬编码: {e}")
+
+        # 2. 回退：使用配置文件中的硬编码 xianyu_token
+        if not xianyu_token:
+            xianyu_token = merchant_cfg.get('auth_config', {}).get('xianyu_token')
+            if not xianyu_token:
+                raise RuntimeError("settings.yaml 中缺少 xianyu_token 配置且动态登录失败")
+            logger.info(f"闲鱼 token 使用配置文件中的硬编码值: {xianyu_token[:10]}...")
+
         return {
             "base_url": merchant_cfg['base_url'],
             "auth_type": 'api_token',

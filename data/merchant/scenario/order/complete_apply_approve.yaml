@@ -2,6 +2,9 @@
 flow_name: "订单完结申请-审核通过"
 description: "商家提交完结申请 → 运营审核通过"
 
+variables:
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
+
 merchant:
   # 查询可完结订单的 SQL（需要替换 ${shop_id}）
   retry_config:
@@ -15,6 +18,7 @@ merchant:
             AND o.channel_id IN ('004', '007', '008', '009', '011', '085')
             AND o.channel_provenance NOT IN (6, 8)
             AND o.status = '06'
+            AND o.order_id != '${excluded_order_id}'
             AND NOT EXISTS (SELECT 1
               FROM llxz_order.ct_shop_order_complete_apply_log l
               WHERE l.order_id = o.order_id

@@ -2,6 +2,7 @@
 # 全局变量（公共配置）
 variables:
   shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
 
 cash_pledge_tests:
   # ---------- 正向用例 ----------
@@ -17,6 +18,7 @@ cash_pledge_tests:
         INNER JOIN llxz_order.ct_shop_cash_pledge_usage c 
           ON o.order_id = c.order_id 
         WHERE o.shop_id = "${shop_id}"
+          AND o.order_id != '${excluded_order_id}'
         LIMIT 1
       column: order_id
       multiple: false
@@ -92,6 +94,7 @@ cash_pledge_tests:
         INNER JOIN llxz_order.ct_shop_cash_pledge c 
           ON o.order_id = c.order_id 
         WHERE o.shop_id = "${shop_id}"
+          AND o.order_id != '${excluded_order_id}'
         LIMIT 1
       column: order_id
     params:

@@ -59,7 +59,8 @@ class TestRepairOrder:
                 # 1. 查询可补订单（排除已尝试的订单）
                 with allure.step(f"步骤1: 查询可补订单"):
                     sql_template = self.config['merchant']['query_order_sql']
-                    sql = sql_template.replace('${shop_id}', shop_id)
+                    yaml_vars = self._load_global_vars()
+                    sql = sql_template.replace('${shop_id}', shop_id).replace('${excluded_order_id}', yaml_vars.get('excluded_order_id', ''))
 
                     # 如果有已尝试的订单，排除它们
                     if tried_order_ids:

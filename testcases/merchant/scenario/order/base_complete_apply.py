@@ -13,7 +13,9 @@ class BaseCompleteApplyFlow:
         返回 (order_id, voucher_url)
         """
         with allure.step("1. 从数据库查询可完结的订单号"):
-            sql = config['merchant']['query_order_sql'].replace('${shop_id}', variables['shop_id'])
+            sql = (config['merchant']['query_order_sql']
+                   .replace('${shop_id}', variables['shop_id'])
+                   .replace('${excluded_order_id}', variables.get('excluded_order_id', '')))
             result = db.fetch_one(sql)
             if result is None:
                 logger.warning("未查询到可完结的订单，返回空结果")

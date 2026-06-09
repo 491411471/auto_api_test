@@ -1,5 +1,6 @@
 variables:
   shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
 
   # 公用 SQL：获取一个符合条件的订单的 order_id 和 status（订单状态）
   common_sql: |
@@ -7,6 +8,7 @@ variables:
     FROM llxz_order.ct_user_orders
     WHERE shop_id = '${shop_id}'
       AND channel_provenance NOT IN (6, 7, 8)
+      AND order_id != '${excluded_order_id}'
     ORDER BY create_time DESC
     LIMIT 1
 

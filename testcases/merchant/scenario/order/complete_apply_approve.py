@@ -21,6 +21,10 @@ class TestCompleteApplyApprove:
         config = load_yaml(yaml_path)
         base_vars = global_vars.copy()
 
+        # 合并 YAML 顶层 variables（包含 excluded_order_id 等）
+        yaml_vars = config.get('variables', {})
+        base_vars.update(yaml_vars)
+
         # 从 YAML 读取重试配置，若无则使用默认值
         retry_cfg = config.get('retry_config', {})
         max_retries = retry_cfg.get('max_attempts', 3)

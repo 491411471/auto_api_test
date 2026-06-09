@@ -14,8 +14,8 @@ def load_yaml(yaml_path):
 
 
 @allure.epic("商家端")
-@allure.feature("补押金")
-@allure.story("完整补押金流程")
+@allure.feature("补订单")
+@allure.story("完整补订单流程")
 class TestRepairOrder:
 
     @allure.title("完整流程:查询可补订单 → 获取用途 → 提交补订单 → 验证记录(含自动重试)")

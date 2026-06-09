@@ -1,9 +1,8 @@
 import json
 
 import allure
-from pathlib import Path
-import yaml
 
+from utils.data_loader import get_test_data
 from utils.product_utils import (
     gen_product_name,
     generate_uuid,
@@ -12,32 +11,17 @@ from utils.product_utils import (
     replace_placeholders
 )
 
-
-def load_request_template(yaml_path: str) -> dict:
-    """
-    加载请求模板 YAML 文件
-    
-    Args:
-        yaml_path: YAML 文件路径
-        
-    Returns:
-        dict: 模板数据
-    """
-    with open(yaml_path, 'r', encoding='utf-8') as f:
-        data = yaml.safe_load(f)
-    return data['product_create_tests']
+# YAML 数据文件路径（由 get_test_data 智能解析，无需手动拼绝对路径）
+_CREATE_YAML = "data/merchant/scenario/product/product_create_and_audit_api.yaml"
+_AUDIT_YAML  = "data/merchant/scenario/product/product_audit_api.yaml"
 
 # ==================== 测试类 ====================
-@allure.epic("商家端")
 @allure.feature("商家端-商品管理")
 @allure.story("新增商品 → 运营端审核通过 → 验证审核状态")
 class TestProductCreateAndAudit:
 
     @allure.title("完整流程：新增短租商品 → 调用审核接口通过 → 验证商品审核状态为2")
     def test_create_product_and_audit_pass(self, api_client, db, admin_api_client):
-        # 获取项目根目录
-        project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
-
         # ---------- 步骤1：生成动态变量 ----------
         with allure.step("生成动态测试数据"):
             # 生成商品名称
@@ -74,16 +58,12 @@ class TestProductCreateAndAudit:
 
         # ---------- 步骤2：加载商品创建模板并替换 ----------
         with allure.step("加载商品创建请求模板"):
-            # 构建 YAML 文件路径
-            yaml_path = project_root / "data" / "merchant" / "scenario" / "product" / "product_create_and_audit_api.yaml"
-            
-            # 验证文件是否存在
-            if not yaml_path.exists():
-                raise FileNotFoundError(f"YAML 配置文件不存在: {yaml_path}")
-            
-            # 加载模板
-            template = load_request_template(str(yaml_path))
-            allure.attach(json.dumps(template, indent=2), "原始模板", attachment_type=allure.attachment_type.JSON)
+            # 通过 get_test_data 智能查找 YAML，无需手动拼路径
+            template = get_test_data(_CREATE_YAML, "product_create_tests")
+            if not template:
+                raise RuntimeError(f"无法加载 YAML 数据: {_CREATE_YAML} -> product_create_tests")
+            allure.attach(json.dumps(template, indent=2, ensure_ascii=False, default=str),
+                          "原始模板", attachment_type=allure.attachment_type.JSON)
 
         with allure.step("替换请求体中的占位符"):
             create_payload = replace_placeholders(template, variables)
@@ -169,18 +149,11 @@ class TestProductCreateAndAudit:
 
         # ---------- 步骤5：调用审核通过接口 ----------
         with allure.step("加载审核接口请求模板"):
-            # 构建审核 YAML 文件路径
-            audit_yaml_path = project_root / "data" / "merchant" / "scenario" / "product" / "product_audit_api.yaml"
-            
-            # 验证文件是否存在
-            if not audit_yaml_path.exists():
-                raise FileNotFoundError(f"审核 YAML 配置文件不存在: {audit_yaml_path}")
-            
-            # 加载审核配置
-            with open(audit_yaml_path, 'r', encoding='utf-8') as f:
-                audit_data = yaml.safe_load(f)
-            
-            audit_case = audit_data['product_audit_tests'][0]  # 取第一个用例
+            # 通过 get_test_data 智能查找 YAML，无需手动拼路径
+            audit_tests = get_test_data(_AUDIT_YAML, "product_audit_tests")
+            if not audit_tests:
+                raise RuntimeError(f"无法加载 YAML 数据: {_AUDIT_YAML} -> product_audit_tests")
+            audit_case = audit_tests[0]  # 取第一个用例
             audit_body = audit_case['body']
             
             # 构造替换变量

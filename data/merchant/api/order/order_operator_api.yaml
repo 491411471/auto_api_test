@@ -2,6 +2,7 @@
 # 全局变量（公共配置）
 variables:
   shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
 
 order_operator_tests:
   - case_id: BH_001
@@ -13,7 +14,7 @@ order_operator_tests:
     params:
       orderId: "${order_id}"
     sql:
-      query: "SELECT order_id FROM llxz_order.ct_user_orders  WHERE shop_id='${shop_id}' AND channel_provenance != 6 and channel_provenance != 8 and status='06' order by create_time DESC limit 1;"
+      query: "SELECT order_id FROM llxz_order.ct_user_orders WHERE shop_id='${shop_id}' AND channel_provenance != 6 AND channel_provenance != 8 AND status='06' AND order_id != '${excluded_order_id}' ORDER BY create_time DESC LIMIT 1;"
       column: order_id
     expected_status: 200
     validate_data:
@@ -60,7 +61,8 @@ order_operator_tests:
       query: |
         SELECT order_id 
         FROM llxz_order.ct_user_orders
-        WHERE shop_id = "${shop_id}"       # shop_id 由 config_manager 自动提供
+        WHERE shop_id = "${shop_id}"
+          AND order_id != '${excluded_order_id}'
         LIMIT 1
       column: order_id                    # 查询结果存入变量 order_id
       multiple: false                    # 单行结果
