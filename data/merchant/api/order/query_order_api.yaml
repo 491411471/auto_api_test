@@ -93,12 +93,12 @@ order_query_tests:
     json:
       <<: *common_json
       guanGaoId: ""
-      telephone: 15705659822
+      addressUserPhone: 15705659822
     expected_status: 200
     validate_data:
       - path: "data.records[*].orderAddressDto.realname"
         operator: "any_contain"
-        value: "陶大帅"
+        value: "陶玥"
 
   - case_id: OQ_006
     title: "按商品名称模糊查询"

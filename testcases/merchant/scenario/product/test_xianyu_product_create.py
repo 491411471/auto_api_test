@@ -23,12 +23,19 @@ def load_audit_template(yaml_path: str) -> dict:
     return data['xianyu_product_audit_test'][0]
 
 
-# ========== 新增：加载下架模板函数 ==========
+# ========== 加载下架模板函数 ==========
 def load_offline_template(yaml_path: str) -> dict:
     """加载下架请求模板 YAML 文件"""
     with open(yaml_path, 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f)
     return data['xianyu_product_offline_test'][0]   # 返回第一个用例
+
+# ========== 加载审核下架商品模板 ==========
+def load_review_offline_template(yaml_path: str) -> dict:
+    """加载审核闲鱼下架商品请求模板 YAML 文件"""
+    with open(yaml_path, 'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f)
+    return data['review_xianyu_product_offline_test'][0]
 
 # ========== 新增：加载删除闲鱼商品 ==========
 def load_del_template(yaml_path: str) -> dict:
@@ -48,7 +55,7 @@ def attach_error_detail(error_msg: str, context: str):
 @allure.story("新建闲鱼商品")
 class TestXianYuProductCreate:
 
-    @allure.title("新建闲鱼商品-完整流程验证（含下架）")
+    @allure.title("新建闲鱼商品-审核通过-下架商品-审核下架-删除商品流程")
     def test_create_xianyu_product_success(self, xianyu_api_client, db, admin_api_client):
         # 项目根目录：向上多一级到仓库根目录（以便找到顶层 data 目录）
         project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -66,8 +73,12 @@ class TestXianYuProductCreate:
             # self._offline_xianyu_product(xianyu_api_client, project_root, product_id_db)
             self._offline_xianyu_product(xianyu_api_client, project_root, product_id)
 
-        # ========== 第四阶段：删除商家端闲鱼商品（从YAML读取配置） ==========
-        with allure.step("阶段四：删除闲鱼商品"):
+        # ========== 第四阶段：商家端审核下架商品（从YAML读取配置） ==========
+        with allure.step("阶段四：审核闲鱼下架商品"):
+            self._review_offline_xianyu_product(admin_api_client, project_root, p_id)
+
+        # ========== 第五阶段：删除商家端闲鱼商品（从YAML读取配置） ==========
+        with allure.step("阶段五：删除闲鱼商品"):
             self._del_xianyu_product(xianyu_api_client, project_root, p_id, p_type)
 
     # ---------------------- 原有方法（未修改） ----------------------
@@ -85,7 +96,7 @@ class TestXianYuProductCreate:
         return product_id, p_type, p_id
 
     def _prepare_test_data(self, xianyu_api_client):
-        product_name = gen_product_name()
+        product_name = "XianYu" + gen_product_name() + "_Test"
         uuid_1 = generate_uuid()
         image_url,image_id = upload_test_image(xianyu_api_client, "/data/common/images/xianyu.jpg")
 
@@ -256,6 +267,60 @@ class TestXianYuProductCreate:
             validate(actual_value, operator, expected_value, path)
 
         allure.attach("闲鱼商品下架成功：接口调用成功，响应符合 YAML 断言", "下架阶段结果", attachment_type=allure.attachment_type.TEXT)
+
+    # ========== 审核闲鱼下架商品方法 ==========
+    def _review_offline_xianyu_product(self, admin_api_client, project_root, p_id):
+        """审核闲鱼下架商品，配置从 YAML 读取，支持变量替换和动态断言"""
+        yaml_path = project_root / "data" / "merchant" / "scenario" / "product" / "xianyu_product_create.yaml"
+
+        # 1. 加载模板
+        review_case = load_review_offline_template(str(yaml_path))
+
+        # 2. 准备动态变量
+        variables = {
+            "product_id": p_id,
+        }
+
+        # 3. 替换占位符
+        import copy
+        case_copy = copy.deepcopy(review_case)
+        if 'json' in case_copy:
+            case_copy['json'] = replace_placeholders(case_copy['json'], variables)
+
+        # 4. 提取请求参数
+        endpoint = case_copy['endpoint']
+        json_data = case_copy.get('json', {})
+        expected_status = case_copy.get('expected_status', 200)
+        validate_data_list = case_copy.get('validate_data', [])
+
+        allure.attach(json.dumps(case_copy, indent=2, ensure_ascii=False), "审核下架商品请求配置（已替换变量）", attachment_type=allure.attachment_type.JSON)
+
+        # 5. 发送请求
+        response = admin_api_client.post(endpoint, json=json_data)
+        allure.attach(str(response.status_code), "HTTP 状态码", attachment_type=allure.attachment_type.TEXT)
+
+        # 6. 验证 HTTP 状态码
+        assert response.status_code == expected_status, (
+            f"HTTP 状态码不符合预期！期望: {expected_status}, 实际: {response.status_code}")
+
+        result = response.json()
+        allure.attach(json.dumps(result, indent=2, ensure_ascii=False), "审核下架商品-接口响应", attachment_type=allure.attachment_type.JSON)
+
+        # 7. 根据 validate_data 动态断言
+        for validate_data in validate_data_list:
+            path = validate_data['path']
+            operator = validate_data['operator']
+            expected_value = validate_data.get('value')
+
+            if path.startswith("$."):
+                key = path[2:]
+                actual_value = result.get(key)
+            else:
+                actual_value = result.get(path)
+
+            validate(actual_value, operator, expected_value, path)
+
+        allure.attach("闲鱼下架商品审核通过：接口调用成功，响应符合 YAML 断言", "审核下架阶段结果", attachment_type=allure.attachment_type.TEXT)
 
     # ========== 删除闲鱼商品方法 ==========
     def _del_xianyu_product(self, xianyu_api_client, project_root, p_id, p_type):

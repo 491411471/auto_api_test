@@ -118,6 +118,52 @@ xianyu_product_offline_test:
         operator: "=="
         value: true
 
+review_xianyu_product_test:
+  - case_id: "RPI_001"
+    title: "再次审核闲鱼下架商品"
+    description: "操作闲鱼下架商品进行审核，审核通过"
+    method: POST
+    endpoint: "/hzsx/xianyu/product/opeAuditProductPost"
+    json:
+      auditState: 2
+      reason: null
+      id: "${product_id}"
+      configIdList: [ ]
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+review_xianyu_product_offline_test:
+  - case_id: "RPI_002"
+    title: "审核闲鱼下架商品"
+    description: "操作闲鱼下架商品进行审核，审核通过"
+    method: POST
+    endpoint: "/hzsx/xianyu/product/opeAuditProductPost"
+    json:
+      auditState: 2
+      reason: null
+      id: "${product_id}"
+      configIdList: [ ]
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
 del_xianyu_product_test:
   - case_id: "DPI_001"
     title: "删除闲鱼商品"
@@ -125,9 +171,8 @@ del_xianyu_product_test:
     method: GET
     endpoint: "/hzsx/product/busUpdateProductByRecycleDel"
     params:
-      productId: "${product_id}"
+      id: "${product_id}"
       channelGroupId: 001
-      type: ${type}
     expected_status: 200
     validate_data:
       - path: "$.rpcResult"

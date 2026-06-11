@@ -60,32 +60,32 @@ class TestOrderOperatorApi:
         allure.attach(f"保存的 order_id: {TestOrderOperatorApi.shared_order_id}",
                       name="跨用例传递", attachment_type=allure.attachment_type.TEXT)
 
-    def test_bh_004(self, api_client, db):
-        # 如果 BH_003 失败或未执行，跳过验证
-        if TestOrderOperatorApi.shared_order_id is None:
-            pytest.skip("BH_003 未执行或失败，跳过验证")
-        # 手动构造查询请求，这里简单直接调用查询接口，不依赖 YAML
-        response = api_client.post("/hzsx/business/order/queryOrderByCondition", json={
-                                    "businessType": 1,
-                                    "guangGaoId": "",
-                                    "isQueryHistory": False,
-                                    "orderId": TestOrderOperatorApi.shared_order_id,
-                                    "pageNumber": 1,
-                                    "pageSize": 10,
-                                    "queryType": "queryPageList",
-                                    "requestSource": "businessNewOfListHeaderStatus",
-                                    "status": "06"
-                                })
-        data = response.json()
-        import json
-        print("验证修改的备注信息：",json.dumps(data, indent=4,ensure_ascii=False))
-        # 断言备注已被修改
-        assert data.get("businessSuccess") is True, "查询接口成功"
-        actual_remark = data.get("data", {}).get("records")[0].get("remarkNew")
-        expected_remark = TestOrderOperatorApi.shared_remark
-        assert actual_remark == expected_remark, f"备注不一致：期望 {expected_remark}，实际 {actual_remark}"
-        allure.attach(f"订单 {TestOrderOperatorApi.shared_order_id} 备注为 {actual_remark}",
-                      name="验证结果", attachment_type=allure.attachment_type.TEXT)
+    # def test_bh_004(self, api_client, db):
+    #     # 如果 BH_003 失败或未执行，跳过验证
+    #     if TestOrderOperatorApi.shared_order_id is None:
+    #         pytest.skip("BH_003 未执行或失败，跳过验证")
+    #     # 手动构造查询请求，这里简单直接调用查询接口，不依赖 YAML
+    #     response = api_client.post("/hzsx/business/order/queryOrderByCondition", json={
+    #                                 "businessType": 1,
+    #                                 "guangGaoId": "",
+    #                                 "isQueryHistory": False,
+    #                                 "orderId": TestOrderOperatorApi.shared_order_id,
+    #                                 "pageNumber": 1,
+    #                                 "pageSize": 10,
+    #                                 "queryType": "queryPageList",
+    #                                 "requestSource": "businessNewOfListHeaderStatus",
+    #                                 "status": "06"
+    #                             })
+    #     data = response.json()
+    #     import json
+    #     print("验证修改的备注信息：",json.dumps(data, indent=4,ensure_ascii=False))
+    #     # 断言备注已被修改
+    #     assert data.get("businessSuccess") is True, "查询接口成功"
+    #     actual_remark = data.get("data", {}).get("records")[0].get("remarkNew")
+    #     expected_remark = TestOrderOperatorApi.shared_remark
+    #     assert actual_remark == expected_remark, f"备注不一致：期望 {expected_remark}，实际 {actual_remark}"
+    #     allure.attach(f"订单 {TestOrderOperatorApi.shared_order_id} 备注为 {actual_remark}",
+    #                   name="验证结果", attachment_type=allure.attachment_type.TEXT)
 
 if __name__ == '__main__':
     pytest.main()

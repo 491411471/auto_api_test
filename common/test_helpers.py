@@ -11,13 +11,20 @@ from utils.assert_utils import assert_status_code
 from utils.variable_utils import validate,needs_replacement
 
 try:
-    from jsonpath_ng import parse as jsonpath_parse
+    # 优先使用 jsonpath_ng.ext.parse（支持过滤表达式 [?(@.field=="value")]）
+    # ext.parse 是 parse 的超集，完全向后兼容
+    from jsonpath_ng.ext import parse as jsonpath_parse
     from jsonpath_ng.exceptions import JsonPathParserError, JsonPathLexerError
     JSONPATH_AVAILABLE = True
 except ImportError:
-    JSONPATH_AVAILABLE = False
-    JsonPathParserError = Exception
-    JsonPathLexerError = Exception
+    try:
+        from jsonpath_ng import parse as jsonpath_parse
+        from jsonpath_ng.exceptions import JsonPathParserError, JsonPathLexerError
+        JSONPATH_AVAILABLE = True
+    except ImportError:
+        JSONPATH_AVAILABLE = False
+        JsonPathParserError = Exception
+        JsonPathLexerError = Exception
 
 
 # ==================== 通用变量替换函数 ====================
@@ -154,9 +161,24 @@ def process_dynamic_data(case: Dict[str, Any], db, variables: Dict[str, Any]) ->
             with allure.step(f"执行 SQL 并提取变量{step_suffix}"):
                 # 先替换该 SQL 中的占位符（使用当前 variables）
                 sql_config_replaced = replace_placeholders(sql_config, variables)
-                allure.attach(sql_config_replaced.get('query', ''), name=f"替换变量后的 SQL{step_suffix}", attachment_type=allure.attachment_type.TEXT)
+                replaced_query = sql_config_replaced.get('query', '')
+                allure.attach(replaced_query, name=f"替换变量后的 SQL{step_suffix}", attachment_type=allure.attachment_type.TEXT)
 
-                result = execute_sql(db, sql_config_replaced)
+                try:
+                    result = execute_sql(db, sql_config_replaced)
+                except Exception as e:
+                    # SQL 执行失败时记录完整诊断信息到 Allure，便于定位问题
+                    error_msg = str(e)
+                    diag_info = (
+                        f"SQL 执行失败!\n"
+                        f"错误类型: {type(e).__name__}\n"
+                        f"错误信息: {error_msg}\n"
+                        f"当前 variables 键: {list(variables.keys())}\n"
+                        f"SQL 前 500 字符:\n{replaced_query[:500]}"
+                    )
+                    logger.error(f"SQL 执行失败: {error_msg}")
+                    allure.attach(diag_info, name=f"SQL 执行失败诊断{step_suffix}", attachment_type=allure.attachment_type.TEXT)
+                    raise
 
                 if result is None:
                     continue
@@ -339,6 +361,23 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
     # ---- validate_data ----
     records_cache = None
     if case.get('validate_data'):
+        # 诊断：记录当前可用变量，便于排查占位符未替换问题
+        sql_var_keys = [k for k in variables.keys() if k not in ('base_url', 'channelGroupCode', 'shop_id')]
+        if sql_var_keys:
+            sql_vars_snapshot = {k: variables[k] for k in sql_var_keys}
+            allure.attach(
+                json.dumps(sql_vars_snapshot, ensure_ascii=False, indent=2),
+                name="断言前可用变量（SQL结果）",
+                attachment_type=allure.attachment_type.TEXT
+            )
+        # 检查是否有未替换的占位符
+        validate_data_str = json.dumps(case['validate_data'], ensure_ascii=False)
+        if '${' in validate_data_str:
+            import re as _re
+            unresolved = _re.findall(r'\$\{([^}]+)\}', validate_data_str)
+            msg = f"以下变量未替换，可能已导致断言失败:\n" + '\n'.join(f'  ${{{v}}}' for v in set(unresolved))
+            logger.warning(msg)
+            allure.attach(msg, name="未替换变量警告", attachment_type=allure.attachment_type.TEXT)
         for idx, v in enumerate(case['validate_data']):
             path = v['path']
             operator = v['operator']
@@ -432,6 +471,78 @@ def _get_sql_display(case: Dict[str, Any]) -> str:
         return sql_conf.get('query', '')
     else:
         return str(sql_conf)
+
+
+# ==================== Allure 报告结构化摘要辅助函数 ====================
+def _attach_sql_vars_summary(variables: Dict[str, Any]) -> None:
+    """将所有 SQL 提取的变量聚合为一个摘要附件，便于报告中一览数据库查询结果"""
+    # 排除框架级 / 配置级变量，仅展示 SQL 结果
+    _BUILTIN_KEYS = {'base_url', 'channelGroupCode', 'shop_id', 'token', 'access_token'}
+    sql_vars = {k: v for k, v in variables.items() if k not in _BUILTIN_KEYS and not k.startswith('_')}
+    if not sql_vars:
+        return
+    summary = json.dumps(sql_vars, ensure_ascii=False, indent=2, default=str)
+    allure.attach(summary, name="SQL 提取变量汇总", attachment_type=allure.attachment_type.JSON)
+    logger.info(f"SQL 提取变量汇总: {sql_vars}")
+
+
+def _attach_request_overview(method: str, endpoint: str, params: Any, body_data: Any) -> None:
+    """将请求的 method/endpoint/params/body 聚合为一个结构化概览附件"""
+    overview: Dict[str, Any] = {
+        "method": method,
+        "endpoint": endpoint,
+    }
+    if params:
+        overview["params"] = params
+    if body_data:
+        # 截取过长的 body，避免报告臃肿
+        body_str = json.dumps(body_data, ensure_ascii=False)
+        overview["body"] = body_data if len(body_str) <= 2000 else json.loads(body_str[:2000] + '"..."}')
+    allure.attach(
+        json.dumps(overview, ensure_ascii=False, indent=2, default=str),
+        name="请求概览",
+        attachment_type=allure.attachment_type.JSON
+    )
+
+
+def _attach_response_summary(response_data: Dict[str, Any]) -> None:
+    """提取响应中 data 层的关键字段作为摘要附件，便于快速定位业务结果"""
+    if not isinstance(response_data, dict):
+        return
+    summary: Dict[str, Any] = {
+        "rpcResult": response_data.get("rpcResult"),
+        "businessSuccess": response_data.get("businessSuccess"),
+        "errorCode": response_data.get("errorCode"),
+        "errorMessage": response_data.get("errorMessage"),
+    }
+    # 提取 data 层摘要
+    data = response_data.get("data")
+    if isinstance(data, dict):
+        data_summary: Dict[str, Any] = {}
+        # 分页字段
+        for pf in ("total", "size", "current", "pages"):
+            if pf in data:
+                data_summary[pf] = data[pf]
+        # records 摘要
+        records = data.get("records")
+        if isinstance(records, list):
+            data_summary["records_count"] = len(records)
+            if records:
+                # 展示首条记录的关键字段（最多 10 个字段）
+                first = records[0]
+                if isinstance(first, dict):
+                    data_summary["records[0]_preview"] = {
+                        k: v for i, (k, v) in enumerate(first.items()) if i < 10
+                    }
+        summary["data"] = data_summary
+    elif data is not None:
+        summary["data"] = str(data)[:500]
+
+    allure.attach(
+        json.dumps(summary, ensure_ascii=False, indent=2, default=str),
+        name="响应摘要",
+        attachment_type=allure.attachment_type.JSON
+    )
 
 
 # ==================== 从响应提取变量（支持多种配置形式） ====================
@@ -689,6 +800,10 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
         # 步骤3：处理 SQL 动态数据
         process_dynamic_data(case, db, variables)
 
+        # SQL 结果聚合摘要（便于在报告中一览所有数据库变量）
+        if 'sql' in case:
+            _attach_sql_vars_summary(variables)
+
         # 步骤4：第二次变量替换
         with allure.step("3. 第二次变量替换（使用包含数据库结果的完整 variables 替换所有剩余占位符）"):
             case = replace_placeholders(case, variables)
@@ -705,14 +820,17 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
         with allure.step(f"4. 发送 HTTP {case.get('method', 'POST').upper()} 请求并验证响应"):
             method = case.get('method', 'POST').upper()
             endpoint = case.get('endpoint', '')
-            allure.attach(f"{method} {endpoint}", name="请求 URL", attachment_type=allure.attachment_type.TEXT)
             # 初始化变量
             params = case.get('params', {})  # URL 查询参数
             body_data = case.get('json', {})  # 默认请求体数据
+
+            # —— 请求概览（聚合 method/endpoint/params/body 为结构化附件）——
+            _attach_request_overview(method, endpoint, params, body_data)
+
             # 判断是否为 form-urlencoded 格式
             body_type = case.get('body_type', 'json')  # 默认为 json
             if method == 'GET':
-                allure.attach(str(params), name="请求参数 (Query)", attachment_type=allure.attachment_type.TEXT)
+                allure.attach(json.dumps(params, ensure_ascii=False, indent=2), name="请求参数 (Query)", attachment_type=allure.attachment_type.JSON)
                 resp = api_client.get(endpoint, params=params)
             else:
                 if body_type == 'form-urlencoded':
@@ -738,6 +856,9 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
             response_str = json.dumps(response_data, ensure_ascii=False)[:5000]
             allure.attach(response_str, name="完整响应体", attachment_type=allure.attachment_type.JSON)
             logger.info(f"解析后的 JSON 摘要: {response_str[:200]}...")
+
+            # —— 响应摘要（提取 data 层关键字段）——
+            _attach_response_summary(response_data)
 
             # 检查响应是否为可重试的错误（仅在配置了 error_keywords 时）
             if error_keywords and response_data.get('businessSuccess') is False:
@@ -773,6 +894,36 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
                             attachment_type=allure.attachment_type.TEXT
                         )
                         # 继续执行断言（预期会失败）
+
+            # ==================== 业务错误容错验证 ====================
+            # 当 API 返回 businessSuccess=false（如"正在提交中"），但操作可能已成功处理时，
+            # 通过 post_sql 验证数据库状态来判断测试是否通过。
+            if (case.get('verify_on_business_error')
+                    and response_data.get('businessSuccess') is False):
+                error_msg = response_data.get('errorMessage', '') or ''
+                logger.warning(f"API 返回业务失败: {error_msg}，尝试通过 post_sql 容错验证")
+                allure.attach(
+                    f"API 错误: {error_msg}\n策略: 通过 post_sql 验证数据库状态",
+                    name="业务错误容错验证",
+                    attachment_type=allure.attachment_type.TEXT
+                )
+                try:
+                    process_post_operations(case, db, variables)
+                    # post_sql 通过 → 操作已成功，测试通过
+                    logger.info(f"业务错误容错验证通过（操作已成功）: {error_msg}")
+                    allure.attach(
+                        "post_sql 验证通过，确认操作已成功处理",
+                        name="容错验证结果",
+                        attachment_type=allure.attachment_type.TEXT
+                    )
+                    break
+                except AssertionError as e:
+                    allure.attach(
+                        f"容错验证失败: {e}",
+                        name="容错验证失败",
+                        attachment_type=allure.attachment_type.TEXT
+                    )
+                    raise  # 重新抛出，测试失败
 
             # 执行断言验证
             assert_status_code(resp.status_code, case['expected_status'])

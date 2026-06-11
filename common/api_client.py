@@ -21,7 +21,17 @@ class APIClient:
       - Allure 步骤记录
       - 详细日志
       - 请求间隔控制（防止连续点击错误）
+      - 可配置的响应错误重试模式（retry_patterns）
     """
+
+    # 默认的业务错误重试模式：匹配 errorMessage 中的关键词
+    # 扩展时只需在此列表中添加新的模式字符串即可
+    DEFAULT_RETRY_PATTERNS = [
+        '请不要连续点击',
+        '操作频繁',
+        '请勿重复点击',
+        '正在提交中',
+    ]
 
     def __init__(
         self, 
@@ -30,13 +40,15 @@ class APIClient:
         auth_config: Optional[Dict[str, Any]] = None, 
         timeout: int = 60, 
         max_retries: int = 3, 
-        request_interval: float = 1.0
+        request_interval: float = 1.0,
+        retry_patterns: Optional[list] = None
     ) -> None:
         logger.info("实际值和期望值输出....")
         self.base_url = base_url.rstrip('/')
         self.timeout = timeout
         self.max_retries = max_retries
         self.request_interval = request_interval  # 请求间隔时间（秒）
+        self.retry_patterns = retry_patterns or self.DEFAULT_RETRY_PATTERNS
         self.session = requests.Session()
         self._last_request_time = 0.0  # 上次请求时间戳
 
@@ -100,24 +112,25 @@ class APIClient:
                 self._log_response(resp)
                 resp.raise_for_status()
                 
-                # 检查响应是否包含"连续点击"错误
+                # 检查响应是否包含可重试的业务错误（如限流、重复点击等）
                 try:
                     response_json = resp.json()
-                    error_message = response_json.get('errorMessage', '')
-                    if '请不要连续点击' in str(error_message):
-                        logger.warning(f"检测到'连续点击'错误")
+                    error_message = str(response_json.get('errorMessage', '') or '')
+                    matched_pattern = next(
+                        (p for p in self.retry_patterns if p in error_message), None
+                    )
+                    if matched_pattern:
+                        logger.warning(f"检测到业务错误: '{error_message}' (匹配模式: '{matched_pattern}')")
                         if attempt < self.max_retries - 1:
-                            wait_time = 3 * (attempt + 1)  # 递增等待时间：3秒、6秒、9秒
+                            wait_time = 3 * (attempt + 1)  # 递增等待：3s, 6s, 9s
                             logger.warning(f"等待 {wait_time} 秒后重试 (尝试 {attempt+1}/{self.max_retries})")
                             time.sleep(wait_time)
-                            # 更新最后请求时间，确保下次请求有足够的间隔
                             self._last_request_time = time.time() - self.request_interval
-                            continue  # 继续重试
+                            continue
                         else:
-                            logger.error(f"重试{self.max_retries}次后仍然收到'连续点击'错误")
-                            # 返回响应，让测试断言失败
+                            logger.error(f"重试{self.max_retries}次后仍然收到业务错误: '{error_message}'")
                             return resp
-                except:
+                except (ValueError, AttributeError):
                     pass
                 
                 return resp
