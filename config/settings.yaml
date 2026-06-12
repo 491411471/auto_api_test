@@ -31,7 +31,7 @@ environments:
       xianyu_login:
         mobile: "13811680671"
         smsLoginVerifyCode: "1"
-        loginTimestamp: "34638162506202383"
+        loginTimestamp: "44638162506202789"
     
     # 运营端配置
     admin:

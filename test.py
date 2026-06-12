@@ -1,27 +1,16 @@
-from faker import Faker
+import requests
 
-fake = Faker('zh_CN')
-def generate_chinese_name(existing_set=None):
-    """生成较低重复率的名字"""
-    if existing_set is None:
-        return fake.name()
-    while True:
-        name = fake.name()
-        if name not in existing_set:
-            existing_set.add(name)
-            return name
+url = "https://oss.llxzu.com/bd4a46def46641a79e9b697ec95fb526.pdf"
 
+headers = {
+    "User-Agent": "Mozilla/5.0"
+}
 
+resp = requests.get(url, headers=headers, timeout=30)
 
-def gen_chinese_street():
-    """随机生成中文街道地址"""
-    return fake.street_address()
-# 使用示例
-print(gen_chinese_street())  # 输出：海淀区中关村大街1号
-# 使用示例
-if __name__ == '__main__':
-
-    import math
-
-    r=math.ceil(74 / 10)
-    print(r)
+if resp.status_code == 200:
+    with open("test.pdf", "wb") as f:
+        f.write(resp.content)
+    print("✅ PDF 下载成功")
+else:
+    print("❌ 请求失败，状态码：", resp.status_code)

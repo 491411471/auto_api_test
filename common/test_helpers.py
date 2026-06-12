@@ -12,7 +12,7 @@ from utils.variable_utils import validate,needs_replacement
 
 try:
     # 优先使用 jsonpath_ng.ext.parse（支持过滤表达式 [?(@.field=="value")]）
-    # ext.parse 是 parse 的超集，完全向后兼容
+    # ext.parse 是 parse 的超集
     from jsonpath_ng.ext import parse as jsonpath_parse
     from jsonpath_ng.exceptions import JsonPathParserError, JsonPathLexerError
     JSONPATH_AVAILABLE = True
@@ -366,12 +366,12 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
         if sql_var_keys:
             sql_vars_snapshot = {k: variables[k] for k in sql_var_keys}
             allure.attach(
-                json.dumps(sql_vars_snapshot, ensure_ascii=False, indent=2),
+                json.dumps(sql_vars_snapshot, ensure_ascii=False, indent=2, default=str),
                 name="断言前可用变量（SQL结果）",
                 attachment_type=allure.attachment_type.TEXT
             )
         # 检查是否有未替换的占位符
-        validate_data_str = json.dumps(case['validate_data'], ensure_ascii=False)
+        validate_data_str = json.dumps(case['validate_data'], ensure_ascii=False, default=str)
         if '${' in validate_data_str:
             import re as _re
             unresolved = _re.findall(r'\$\{([^}]+)\}', validate_data_str)
@@ -495,9 +495,13 @@ def _attach_request_overview(method: str, endpoint: str, params: Any, body_data:
     if params:
         overview["params"] = params
     if body_data:
-        # 截取过长的 body，避免报告臃肿
-        body_str = json.dumps(body_data, ensure_ascii=False)
-        overview["body"] = body_data if len(body_str) <= 2000 else json.loads(body_str[:2000] + '"..."}')
+        # 截取过长的 body，避免报告臃肿；截断时存为纯文本而非非法 JSON
+        body_str = json.dumps(body_data, ensure_ascii=False, default=str)
+        if len(body_str) <= 3000:
+            overview["body"] = body_data
+        else:
+            overview["body"] = body_str[:3000] + "...(truncated)"
+            overview["body_length"] = len(body_str)
     allure.attach(
         json.dumps(overview, ensure_ascii=False, indent=2, default=str),
         name="请求概览",
@@ -765,13 +769,26 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
     # 步骤2：第一次变量替换
     with allure.step("2. 第一次变量替换（使用已有变量替换请求参数、SQL 中的已知占位符）"):
         case = replace_placeholders(case, variables)
-        logger.info(f"第一次替换后的请求参数: {case.get('params', {})}")
+
+        # 构造第一次替换后的结构化摘要（params / json / sql）
+        _first_summary: Dict[str, Any] = {}
+        _method_first = case.get('method', 'POST').upper()
+        _params_first = case.get('params', {})
+        _json_first = case.get('json', {})
+        if _params_first:
+            _first_summary["params"] = _params_first
+        if _json_first and _method_first != 'GET':
+            _first_summary["json (请求体)"] = _json_first
         sql_display = _get_sql_display(case)
+        if sql_display:
+            _first_summary["sql"] = sql_display
+
+        logger.info(f"第一次替换后的请求参数: {_first_summary}")
         logger.info(f"第一次替换后的 SQL: {sql_display}")
         allure.attach(
-            f"请求参数: {case.get('params', {})}\nSQL: {sql_display}",
+            json.dumps(_first_summary, ensure_ascii=False, indent=2, default=str) if _first_summary else "无参数/SQL",
             name="第一次替换后数据",
-            attachment_type=allure.attachment_type.TEXT
+            attachment_type=allure.attachment_type.JSON
         )
 
     # 保存步骤2之后的 case 和 variables 状态，用于重试时恢复
@@ -807,13 +824,30 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
         # 步骤4：第二次变量替换
         with allure.step("3. 第二次变量替换（使用包含数据库结果的完整 variables 替换所有剩余占位符）"):
             case = replace_placeholders(case, variables)
-            logger.info(f"最终替换后的请求参数: {case.get('params', {})}")
+
+            # 构造最终替换后的结构化摘要（params / json / sql）
+            _final_summary: Dict[str, Any] = {}
+            _method_upper = case.get('method', 'POST').upper()
+            _params_final = case.get('params', {})
+            _json_final = case.get('json', {})
+            if _params_final:
+                _final_summary["params"] = _params_final
+            if _json_final and _method_upper != 'GET':
+                _json_str = json.dumps(_json_final, ensure_ascii=False, default=str)
+                if len(_json_str) <= 5000:
+                    _final_summary["json (请求体)"] = _json_final
+                else:
+                    _final_summary["json (请求体)"] = _json_str[:5000] + "...(truncated)"
             sql_display_final = _get_sql_display(case)
+            if sql_display_final:
+                _final_summary["sql"] = sql_display_final
+
+            logger.info(f"最终替换后的请求参数: {_final_summary}")
             logger.info(f"最终替换后的 SQL: {sql_display_final}")
             allure.attach(
-                f"请求参数: {case.get('params', {})}\nSQL: {sql_display_final}",
+                json.dumps(_final_summary, ensure_ascii=False, indent=2, default=str) if _final_summary else "无参数/SQL",
                 name="最终替换后数据",
-                attachment_type=allure.attachment_type.TEXT
+                attachment_type=allure.attachment_type.JSON
             )
 
         # 步骤5：发送请求并验证响应
@@ -830,7 +864,7 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
             # 判断是否为 form-urlencoded 格式
             body_type = case.get('body_type', 'json')  # 默认为 json
             if method == 'GET':
-                allure.attach(json.dumps(params, ensure_ascii=False, indent=2), name="请求参数 (Query)", attachment_type=allure.attachment_type.JSON)
+                allure.attach(json.dumps(params, ensure_ascii=False, indent=2, default=str), name="请求参数 (Query)", attachment_type=allure.attachment_type.JSON)
                 resp = api_client.get(endpoint, params=params)
             else:
                 if body_type == 'form-urlencoded':
@@ -843,7 +877,7 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
                     )
                     resp = api_client.post(endpoint, data=encoded_data, params=params)
                 else:
-                    allure.attach(json.dumps(body_data, ensure_ascii=False, indent=2), name="请求体 (JSON)", attachment_type=allure.attachment_type.JSON)
+                    allure.attach(json.dumps(body_data, ensure_ascii=False, indent=2, default=str), name="请求体 (JSON)", attachment_type=allure.attachment_type.JSON)
                     if body_data:
                         resp = api_client.post(endpoint, json=body_data, params=params)
                     else:
