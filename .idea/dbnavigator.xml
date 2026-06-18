@@ -14,9 +14,6 @@
       <assistant-state connection-id="virtual-mysql-connection" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
       </assistant-state>
-      <assistant-state connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
-        <tools />
-      </assistant-state>
       <assistant-state connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="3F500E461F5449FE932CE799D4326103" availability="AVAILABLE" acknowledgement="ENGAGED" selected="true">
         <chats>
           <chat id="3F500E461F5449FE932CE799D4326103" title="" session-signature="" timestamp="1778839448561">
@@ -24,6 +21,9 @@
             <context provider="" profile="" model="" action="" interactive="true" />
           </chat>
         </chats>
+        <tools />
+      </assistant-state>
+      <assistant-state connection-id="26c19248-0e92-47ef-873e-30eec3c1dca2" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
       </assistant-state>
     </assistants>
@@ -1215,7 +1215,7 @@ LIMIT 1;]]></console>
       <regional-settings>
         <date-format value="MEDIUM" />
         <number-format value="UNGROUPED" />
-        <locale value="SYSTEM_DEFAULT" />
+        <locale value="zh_CN" />
         <use-custom-formats value="false" />
       </regional-settings>
       <environment>

@@ -24,14 +24,14 @@ environments:
       auth_config:
         key: "token"
         value: "hqpl38f44oqyqwl2ubkjx6rc1vsu1u9o"  # auto_login=false 时使用的兑底 token
-        xianyu_token: "txhos4hpuu7aqvzjm7x3cjijk74fe4di"
+        xianyu_token: "jae7vut0wkt552iw19b0tg2dm8ygx76k"
       timeout: 120
       max_retries: 3
       request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制
       xianyu_login:
         mobile: "13811680671"
         smsLoginVerifyCode: "1"
-        loginTimestamp: "34638162506202383"
+        loginTimestamp: "44638162506202789"
     
     # 运营端配置
     admin:

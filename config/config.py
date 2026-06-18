@@ -38,6 +38,15 @@ if not DB_CONFIG["password"]:
         "3. 重新运行测试"
     )
 
+# ---------- 数仓数据库配置 ----------
+DW_DB_CONFIG = {
+    "host": os.getenv("DW_HOST", "127.0.0.1"),
+    "port": int(os.getenv("DW_PORT", os.getenv("DW_POR", "9030"))),
+    "user": os.getenv("DW_USER", ""),
+    "password": os.getenv("DW_PASSWORD", ""),
+    "charset": os.getenv("DW_CHARSET", "utf8mb4"),
+}
+
 # ---------- 企业微信机器人配置 ----------
 WECHAT_WEBHOOK = os.getenv("WECHAT_WEBHOOK")
 WECHAT_USERID = os.getenv("WECHAT_USERIDS", "").split(",") if os.getenv("WECHAT_USERIDS") else []

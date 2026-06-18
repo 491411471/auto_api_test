@@ -22,6 +22,7 @@ class APIClient:
       - 详细日志
       - 请求间隔控制（防止连续点击错误）
       - 可配置的响应错误重试模式（retry_patterns）
+      - LOGIN_INVALID 自动检测 + token 刷新重试
     """
 
     # 默认的业务错误重试模式：匹配 errorMessage 中的关键词
@@ -33,6 +34,15 @@ class APIClient:
         '正在提交中',
     ]
 
+    # 登录失效检测模式（匹配 code 或 errorMessage/errorMsg）
+    LOGIN_INVALID_PATTERNS = [
+        'LOGIN_INVALID',
+        '重新登录',
+        '登录已过期',
+        'token已过期',
+        'token无效',
+    ]
+
     def __init__(
         self, 
         base_url: str, 
@@ -41,7 +51,8 @@ class APIClient:
         timeout: int = 60, 
         max_retries: int = 3, 
         request_interval: float = 1.0,
-        retry_patterns: Optional[list] = None
+        retry_patterns: Optional[list] = None,
+        endpoint: Optional[str] = None,
     ) -> None:
         logger.info("实际值和期望值输出....")
         self.base_url = base_url.rstrip('/')
@@ -51,25 +62,80 @@ class APIClient:
         self.retry_patterns = retry_patterns or self.DEFAULT_RETRY_PATTERNS
         self.session = requests.Session()
         self._last_request_time = 0.0  # 上次请求时间戳
+        self._endpoint = endpoint  # 终端类型（admin/merchant），用于 token 刷新
+        self._auth_type = auth_type
+        self._auth_config = auth_config or {}
+        self._token_refreshed = False  # 标记本次会话是否已刷新过 token（避免无限循环）
 
         # 配置认证
+        self._apply_auth(auth_type, auth_config)
+
+    def _apply_auth(self, auth_type, auth_config):
+        """应用认证信息到 session headers"""
         if auth_type == 'api_token' and auth_config:
             # 兼容两种配置格式：
             # 1. {'key': 'Token', 'value': 'xxx'}
             # 2. {'token': 'xxx'}
             if 'token' in auth_config:
-                # 格式2: {'token': 'xxx'}，默认使用 'Token' 作为 header key
                 header_key = auth_config.get('key', 'token')
                 self.session.headers.update({header_key: auth_config['token']})
             else:
-                # 格式1: {'key': 'Token', 'value': 'xxx'}
                 self.session.headers.update({auth_config.get('key', 'Token'): auth_config['value']})
         elif auth_type == 'bearer' and auth_config:
             self.session.headers.update({'Authorization': f"Bearer {auth_config['token']}"})
         elif auth_type == 'basic' and auth_config:
             self.session.auth = HTTPBasicAuth(auth_config['username'], auth_config['password'])
 
-        logger.info(f"API客户端初始化 | base_url={self.base_url} | auth_type={auth_type} | timeout={timeout} | headers={self.session.headers}")
+        logger.info(f"API客户端初始化 | base_url={self.base_url} | auth_type={auth_type} | endpoint={self._endpoint} | timeout={self.timeout} | headers={self.session.headers}")
+
+    def _refresh_token(self):
+        """
+        刷新 token：清空缓存 → 重新登录获取 → 更新 session headers。
+        仅当 endpoint 已配置时才能刷新。返回 True 表示刷新成功。
+        """
+        if not self._endpoint:
+            logger.warning("[Token刷新] 未配置 endpoint，无法刷新 token")
+            return False
+
+        try:
+            from common.token_provider import TokenProvider
+            from common.config_manager import config_manager
+
+            # 1. 清空 TokenProvider 缓存
+            TokenProvider.clear_cache()
+            logger.info(f"[Token刷新] 已清空 TokenProvider 缓存")
+
+            # 2. 从 config_manager 获取新配置（会触发重新登录）
+            new_cfg = config_manager.get_api_client_config(endpoint=self._endpoint)
+            new_auth_config = new_cfg.get('auth_config', {})
+
+            # 3. 更新 session headers
+            self._auth_config = new_auth_config
+            self._apply_auth(new_cfg.get('auth_type'), new_auth_config)
+
+            new_token = new_auth_config.get('value') or new_auth_config.get('token', '')
+            logger.info(f"[Token刷新] token 刷新成功: {new_token[:16]}..." if new_token else "[Token刷新] token 刷新完成")
+            allure.attach(
+                f"endpoint={self._endpoint}\nnew_token={new_token[:16]}...",
+                name="Token 自动刷新",
+                attachment_type=allure.attachment_type.TEXT,
+            )
+            return True
+        except Exception as e:
+            logger.error(f"[Token刷新] token 刷新失败: {e}")
+            return False
+
+    def _is_login_invalid(self, response_json: dict) -> bool:
+        """检测响应是否为登录失效"""
+        # 检查 code 字段（如 {"code": "LOGIN_INVALID"}）
+        code = str(response_json.get('code', '') or '')
+        # 检查 errorMessage / errorMsg 字段
+        error_msg = str(
+            response_json.get('errorMessage', '') or
+            response_json.get('errorMsg', '') or ''
+        )
+        combined = f"{code} {error_msg}"
+        return any(p in combined for p in self.LOGIN_INVALID_PATTERNS)
 
     def _log_request(self, method, url, **kwargs):
         logger.debug(f"--> {method} {url}")
@@ -112,10 +178,24 @@ class APIClient:
                 self._log_response(resp)
                 resp.raise_for_status()
                 
-                # 检查响应是否包含可重试的业务错误（如限流、重复点击等）
+                # 检查响应是否包含可重试的业务错误
                 try:
                     response_json = resp.json()
                     error_message = str(response_json.get('errorMessage', '') or '')
+
+                    # —— 优先检测登录失效 ——
+                    if self._is_login_invalid(response_json) and not self._token_refreshed:
+                        error_detail = response_json.get('code', '') or response_json.get('errorMsg', '')
+                        logger.warning(f"[Token刷新] 检测到登录失效: {error_detail}，尝试刷新 token 并重试")
+                        if self._refresh_token():
+                            self._token_refreshed = True  # 仅允许刷新一次，防止无限循环
+                            self._last_request_time = time.time() - self.request_interval
+                            continue  # 用新 token 重试
+                        else:
+                            logger.error("[Token刷新] token 刷新失败，返回原始响应")
+                            return resp
+
+                    # —— 常规业务错误重试（限流等）——
                     matched_pattern = next(
                         (p for p in self.retry_patterns if p in error_message), None
                     )

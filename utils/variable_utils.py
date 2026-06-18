@@ -90,7 +90,7 @@ def validate(actual: Any, operator: str, expected: Any, path: str = "") -> None:
     """
     通用断言验证，支持多种操作符：
     ==, !=, >, >=, <, <=, contains, not_contains, length, type,
-    all_in, any_contain, all_contain, all_eq, all_between, regex_match,
+    all_in, any_contain, all_contain, all_eq, all_not_eq, all_between, regex_match,
     empty, not_empty, has_key, not_has_key, startswith, endswith,
     between, length_gt, length_ge, length_lt, length_le,
     same_elements, is_none, is_not_none, date_between, datetime_between
@@ -281,8 +281,52 @@ def validate(actual: Any, operator: str, expected: Any, path: str = "") -> None:
     elif operator == "all_eq":
         assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
         for item in actual:
-            print("item", item)
             assert item == expected, format_error(f"元素 {item} 不等于 {expected}")
+
+    elif operator == "all_not_eq":
+        assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
+        for item in actual:
+            assert item != expected, format_error(f"元素 {item} 不应等于 {expected}")
+
+    elif operator == "all_lt":
+        assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
+        for item in actual:
+            if item is None:
+                continue
+            v = item
+            if isinstance(v, str):
+                v = float(v) if '.' in v else int(v)
+            assert v < expected, format_error(f"元素 {v} 不小于 {expected}")
+
+    elif operator == "all_le":
+        assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
+        for item in actual:
+            if item is None:
+                continue
+            v = item
+            if isinstance(v, str):
+                v = float(v) if '.' in v else int(v)
+            assert v <= expected, format_error(f"元素 {v} 不大于等于 {expected}")
+
+    elif operator == "all_gt":
+        assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
+        for item in actual:
+            if item is None:
+                continue
+            v = item
+            if isinstance(v, str):
+                v = float(v) if '.' in v else int(v)
+            assert v > expected, format_error(f"元素 {v} 不大于 {expected}")
+
+    elif operator == "all_ge":
+        assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
+        for item in actual:
+            if item is None:
+                continue
+            v = item
+            if isinstance(v, str):
+                v = float(v) if '.' in v else int(v)
+            assert v >= expected, format_error(f"元素 {v} 不小于等于 {expected}")
 
     elif operator == "all_between":
         start, end = expected

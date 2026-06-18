@@ -235,6 +235,7 @@ if __name__ == '__main__':
     send_notify = not args.no_notify
     run_tests(
         env=args.env,
+        endpoint=args.endpoint,
         api_only=args.api,
         scenario_only=args.scenario,
         mark=args.mark,

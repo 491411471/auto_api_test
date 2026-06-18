@@ -16,6 +16,7 @@ _CREATE_YAML = "data/merchant/scenario/product/product_create_and_audit_api.yaml
 _AUDIT_YAML  = "data/merchant/scenario/product/product_audit_api.yaml"
 
 # ==================== 测试类 ====================
+@allure.epic("商家端")
 @allure.feature("商家端-商品管理")
 @allure.story("新增商品 → 运营端审核通过 → 验证审核状态")
 class TestProductCreateAndAudit:

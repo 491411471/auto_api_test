@@ -8,18 +8,24 @@ from config.config import DB_CONFIG
 
 
 class DatabaseManager:
-    def __init__(self):
+    def __init__(self, db_config: dict = None):
+        """
+        初始化数据库管理器。
+        :param db_config: 自定义数据库连接配置字典，格式同 DB_CONFIG。
+                          未传时使用全局默认 DB_CONFIG。
+        """
+        self._db_config = db_config or DB_CONFIG
         self.connection = None
         self.cursor = None
 
     def __enter__(self):
         try:
             self.connection = pymysql.connect(
-                host=DB_CONFIG['host'],
-                port=DB_CONFIG.get('port', 3306),
-                user=DB_CONFIG['user'],
-                password=DB_CONFIG['password'],
-                charset=DB_CONFIG.get('charset', 'utf8mb4'),
+                host=self._db_config['host'],
+                port=self._db_config.get('port', 3306),
+                user=self._db_config['user'],
+                password=self._db_config['password'],
+                charset=self._db_config.get('charset', 'utf8mb4'),
                 cursorclass=DictCursor
             )
             self.cursor = self.connection.cursor()

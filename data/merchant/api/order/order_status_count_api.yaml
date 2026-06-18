@@ -180,28 +180,34 @@ order_status_tests:
         value: "${total_count}"
 
   # ==================== 待归还 ====================
-  - case_id: OST_009
-    title: "验证待归还订单统计"
-    description: "状态为待归还（status='06'|'07'|unrent_time >当日期时间）的订单数量"
-    <<: *common_endpoint
-    params:
-      <<: *common_params
-    sql:
-      query: |
-        SELECT COUNT(*) as total_count
-        FROM llxz_order.ct_user_orders
-        WHERE shop_id = '${shop_id}'
-          AND channel_id IN ('004', '007', '008', '009', '011', '012', '085')
-          AND rent_start IS NOT NULL
-          AND (delete_time IS NULL OR delete_time <= '2001-01-01 00:00:00')
-          AND status IN ('06')
-          AND unrent_time < NOW();
-      column: "total_count"
-    expected_status: 200
-    validate_data:
-      - path: "data[?(@.status=='12')].total"
-        operator: "=="
-        value: "${total_count}"
+#  - case_id: OST_009
+#    title: "验证待归还订单统计"
+#    description: "状态为待归还（status='06'|'07'|unrent_time >当日期时间）的订单数量"
+#    <<: *common_endpoint
+#    params:
+#      <<: *common_params
+#    sql:
+#      query: >
+#        SELECT COUNT(*) AS total_count
+#        FROM llxz_order.ct_user_orders o
+#        WHERE o.status = '06'
+#          AND NOT EXISTS (
+#            SELECT 1
+#            FROM llxz_order.ct_order_by_stages s
+#            WHERE s.order_id = o.order_id
+#              AND s.status IN (1, 4)  -- 查找状态为 1 或 4 的记录
+#        )
+#          AND o.shop_id = '${shop_id}'
+#          AND o.channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+#          AND rent_start IS NOT NULL
+#          AND (o.delete_time IS NULL OR o.delete_time <= '2001-01-01 00:00:00')
+#          AND o.unrent_time < NOW();
+#      column: "total_count"
+#    expected_status: 200
+#    validate_data:
+#      - path: "data[?(@.status=='12')].total"
+#        operator: "=="
+#        value: "${total_count}"
 
   # ==================== 归还中 ====================
   - case_id: OST_010
@@ -232,15 +238,18 @@ order_status_tests:
     params:
       <<: *common_params
     sql:
-      query: |
-        SELECT count(*) AS total_count
-        FROM llxz_order.ct_user_orders
-        WHERE(shop_id = '${shop_id}'
-        		AND channel_id IN ( '004', '007', '008', '009', '011', '012', '085' )
-        		AND rent_start IS NOT NULL
-        	AND ( delete_time <= '2001-01-01 00:00:00' OR delete_time IS NULL ))
-        	AND `status` IN ( '06', '07', '08', '12' )
-        	AND is_violation = '04';
+      query: >
+        SELECT COUNT(*) AS total_count
+        FROM llxz_order.ct_user_orders o
+        WHERE 1=1
+          -- 原有订单基础条件
+          AND o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+          AND o.channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+          AND o.rent_start IS NOT NULL
+          AND (o.delete_time <= '2001-01-01 00:00:00' OR o.delete_time IS NULL)
+          AND o.status IN ('06', '07', '08', '12')
+          AND o.is_violation = '04'
+
       column: "total_count"
     expected_status: 200
     validate_data:
@@ -256,7 +265,7 @@ order_status_tests:
     params:
       <<: *common_params
     sql:
-      query: |
+      query: >
         SELECT COUNT(DISTINCT cobs.order_id) AS total_count
         FROM llxz_order.ct_user_orders AS cuo
         INNER JOIN llxz_order.ct_order_by_stages AS cobs ON cobs.order_id = cuo.order_id

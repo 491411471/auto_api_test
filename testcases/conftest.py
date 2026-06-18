@@ -14,6 +14,7 @@ from common.api_client import APIClient
 from common.config_manager import config_manager
 from common.database import DatabaseManager
 from common.logger import logger
+from config.config import DW_DB_CONFIG
 
 
 def pytest_addoption(parser):
@@ -48,13 +49,9 @@ def apply_cli_overrides(request):
 def api_client():
     """全局 API 客户端，根据当前环境/终端配置动态创建"""
     cfg = config_manager.get_api_client_config()
-    client = APIClient(
-        base_url=cfg["base_url"],
-        auth_type=cfg["auth_type"],
-        auth_config=cfg["auth_config"],
-        timeout=cfg["timeout"],
-        max_retries=cfg["max_retries"]
-    )
+    # 将 endpoint 注入到 cfg，以便 APIClient 能在检测到登录失效时自动刷新 token
+    cfg['endpoint'] = config_manager.current_endpoint
+    client = APIClient(**cfg)
     logger.info(f"API客户端初始化完成，环境: {config_manager.current_env}")
     yield client
     logger.info("API客户端关闭")
@@ -65,6 +62,7 @@ def api_client():
 def merchant_api_client():
     """商家端 API 客户端（固定使用 merchant 终端配置）"""
     cfg = config_manager.get_api_client_config(endpoint='merchant')
+    cfg['endpoint'] = 'merchant'  # 传入 endpoint 以支持 token 自动刷新
     client = APIClient(**cfg)
     logger.info("商家端 API 客户端初始化完成")
     yield client
@@ -75,6 +73,7 @@ def merchant_api_client():
 def admin_api_client():
     """运营端 API 客户端（固定使用 admin 终端配置）"""
     cfg = config_manager.get_api_client_config(endpoint='admin')
+    cfg['endpoint'] = 'admin'  # 传入 endpoint 以支持 token 自动刷新
     client = APIClient(**cfg)
     logger.info("运营端 API 客户端初始化完成")
     yield client
@@ -85,6 +84,8 @@ def admin_api_client():
 def xianyu_api_client():
     """闲鱼店铺 API 客户端（使用 merchant 配置中的 xianyu_token）"""
     cfg = config_manager.get_xianyu_api_client_config()
+    # xianyu 使用 merchant 端的 token 语义，显式注入 endpoint
+    cfg['endpoint'] = 'merchant'
     client = APIClient(**cfg)
     logger.info(f"闲鱼店铺 API 客户端初始化完成 (token: {cfg['auth_config']['token'][:10]}...)")
     yield client
@@ -105,5 +106,17 @@ def global_vars():
 def db():
     """每个测试函数独立获取一个新的数据库连接"""
     with DatabaseManager() as db_manager:
+        yield db_manager
+
+
+@pytest.fixture
+def dw_db():
+    """
+    数仓数据库连接，每个测试函数独立获取。
+    连接信息从环境变量 DW_HOST/DW_PORT/DW_USER/DW_PASSWORD 读取。
+    用法与 db fixture 一致，支持 context manager 自动释放。
+    """
+    logger.info(f"数仓数据库连接: {DW_DB_CONFIG['user']}@{DW_DB_CONFIG['host']}:{DW_DB_CONFIG['port']}")
+    with DatabaseManager(db_config=DW_DB_CONFIG) as db_manager:
         yield db_manager
 
