@@ -202,29 +202,6 @@ def process_dynamic_data(case: Dict[str, Any], db, variables: Dict[str, Any]) ->
                         variables['sql_result'] = result
                         logger.info(f"从数据库获取的变量（多行多字段）: sql_result = {result}")
                         allure.attach(f"sql_result = {result}", name=f"从数据库获取的变量（多行多字段）{step_suffix}", attachment_type=allure.attachment_type.TEXT)
-
-                        # ---- var_prefix 自动展开（向后兼容：不影响未配置的用例） ----
-                        # YAML 配置示例：
-                        #   var_prefix:
-                        #     first: 0      # 第0行的 id→first_id, product_id→first_product_id
-                        #     second: 1     # 第1行的 id→second_id, product_id→second_product_id
-                        var_prefix = sql_config.get('var_prefix')
-                        if var_prefix and isinstance(var_prefix, dict) and result:
-                            _expanded = {}
-                            for prefix_name, row_idx in var_prefix.items():
-                                if isinstance(row_idx, int) and 0 <= row_idx < len(result):
-                                    row = result[row_idx]
-                                    if isinstance(row, dict):
-                                        for col, val in row.items():
-                                            _expanded[f"{prefix_name}_{col}"] = val
-                            if _expanded:
-                                variables.update(_expanded)
-                                logger.info(f"var_prefix 展开变量: {list(_expanded.keys())}")
-                                allure.attach(
-                                    json.dumps(_expanded, ensure_ascii=False, default=str),
-                                    name=f"var_prefix 展开变量{step_suffix}",
-                                    attachment_type=allure.attachment_type.JSON
-                                )
                     else:
                         variables['sql_result'] = result
                         logger.info(f"从数据库获取的变量（多行）: sql_result = {result}")
@@ -393,23 +370,15 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
                 name="断言前可用变量（SQL结果）",
                 attachment_type=allure.attachment_type.TEXT
             )
-        # 先对 validate_data 做一次替换（使用当前 variables），再检查是否仍有未替换的占位符
-        try:
-            replaced_validate_data = replace_placeholders(case['validate_data'], variables)
-        except Exception:
-            # 如果替换失败，回退为原始数据以便后续逐项处理
-            replaced_validate_data = case['validate_data']
-
-        # 检查是否有未替换的占位符（诊断信息）
-        validate_data_str = json.dumps(replaced_validate_data, ensure_ascii=False, default=str)
+        # 检查是否有未替换的占位符
+        validate_data_str = json.dumps(case['validate_data'], ensure_ascii=False, default=str)
         if '${' in validate_data_str:
             import re as _re
             unresolved = _re.findall(r'\$\{([^}]+)\}', validate_data_str)
             msg = f"以下变量未替换，可能已导致断言失败:\n" + '\n'.join(f'  ${{{v}}}' for v in set(unresolved))
             logger.warning(msg)
             allure.attach(msg, name="未替换变量警告", attachment_type=allure.attachment_type.TEXT)
-
-        for idx, v in enumerate(replaced_validate_data):
+        for idx, v in enumerate(case['validate_data']):
             path = v['path']
             operator = v['operator']
             # 使用 .get() 兼容无期望值的操作符（如 exists, is_none, empty 等）

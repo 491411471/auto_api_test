@@ -1,142 +1,239 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"用例ID: MOB_005  |  描述: 调用loginV2接口使用验证码登录，提取token和shopId","4208","MOB_005 | 使用验证码登录","testcases.admin.scenario.merchant_onboarding","2026-06-18","passed","2026-06-18","TestMerchantOnboarding","test_merchant_onboarding","",""
-"步骤0：轻量级数据检查，确认数据库中有足够的可用商品，不足则跳过后续所有测试。","25","EPO_000 | 检查可用商品数据","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"TC02-TC08: 多种条件组合查询（渠道、订单号、投保状态、扣款状态、险种、时间、复合）","2893","IOQ_004 | 以投保状态(status=1 投保中)为查询条件","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"查询状态为待支付(01)的质选服务单，获取orderId用于后续取消操作","730","CMO_001 | 查询待支付的质选服务单","testcases.admin.api.goods_services","2026-06-18","passed","2026-06-18","TestCancelMakeOrder","test_cancel_make_order","",""
-"用例ID: CDA_002
-校验日期: 2026-06-13
-API 字段: onLineComplaintsNum
-描述: 过滤 complaints_type=0（内部投诉），与 API onLineComplaintsNum 字段比对","105","CDA_002 | 近7天每日内部投诉订单数 - 2026-06-13","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"用例ID: OFF_003  |  描述: 用 productId 精确查询已上架商品列表，验证该商品已不在上架列表中","3893","OFF_003 | 验证商品已下架","testcases.admin.scenario.product","2026-06-18","passed","2026-06-18","TestProductOffShelf","test_product_shelf_toggle_admin","",""
-"用例ID: CP_002  |  描述: 按APP查询已撤诉订单（sourceType=2）的投诉订单列表","3430","CP_002 | 按APP查询已撤诉订单","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintAPI","test_complaint_api","",""
-"用例ID: MOB_006  |  描述: 通过SQL查询用户ID和最新shopId，调用changeLogin接口进入店铺","2617","MOB_006 | 进入店铺","testcases.admin.scenario.merchant_onboarding","2026-06-18","passed","2026-06-18","TestMerchantOnboarding","test_merchant_onboarding","",""
-"TC02-TC08: 多种条件组合查询（渠道、订单号、投保状态、扣款状态、险种、时间、复合）","2832","IOQ_006 | 以险种人保(insuranceType=1)为查询条件","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"用例ID: CP_004  |  描述: 按涉诉类型查询投诉诉订单（typeId=5--假冒伪劣品牌）的投诉订单列表","2727","CP_004 | 按涉诉类型查询投诉诉订单","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintAPI","test_complaint_api","",""
-"用例ID: MO_002  |  描述: 使用originalOrderId作为orderId查询条件，验证返回结果中包含该订单","5724","MO_002 | 以订单编号-查询补订单列表","testcases.merchant.api.order","2026-06-18","passed","2026-06-18","TestMakeOrderManagement","test_make_order_api","",""
-"用例ID: EPO_011  |  描述: 关闭指定商品的多台设备开关(isOpen=false)，验证接口返回成功","2194","EPO_011 | 关闭多台设备","testcases.admin.api.product_management","2026-06-18","failed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"用例ID: DPD_002  |  描述: 使用 SQL 获取的 product_id 查询草稿箱，验证商品存在","2645","DPD_002 | 查询草稿箱验证抖音商品","testcases.merchant.api.product","2026-06-18","passed","2026-06-18","TestDouyinProductDraft","test_douyin_product_draft","",""
-"使用店铺编码查询，验证返回的店铺编码均与查询条件一致","3497","EP_004 | 以店铺编码为查询条件","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"用例ID: CDA_002
-校验日期: 2026-06-17
-API 字段: onLineComplaintsNum
-描述: 过滤 complaints_type=0（内部投诉），与 API onLineComplaintsNum 字段比对","21","CDA_002 | 近7天每日内部投诉订单数 - 2026-06-17","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"用例ID: EPO_004  |  描述: 将修改后的商品数据保存到草稿箱","1198","EPO_004 | 修改内容并保存草稿箱","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"用例ID: CP_003  |  描述: 按渠道来源查询已撤诉订单（rentType=0）的投诉订单列表","2785","CP_003 | 按渠道来源查询已撤诉订单","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintAPI","test_complaint_api","",""
-"查询已下架商品(type=2)，验证返回商品的上架状态均为已下架(type=2)","2864","EP_010 | 以已下架为查询条件","testcases.admin.api.product_management","2026-06-18","skipped","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"用例ID: CDA_001
-校验日期: 2026-06-12
-API 字段: complaintsCount
-描述: 无类型过滤，统计每日全部投诉量，与 API complaintsCount 字段比对","1612","CDA_001 | 近7天每日投诉订单总数 - 2026-06-12","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"用 productId 精确查询已下架列表，验证该商品已不在下架列表中","2","ON_003 - 验证商品已上架","testcases.admin.scenario.product","2026-06-18","skipped","2026-06-18","TestProductOnShelf","test_product_shelf_toggle_admin","",""
-"通过SQL获取第二组商品的id，调用编辑详情接口获取商品数据","3321","EPO_003 | 编辑商品-展示详情","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"用例ID: PLO_007  |  描述: 从步骤6获取2条商品编码，批量上架(type=1)","10256","PLO_007 | 批量上架","testcases.admin.api.product_management","2026-06-18","failed","2026-06-18","TestProductListOperations","test_product_list_operations","",""
-"用例ID: CDA_001
-校验日期: 2026-06-14
-API 字段: complaintsCount
-描述: 无类型过滤，统计每日全部投诉量，与 API complaintsCount 字段比对","36","CDA_001 | 近7天每日投诉订单总数 - 2026-06-14","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"查询已上架商品(type=1)，验证返回商品的上架状态均为已上架(type=1)","2285","EP_009 | 以已上架状态为查询条件","testcases.admin.api.product_management","2026-06-18","skipped","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"用例ID: IOP_003  |  描述: 查询投保中的订单号，将其分配给险种1(人保)","3723","IOP_003 | 分配投保订单","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"使用步骤1提取的 productId 调用上架接口（type=1, GET）","2","ON_002 - 上架商品","testcases.admin.scenario.product","2026-06-18","skipped","2026-06-18","TestProductOnShelf","test_product_shelf_toggle_admin","",""
-"用例ID: OFF_001  |  描述: 查询commonStatus=3的已上架商品列表，从中提取productId供下架操作使用","4793","OFF_001 | 查询私域已上架商品","testcases.admin.scenario.product","2026-06-18","passed","2026-06-18","TestProductOffShelf","test_product_shelf_toggle_admin","",""
-"使用创建时间范围查询，验证返回的商品创建时间均在查询范围内","997","EP_006 | 以创建时间为查询条件","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"用例ID: CDA_002
-校验日期: 2026-06-16
-API 字段: onLineComplaintsNum
-描述: 过滤 complaints_type=0（内部投诉），与 API onLineComplaintsNum 字段比对","22","CDA_002 | 近7天每日内部投诉订单数 - 2026-06-16","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"查询已下架商品(type=2)，随机获取3条数据的商品编码和商品名称","3312","step6_query_off_shelf | 查询已下架商品","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestProductListOperations","test_product_list_operations","",""
-"用例2：以 originalOrderId 为查询条件，验证返回结果匹配","226","DO_002 - 以订单编号-查询补押金列表","testcases.merchant.api.order","2026-06-18","passed","2026-06-18","TestDepositOrderManagement","test_deposit_order_api","",""
-"用例ID: CDA_002
-校验日期: 2026-06-12
-API 字段: onLineComplaintsNum
-描述: 过滤 complaints_type=0（内部投诉），与 API onLineComplaintsNum 字段比对","85","CDA_002 | 近7天每日内部投诉订单数 - 2026-06-12","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"用例ID: MOFF_003  |  描述: 查询type=2的已下架商品列表，验证该商品出现在下架列表中","4948","MOFF_003 | 验证商品已下架","testcases.merchant.api.product","2026-06-18","passed","2026-06-18","TestProductOffShelf","test_product_shelf_toggle","",""
-"用例ID: IOP_002  |  描述: 使用投保状态(status=1)查询中提取的orderId，调用取消投保接口","871","IOP_002 | 取消投保订单","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"逐日逐字段校验：SQL COUNT vs API 响应字段","0","test_daily_complaint_count[onLineComplaintsNum-2026-06-18]","","2026-06-18","skipped","2026-06-18","","","",""
-"查询库存将在7天内过期的商品，验证返回商品的库存剩余天数均小于7","2027","EP_007 | 以库存状态(7天内)为查询条件","testcases.admin.api.product_management","2026-06-18","skipped","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"用例ID: IOP_001  |  描述: 使用查询阶段提取的record_id，将险种修改为2(天安财险)，验证接口返回成功","243","IOP_001 | 修改险种","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"用例ID: MON_002  |  描述: 调用updateProductInfo接口，type=1上架指定商品","2582","MON_002 | 上架商品","testcases.merchant.api.product","2026-06-18","passed","2026-06-18","TestProductOnShelf","test_product_shelf_toggle","",""
-"用例ID: EPO_010  |  描述: 开启指定商品的多台设备开关(isOpen=true)，验证接口返回成功","2387","EPO_010 | 开启多台设备","testcases.admin.api.product_management","2026-06-18","failed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"使用默认查询条件查询待审核商品列表，随机选中一条商品提取商品名称/商品编号/店铺名称/店铺编号","4476","EP_001 | 空条件查询待审核商品","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"用例ID: MO_004  |  描述: 使用goodsName作为订单类型查询条件，验证返回结果中的goodsName匹配","6065","MO_004 | 以订单类型-查询补订单列表","testcases.merchant.api.order","2026-06-18","passed","2026-06-18","TestMakeOrderManagement","test_make_order_api","",""
-"用例ID: ON_001  |  描述: 查询type=2的已下架商品列表，从中提取productId供上架操作使用","2484","ON_001 | 查询私域已下架商品","testcases.admin.scenario.product","2026-06-18","failed","2026-06-18","TestProductOnShelf","test_product_shelf_toggle_admin","",""
-"用例ID: MOFF_001  |  描述: 查询type=1的已上架商品列表，从中提取productId供下架操作使用","6656","MOFF_001 | 查询已上架商品","testcases.merchant.api.product","2026-06-18","passed","2026-06-18","TestProductOffShelf","test_product_shelf_toggle","",""
-"用例ID: MOFF_002  |  描述: 调用updateProductInfo接口，type=2下架指定商品","2794","MOFF_002 | 下架商品","testcases.merchant.api.product","2026-06-18","passed","2026-06-18","TestProductOffShelf","test_product_shelf_toggle","",""
-"用例1：不带查询条件，获取 originalOrderId 等数据","660","DO_001 - 无查询条件-查询补押金列表","testcases.merchant.api.order","2026-06-18","passed","2026-06-18","TestDepositOrderManagement","test_deposit_order_api","",""
-"用例ID: CDA_001
-校验日期: 2026-06-16
-API 字段: complaintsCount
-描述: 无类型过滤，统计每日全部投诉量，与 API complaintsCount 字段比对","45","CDA_001 | 近7天每日投诉订单总数 - 2026-06-16","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"用例ID: EPO_009  |  描述: 使用第一组商品的id设置lockState=1(已上锁)，通过SQL验证lock_state已变更为1","2800","EPO_009 | 商品锁关","testcases.admin.api.product_management","2026-06-18","failed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"使用店铺名称查询，验证返回的店铺名称均与查询条件一致","4443","EP_005 | 以店铺名称为查询条件","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"用例ID: PLO_005  |  描述: 从步骤4获取2条商品编码，批量下架(type=2)","10413","PLO_005 | 批量下架","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestProductListOperations","test_product_list_operations","",""
-"空条件查询投保订单，提取 orderId 和 id 供后续用例使用。
-        如果没有查询到数据，则跳过全部依赖数据的测试。
-        ","2358","IOQ_001 | 空条件查询投保订单","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"用例ID: DPD_003  |  描述: 使用草稿箱中的商品信息调用发布接口，完成商品上架","3579","DPD_003 | 从草稿箱发布抖音商品","testcases.merchant.api.product","2026-06-18","passed","2026-06-18","TestDouyinProductDraft","test_douyin_product_draft","",""
-"查询已上架商品(type=1)，随机获取3条数据的商品编码和商品名称","4227","step4_query_on_shelf | 查询已上架的商品","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestProductListOperations","test_product_list_operations","",""
-"用例ID: CMO_002  |  描述: 使用上一步查询到的orderId取消质选服务单，验证取消操作成功","441","CMO_002 | 取消质选服务单","testcases.admin.api.goods_services","2026-06-18","passed","2026-06-18","TestCancelMakeOrder","test_cancel_make_order","",""
-"使用商品名称查询，验证返回的商品名称均与查询条件一致","2717","EP_002 | 以商品名称为查询条件","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"","5752","完整流程：查询账期详情 → 动态计算日期 → 执行续租","testcases.merchant.scenario.order","2026-06-18","passed","2026-06-18","TestRenewalOrder","test_renewal_order","",""
-"用例ID: MON_003  |  描述: 查询type=1的已上架商品列表，验证该商品出现在上架列表中","5591","MON_003 | 验证商品已上架","testcases.merchant.api.product","2026-06-18","passed","2026-06-18","TestProductOnShelf","test_product_shelf_toggle","",""
-"用例ID: CDA_002
-校验日期: 2026-06-15
-API 字段: onLineComplaintsNum
-描述: 过滤 complaints_type=0（内部投诉），与 API onLineComplaintsNum 字段比对","55","CDA_002 | 近7天每日内部投诉订单数 - 2026-06-15","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"","11046","完整流程：固定订单号 → OCR验证码(失败重试-次数可配置) → 部分还款(销账) → 验证回款簿记录","testcases.merchant.scenario.order","2026-06-18","passed","2026-06-18","TestPartialRepayment","test_partial_repayment","",""
-"TC02-TC08: 多种条件组合查询（渠道、订单号、投保状态、扣款状态、险种、时间、复合）","2721","IOQ_002 | 以上架渠道(channelId=008)为查询条件","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"用例ID: MON_001  |  描述: 查询type=2的已下架商品列表，从中提取productId供上架操作使用","5024","MON_001 | 查询已下架商品","testcases.merchant.api.product","2026-06-18","passed","2026-06-18","TestProductOnShelf","test_product_shelf_toggle","",""
-"用例3：以 orderStatus=01 为查询条件，断言所有记录 orderStatus 均为 01，并提取 orderId 用于取消","500","DO_003 - 以订单状态待支付-查询补押金列表","testcases.merchant.api.order","2026-06-18","passed","2026-06-18","TestDepositOrderManagement","test_deposit_order_api","",""
-"用例ID: EPO_005  |  描述: 通过SQL查询草稿箱中的id，调用草稿详情接口验证草稿保存成功","879","EPO_005 | 从草稿箱中获取草稿详情","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"空条件查询商品列表，随机获取3条数据的商品编码和商品名称","2274","step1_query_all_products | 空条件获取商品列表商品信息","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestProductListOperations","test_product_list_operations","",""
-"查询库存已过期的商品，验证返回商品的库存剩余天数均小于0","2617","EP_008 | 以库存状态(已过期)为查询条件","testcases.admin.api.product_management","2026-06-18","skipped","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"用例3：以 status=01 为查询条件，断言所有记录 status 均为 01，并提取 orderId 用于取消","2382","MO_003 - 以订单状态待支付-查询补订单列表","testcases.merchant.api.order","2026-06-18","skipped","2026-06-18","TestMakeOrderManagement","test_make_order_api","",""
-"用例4：使用用例3提取的待支付 orderId 调用取消接口","213","DO_004 - 取消补押金","testcases.merchant.api.order","2026-06-18","passed","2026-06-18","TestDepositOrderManagement","test_deposit_order_api","",""
-"用例ID: MOB_002  |  描述: 调用register接口注册新店铺，mobile和userNameReq为动态生成数据","4180","MOB_002 | 提交注册店铺信息","testcases.admin.scenario.merchant_onboarding","2026-06-18","passed","2026-06-18","TestMerchantOnboarding","test_merchant_onboarding","",""
-"TC02-TC08: 多种条件组合查询（渠道、订单号、投保状态、扣款状态、险种、时间、复合）","2800","IOQ_008 | 复合查询（上架渠道+投保状态+扣款状态）","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"用例ID: PLO_002  |  描述: 从步骤1获取2条商品编码，批量设置库存为100，日期范围为当前日期至15天后","2132","PLO_002 | 批量设置库存","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestProductListOperations","test_product_list_operations","",""
-"用例ID: DPD_001  |  描述: 调用 addDraftProduct 接口保存抖音商品草稿，提取 data 字段作为 draft_id","2687","DPD_001 | 保存抖音商品到草稿箱","testcases.merchant.api.product","2026-06-18","passed","2026-06-18","TestDouyinProductDraft","test_douyin_product_draft","",""
-"TC02-TC08: 多种条件组合查询（渠道、订单号、投保状态、扣款状态、险种、时间、复合）","2665","IOQ_007 | 以保单创建时间范围为查询条件","testcases.admin.api.insurance_order","2026-06-18","skipped","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"使用商品编码查询，验证返回的商品编码均与查询条件一致","3067","EP_003 | 以商品编码为查询条件","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductQuery","test_examine_product_api","",""
-"用例ID: CDA_001
-校验日期: 2026-06-15
-API 字段: complaintsCount
-描述: 无类型过滤，统计每日全部投诉量，与 API complaintsCount 字段比对","37","CDA_001 | 近7天每日投诉订单总数 - 2026-06-15","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"用例ID: CDA_001
-校验日期: 2026-06-13
-API 字段: complaintsCount
-描述: 无类型过滤，统计每日全部投诉量，与 API complaintsCount 字段比对","27","CDA_001 | 近7天每日投诉订单总数 - 2026-06-13","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"用例ID: OFF_002  |  描述: 调用setProuctShowState接口，type=3下架指定商品","228","OFF_002 | 下架商品","testcases.admin.scenario.product","2026-06-18","passed","2026-06-18","TestProductOffShelf","test_product_shelf_toggle_admin","",""
-"用例ID: MOB_001  |  描述: 调用generateRegCdByGroupCodeNew接口获取注册码，提取data字段供后续注册使用","4747","MOB_001 | 获取注册码","testcases.admin.scenario.merchant_onboarding","2026-06-18","passed","2026-06-18","TestMerchantOnboarding","test_merchant_onboarding","",""
-"用例ID: CDA_001
-校验日期: 2026-06-17
-API 字段: complaintsCount
-描述: 无类型过滤，统计每日全部投诉量，与 API complaintsCount 字段比对","58","CDA_001 | 近7天每日投诉订单总数 - 2026-06-17","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"用例5：使用用例3提取的待支付 orderId 调用取消接口","0","MO_005 - 取消补订单","testcases.merchant.api.order","2026-06-18","skipped","2026-06-18","TestMakeOrderManagement","test_make_order_api","",""
-"用例ID: EPO_008  |  描述: 使用第一组商品的id设置lockState=0(未上锁)，通过SQL验证lock_state已变更为0","2817","EPO_008 | 商品锁开","testcases.admin.api.product_management","2026-06-18","failed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"用例ID: CP_004  |  描述: 按涉诉类型查询投诉诉订单（typeId=5--假冒伪劣品牌）的投诉订单列表","2456","CP_004 | 按涉诉类型查询投诉诉订单","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintAPI","test_complaint_api","",""
-"用例ID: EPO_006  |  描述: 隐藏指定商品(type=3)，通过SQL验证商品type已变更为3","2366","EPO_006 | 隐藏商品","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"","10660","完整流程：查询账期详情 → 动态计算日期 → 续租 → 取消续租","testcases.merchant.scenario.order","2026-06-18","passed","2026-06-18","TestReletCancelReletOrder","test_relet_cancel_relet_order","",""
-"TC02-TC08: 多种条件组合查询（渠道、订单号、投保状态、扣款状态、险种、时间、复合）","2392","IOQ_003 | 以订单号为查询条件","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"用例ID: EPO_007  |  描述: 显示指定商品(type=1)，通过SQL验证商品type已变更为1","2869","EPO_007 | 显示商品","testcases.admin.api.product_management","2026-06-18","failed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"用例ID: CDA_002
-校验日期: 2026-06-14
-API 字段: onLineComplaintsNum
-描述: 过滤 complaints_type=0（内部投诉），与 API onLineComplaintsNum 字段比对","64","CDA_002 | 近7天每日内部投诉订单数 - 2026-06-14","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
-"TC02-TC08: 多种条件组合查询（渠道、订单号、投保状态、扣款状态、险种、时间、复合）","2662","IOQ_005 | 以扣款状态(chargeStatus=1)为查询条件","testcases.admin.api.insurance_order","2026-06-18","passed","2026-06-18","TestPiccInsuranceOrder","test_picc_insurance_order","",""
-"
-        获取图片验证码并使用 ddddocr 进行 OCR 识别。
-        若识别失败（非图片响应/OCR异常/结果过短），重新获取并重试，最多 5 次。
-        5 次全部失败则跳过本次注册。
-        本步骤仅负责识别，验证码校验由步骤4独立完成。
-        ","1496","REG_003 - 解析注册登录的图片验证码","testcases.admin.scenario.merchant_onboarding","2026-06-18","passed","2026-06-18","TestMerchantOnboarding","test_merchant_onboarding","",""
-"用例ID: PLO_003  |  描述: 从步骤1获取2条商品编码，随机设置分类类型(1:普通/2:芝麻免押/3:高危/4:双签)","2236","PLO_003 | 批量分类","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestProductListOperations","test_product_list_operations","",""
-"用例1：不带查询条件，获取 orderId、originalOrderId、goodsName 等数据","2808","MO_001 - 无查询条件-查询补订单列表","testcases.merchant.api.order","2026-06-18","passed","2026-06-18","TestMakeOrderManagement","test_make_order_api","",""
+"用例ID: AOL_002  |  描述: 筛选今日跟进状态为'未跟进'的已分配订单，验证返回结果均符合筛选条件","687","AOL_002 | 已分配订单列表-按'今日跟进状态'筛选（未跟进）","testcases.merchant.api.post_lease_management","2026-06-11","passed","2026-06-11","TestAssignedOrderList","test_assigned_order_list_api","",""
+"用例ID: OBAR_001  |  描述: 验证批量将订单分配给指定负责人的接口功能","553","OBAR_001 | 订单列表分配一个负责人--正常分配","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_order_batch_assign_responsible_person_api","",""
+"用例ID: CP_001  |  描述: 传入有效的 orderId 和 shopId，应返回该订单的押金使用明细列表","509","CP_001 | 获取押金使用明细-正向用例（有效订单）","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderOperatorApi","test_cash_pledge_api","",""
+"","3177","完整流程：新增仓库 → 获取新建仓库id → 新增商品库存","testcases.merchant.scenario.inventory","2026-06-11","passed","2026-06-11","TestWarehouseManagement","test_warehouse_management_flow","",""
+"用例ID: OQ_OPE_003  |  描述: 使用真实订单状态查询，验证返回记录的 status 均匹配","3052","OQ_OPE_003 | 以订单状态为查询条件","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"用例ID: PA_005  |  描述: 所有搜索条件为空，返回默认列表","150","PA_005 | 空查询条件","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"用例ID: CP_002  |  描述: 传入一个不存在的 orderId，应返回业务失败或空数据","695","CP_002 | 获取押金使用明细-异常用例（orderId 不存在）","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderOperatorApi","test_cash_pledge_api","",""
+"用例ID: OST_010  |  描述: 状态为归还中（status='19'）的订单数量","716","OST_010 | 验证归还中订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: OST_008  |  描述: 状态为订单完成（status='09'）的订单数量","785","OST_008 | 验证订单完成统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: CP_004  |  描述: 确保 amount 和 residueAmount 为数字字符串且非负","870","CP_004 | 获取押金使用明细-验证金额字段格式","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderOperatorApi","test_cash_pledge_api","",""
+"用例ID: COQ_001  |  描述: 以空值为条件，验证接口正常返回，total 等于数据库记录数（SQL 独立验证）","4350","COQ_001 | 空值查询条件--投诉订单查询","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"按订单号查询续租订单（动态获取order_id）","2534","RL_002 - 按订单号查询","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestReletOrderApi","test_relet_order_api","",""
+"用例ID: OST_011  |  描述: 状态为已逾期（status='20'）的订单数量","694","OST_011 | 验证已逾期订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"参数化执行订单详情接口测试用例","0","test_order_detail[OD_005]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestOrderDetail","test_order_detail_api","",""
+"用例ID: OQ_OPE_002  |  描述: 使用真实下单人姓名查询，验证返回记录中均包含该姓名","4163","OQ_OPE_002 | 以下单人姓名为查询条件","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"用例ID: PICC_010  |  描述: 查询chargeStatus=3(已退款)的投保记录，验证返回结果中所有记录扣款状态为3","760","PICC_010 | 以扣款状态为查询条件-已退款","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例ID: ON_001  |  描述: 查询type=2的已下架商品列表，从中提取productId供上架操作使用","4397","ON_001 | 查询私域已下架商品","testcases.admin.scenario.product","2026-06-11","passed","2026-06-11","TestProductOnShelf","test_product_shelf_toggle_admin","",""
+"用例ID: DPD_003  |  描述: 使用草稿箱中的商品信息调用发布接口，完成商品上架","3901","DPD_003 | 从草稿箱发布抖音商品","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestDouyinProductDraft","test_douyin_product_draft","",""
+"用例ID: COQ_012  |  描述: typeId=5（假冒伪劣品牌），验证接口正常返回","2679","COQ_012 | 涉诉类型为查询条件--假冒伪劣品牌","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
 " 完整投诉流程：
     #       1. 从数据库获取可投诉订单（user_name, order_id, uid）
     #       2. 发起投诉
-    #       3. 根据 order_id 查询投诉记录，验证存在","3893","完整流程：小程序发起投诉 → 查询投诉订单 → 查看投诉详情","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintAPI","test_complaint_api","",""
-"用例ID: EPO_001  |  描述: 通过SQL获取两组商品数据，调用商品详情接口，提取image_item_id/product_spec_id供后续提交","3371","EPO_001 | 查看商品详情","testcases.admin.api.product_management","2026-06-18","passed","2026-06-18","TestExamineProductOperation","test_examine_product_operation_api","",""
-"用例ID: CDA_001
-校验日期: 2026-06-18
-API 字段: complaintsCount
-描述: 无类型过滤，统计每日全部投诉量，与 API complaintsCount 字段比对","103","CDA_001 | 近7天每日投诉订单总数 - 2026-06-18","testcases.merchant.api.complaint","2026-06-18","passed","2026-06-18","TestComplaintDailyAnalysis","test_complaint_daily_analysis","",""
+    #       3. 根据 order_id 查询投诉记录，验证存在","5560","完整流程：小程序发起投诉 → 查询投诉订单 → 查看投诉详情","testcases.merchant.api.complaint","2026-06-11","passed","2026-06-11","TestComplaintAPI","test_complaint_api","",""
+"用例ID: CSQ_010  |  描述: 组合筛选（近7日），验证投诉率计算公式：
+  complaintRate = complaintTotalNum / completedOrderNum * 100%
+Python 层交叉验证：用 SQL 独立数据源计算期望值，与 API 返回值对比。
+订单总量为 0 时，投诉率应为 0.00%。
+","2824","CSQ_010 | 多条件组合-验证投诉率计算公式","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: COQ_005  |  描述: status=1（已完成），验证返回记录状态均为已完成，total 等于 finishComplaintNo（数据库独立验证）","2921","COQ_005 | 以处理状态--已完成为查询条件","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"","1326","test_rental_order_query[RO_002]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestRentalOrderQuery","test_rental_order","",""
+"","0","test_rental_order_query[RO_008]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestRentalOrderQuery","test_rental_order","",""
+"用例ID: OQ_OPE_009  |  描述: 使用真实下单人手机号查询，验证返回记录非空","2807","OQ_OPE_009 | 以下单人手机号为查询条件","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"用例ID: PICC_007  |  描述: 查询status=3(已取消)的投保记录，验证返回结果中所有记录状态为3","331","PICC_007 | 以保单状态为查询条件-已取消","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例ID: PD_002  |  描述: 检查 hasPayRent 等于状态为2的账期租金之和","657","PD_002 | 验证已支付金额正确性","testcases.merchant.api.order","2026-06-11","broken","2026-06-11","TestOrderPayDetailApi","test_order_pay_detail_api","",""
+"用例ID: OST_006  |  描述: 状态为租用中（status='06'）的订单数量","757","OST_006 | 验证租用中订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"参数化执行订单详情接口测试用例","0","test_order_detail[OD_007]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestOrderDetail","test_order_detail_api","",""
+"用例ID: ON_003  |  描述: 用 productId 精确查询已下架商品列表，验证该商品已不在下架列表中","5865","ON_003 | 验证商品已上架","testcases.admin.scenario.product","2026-06-11","passed","2026-06-11","TestProductOnShelf","test_product_shelf_toggle_admin","",""
+"用例ID: COP_002  |  描述: 查询一条跟进中(status=3)投诉工单，调用处理接口将其状态改为已完结(status=1)，并通过DB验证状态变更","2930","COP_002 | 工单处理：跟进中 → 已完结","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderProcess","test_complaint_order_process_api","",""
+"用例ID: COP_001  |  描述: 查询一条待处理(status=0)投诉工单，调用处理接口将其状态改为跟进中(status=3)，并通过DB验证状态变更","396","COP_001 | 工单处理：待处理 → 跟进中","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderProcess","test_complaint_order_process_api","",""
+"用例ID: OQ_007  |  描述: 按下单人的真实姓名查询","389","OQ_007 | 按下单人姓名查询","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: PICC_006  |  描述: 查询status=2(已投保)的投保记录，验证返回结果中所有记录状态为2","1283","PICC_006 | 以保单状态为查询条件-已投保","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例ID: BH_002  |  描述: ordrId传空字符串，应返回系统错误（错误码999999）","652","BH_002 | 浏览记录-异常用例（ordrId为空字符串）","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderOperatorApi","test_order_operator_api","",""
+"用例ID: SBA_001  |  描述: 使用动态生成的姓名、街道、电话号码调用保存接口，验证返回成功","339","SBA_001 | 正常新增归还地址-动态生成姓名街道电话","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_give_back_address","",""
+"用例ID: OQ_016  |  描述: 订单查询--芝麻严选单条件查询","706","OQ_016 | 订单查询--芝麻严选","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: OQ_006  |  描述: 根据商品名称关键字查询订单","1594","OQ_006 | 按商品名称模糊查询","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例5：使用用例3提取的待支付 orderId 调用取消接口","0","MO_005 - 取消补订单","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestMakeOrderManagement","test_make_order_api","",""
+"用例4：以 goodsName 为查询条件，验证返回结果中的 goodsName 匹配","1","MO_004 - 以订单类型-查询补订单列表","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestMakeOrderManagement","test_make_order_api","",""
+"
+        CM_001: 合同申请-仲裁-中国海事-审核通过
+        
+        流程：
+        1. 发起仲裁合同申请
+        2. 查询最新申请记录ID
+        3. 运营端审核通过
+        4. 验证合同状态为已通过
+        ","3382","test_cm_001_arbitration_contract_approval","testcases.merchant.scenario.contract-lifecycle","2026-06-11","passed","2026-06-11","TestContractManagement","test_contract_management","",""
+"用例ID: OQ_012  |  描述: 验证分页参数正常工作","496","OQ_012 | 分页查询：第二页数据","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: COQ_009  |  描述: sourceType=2（支付宝），验证接口正常返回","3849","COQ_009 | 以app来源为查询条件--支付宝","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"用例ID: OFF_001  |  描述: 查询commonStatus=3的已上架商品列表，从中提取productId供下架操作使用","4998","OFF_001 | 查询私域已上架商品","testcases.admin.scenario.product","2026-06-11","passed","2026-06-11","TestProductOffShelf","test_product_shelf_toggle_admin","",""
+"用例ID: MOFF_003  |  描述: 查询type=2的已下架商品列表，验证该商品出现在下架列表中","4922","MOFF_003 | 验证商品已下架","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductOffShelf","test_product_shelf_toggle","",""
+"用例ID: RL_001  |  描述: 不传查询条件，获取全部续租订单列表","298","RL_001 | 无条件查询全部续租订单","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestReletOrderApi","test_relet_order_api","",""
+"用例ID: DPD_002  |  描述: 使用 SQL 获取的 product_id 查询草稿箱，验证商品存在","2921","DPD_002 | 查询草稿箱验证抖音商品","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestDouyinProductDraft","test_douyin_product_draft","",""
+"正常提交补订单测试（含自动重试机制）","5642","补订单接口-正常流程测试","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestRepairOrder","test_repair_order_api","",""
+"","9477","新建闲鱼商品-审核通过-下架商品-审核下架-删除商品流程","testcases.merchant.scenario.product","2026-06-11","passed","2026-06-11","TestXianYuProductCreate","test_xianyu_product_create","",""
+"用例ID: PU_001  |  描述: 无","675","PU_001 | 商品修改下架","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"按订单号查询购买订单（动态获取order_id）","2773","BO_002 - 按订单号查询购买订单","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestBuyOutOrderApi","test_buy_out_order_api","",""
+"用例ID: PA_007  |  描述: type=2 表示下架商品","897","PA_007 | 下架商品查询","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"用例ID: CSQ_08  |  描述: 组合筛选（近7日），用 SQL 独立查询已完成订单总量，验证 API 返回的该商户 completedOrderNum 与 DB 一致","2859","CSQ_08 | 多条件组合-验证某具体商户已完成订单总量","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: OS_004  |  描述: 检查每个分期的 rentStartDt 和 rentEndDt 格式正确、同期间隔合理、前后期连续","3242","OS_004 | 验证订单分期租期起止日期","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderStagesDetail","test_order_stages_detail_api","",""
+"用例ID: OST_009  |  描述: 状态为待归还（status='06'|'07'|unrent_time >当日期时间）的订单数量","748","OST_009 | 验证待归还订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: COQ_010  |  描述: 使用精确订单号查询，验证返回结果的订单号与查询条件一致","2511","COQ_010 | 以订单号为查询条件","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"按订单状态查询续租订单（动态获取status）","2660","RL_003 - 按订单状态查询","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestReletOrderApi","test_relet_order_api","",""
+"用例4：使用用例3提取的待支付 orderId 调用取消接口","205","DO_004 - 取消补押金","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestDepositOrderManagement","test_deposit_order_api","",""
+"用例ID: PD_001  |  描述: 检查 oldAllRent 与数据库中的总租金一致","805","PD_001 | 验证总租金字段正确性","testcases.merchant.api.order","2026-06-11","broken","2026-06-11","TestOrderPayDetailApi","test_order_pay_detail_api","",""
+"用例ID: OR_002  |  描述: 检查返回数据中的身份证累计下单数（idcardSubmitOrderCount）字段值","566","OR_002 | 验证身份证累计下单数","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderRecordsApi","test_check_order_records","",""
+"用例ID: CP_003  |  描述: orderId 传空字符串，应返回参数错误","722","CP_003 | 获取押金使用明细-边界用例（orderId 为空字符串）","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderOperatorApi","test_cash_pledge_api","",""
+"参数化执行订单详情接口测试用例","0","test_order_detail[OD_006]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestOrderDetail","test_order_detail_api","",""
+"用例ID: OQ_014  |  描述: 查询全部订单，应返回分页数据","1418","OQ_014 | 空查询条件（不传任何筛选）","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: PICC_004  |  描述: 查询insuranceType=2(天安财险)的投保记录，验证返回结果中所有记录险种为2","631","PICC_004 | 以险种为查询条件-天安财险","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例ID: PD_003  |  描述: 检查 noPayRent = 总租金 - 已支付租金","675","PD_003 | 验证未付租金正确性","testcases.merchant.api.order","2026-06-11","broken","2026-06-11","TestOrderPayDetailApi","test_order_pay_detail_api","",""
+"用例ID: RO_005  |  描述: 设置逾期天数最小值和最大值，验证返回结果的逾期天数均在范围内","616","RO_005 | 租后订单-按逾期天数范围查询","testcases.merchant.api.post_lease_management","2026-06-11","passed","2026-06-11","TestRentalOrderQuery","test_rental_order","",""
+"用例ID: MOFF_002  |  描述: 调用updateProductInfo接口，type=2下架指定商品","2863","MOFF_002 | 下架商品","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductOffShelf","test_product_shelf_toggle","",""
+"用例ID: SBA_004  |  描述: 修改归还地址信息，将地址类型改为1","2859","SBA_004 | 修改归还地址","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_give_back_address","",""
+"用例ID: OST_002  |  描述: 状态为待支付（status='01'）的订单数量","688","OST_002 | 验证待支付订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: CSQ_004  |  描述: 验证近30日筛选的起止时间为当前日期向前推30天 00:00:00 至当天 23:59:59","2973","CSQ_004 | 快捷时间筛选-近30日","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: OQ_015  |  描述: 订单查询--高分专享单条件查询","674","OQ_015 | 订单查询--高分专享","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: CSQ_003  |  描述: 验证近7日筛选的起止时间为当前日期向前推7天 00:00:00 至当天 23:59:59","2834","CSQ_003 | 快捷时间筛选-近7日","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: OQ_013  |  描述: 默认排序应为 create_time DESC，验证第一条记录时间晚于最后一条","1492","OQ_013 | 按创建时间降序排序","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"","6400","完整流程：新增短租商品 → 调用审核接口通过 → 验证商品审核状态为2","testcases.merchant.scenario.product","2026-06-11","passed","2026-06-11","TestProductCreateAndAudit","test_product_create_and_audit_flow","",""
+"","196","ROS_001 - 租后订单-批量发送短信（正常）","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestRentalOrderSms","test_rental_order","",""
+"用例ID: OFF_003  |  描述: 用 productId 精确查询已上架商品列表，验证该商品已不在上架列表中","3155","OFF_003 | 验证商品已下架","testcases.admin.scenario.product","2026-06-11","passed","2026-06-11","TestProductOffShelf","test_product_shelf_toggle_admin","",""
+"用例ID: PICC_008  |  描述: 查询chargeStatus=1(扣款成功)的投保记录，验证返回结果中所有记录扣款状态为1","800","PICC_008 | 以扣款状态为查询条件-扣款成功","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例ID: OQ_004  |  描述: 通过责任人的姓名模糊匹配订单","834","OQ_004 | 按责任人查询","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: OQ_OPE_004  |  描述: 使用真实店铺名称查询，验证返回记录的 shopid 均匹配","2793","OQ_OPE_004 | 以店铺名称为查询条件","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"","1","test_rental_order_query[RO_004]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestRentalOrderQuery","test_rental_order","",""
+"按订单状态查询购买订单（动态获取state）","2758","BO_003 - 按订单状态查询购买订单","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestBuyOutOrderApi","test_buy_out_order_api","",""
+"用例ID: SBA_002  |  描述: 禁用归还地址--type=0","2792","SBA_002 | 禁用归还地址--type=0","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_give_back_address","",""
+"用例ID: OR_003  |  描述: 检查返回数据中的收货手机成功下单数（phoneTransactionOrderCount）字段值","659","OR_003 | 验证收货手机成功下单数","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderRecordsApi","test_check_order_records","",""
+"用例ID: CSQ_005  |  描述: 组合筛选（近7日 + 短租），验证第一条记录的 completedOrderNum 与数据库独立查询一致","2782","CSQ_005 | 多条件组合-某具体商户已完成订单总量验证","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: MON_001  |  描述: 查询type=2的已下架商品列表，从中提取productId供上架操作使用","2788","MON_001 | 查询已下架商品","testcases.merchant.api.product","2026-06-11","failed","2026-06-11","TestProductOnShelf","test_product_shelf_toggle","",""
+"用例ID: OS_003  |  描述: 从数据库获取该订单每期状态，与接口返回的逐期比对","3244","OS_003 | 验证订单分期每期状态","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderStagesDetail","test_order_stages_detail_api","",""
+"用例ID: PICC_005  |  描述: 查询status=1(投保中)的投保记录，验证返回结果中所有记录状态为1","789","PICC_005 | 以保单状态为查询条件-投保中","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例3：以 orderStatus=01 为查询条件，断言所有记录 orderStatus 均为 01，并提取 orderId 用于取消","347","DO_003 - 以订单状态待支付-查询补押金列表","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestDepositOrderManagement","test_deposit_order_api","",""
+"用例ID: OS_002  |  描述: 从数据库获取该订单每期租金，与接口返回的逐期比对","3414","OS_002 | 验证订单分期每期租金","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderStagesDetail","test_order_stages_detail_api","",""
+"用例ID: OST_014  |  描述: 明日到期：租用中且应还日期为明天（status='23'）","820","OST_014 | 验证明日到期订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"调用 listEventRecord 查询跟进记录，验证最新一条的 orderId 和 content 与提交一致
+
+        独立性保障：若 ER_002 未执行（如 pytest 乱序或 ER_002 失败），
+        则通过 _ensure_event_record 独立提交一条记录，确保断言有数据可比对。
+        ","1","ER_003 - 查询跟进记录-验证新增记录","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestEventRecord","test_event_record","",""
+"传入orderId查询指定逾期订单，验证返回数据关键字段","2821","BD_002 - 按订单号查询逾期订单","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestOverdueOrderApi","test_overdue_order_api","",""
+"用例ID: COQ_006  |  描述: 使用固定订单号查询，验证接口正常返回","1978","COQ_006 | 以订单号查询条件","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"","9982","完整流程：查询账期详情 → 动态计算日期 → 续租 → 取消续租","testcases.merchant.scenario.order","2026-06-11","passed","2026-06-11","TestReletCancelReletOrder","test_relet_cancel_relet_order","",""
+"用例2：以 originalOrderId 为查询条件，验证返回结果匹配","202","DO_002 - 以订单编号-查询补押金列表","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestDepositOrderManagement","test_deposit_order_api","",""
+"查询type=1的已上架商品列表，验证该商品出现在上架列表中","1","MON_003 - 验证商品已上架","testcases.merchant.api.product","2026-06-11","skipped","2026-06-11","TestProductOnShelf","test_product_shelf_toggle","",""
+"用例ID: COQ_013  |  描述: SQL 预查询一条无投诉记录的订单，动态填充参数并调用工单上报接口","2250","COQ_013 | 工单上报","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestAddOffOrderComplaint","test_complaint_order_query_api","",""
+"用例ID: OST_013  |  描述: 今日已还：今日内实际归还的订单（status='22'）","732","OST_013 | 验证今日已还订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: QAL_001  |  描述: 查询租用中订单的操作记录，验证接口返回数据与数据库一致性","746","QAL_001 | 查询操作记录-正常参数-租用中订单","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestQueryActionAuditList","test_query_action_audit_list","",""
+"参数化执行订单详情接口测试用例","0","test_order_detail[OD_008]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestOrderDetail","test_order_detail_api","",""
+"用例ID: BH_003  |  描述: 无","854","BH_003 | 修改订单备注（动态数据）","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderOperatorApi","test_order_operator_api","",""
+"用例1：不带查询条件，获取 originalOrderId 等数据","568","DO_001 - 无查询条件-查询补押金列表","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestDepositOrderManagement","test_deposit_order_api","",""
+"用例3：以 status=01 为查询条件，断言所有记录 status 均为 01，并提取 orderId 用于取消","2684","MO_003 - 以订单状态待支付-查询补订单列表","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestMakeOrderManagement","test_make_order_api","",""
+"用例ID: CSQ_001  |  描述: 不输入任何筛选条件，使用近7日默认时间范围查询，验证接口正常投诉单总数返回及分页数据","2910","CSQ_001 | 默认加载-近7日查询验证接口正常投诉单总数","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: PA_006  |  描述: type=1 表示上架商品","447","PA_006 | 上架商品查询","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"用例ID: OST_012  |  描述: 今日未还：租用中且应还日期小于等于今日且未实际归还（需根据业务调整条件）","856","OST_012 | 验证今日未还订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: OST_007  |  描述: 状态为待结算（status='07'）的订单数量","579","OST_007 | 验证待结算订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: COQ_008  |  描述: rentType=1（长租），orderId 从首次查询中动态获取","3006","COQ_008 | 租期类型--长租为查询条件","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"","770","test_bh_004","testcases.merchant.api.order","2026-06-11","broken","2026-06-11","TestOrderOperatorApi","test_order_operator_api","",""
+"用例ID: COQ_011  |  描述: channels=[008,012]，验证返回记录的渠道来源均为零零享或寻租","3303","COQ_011 | 以渠道来源为查询条件","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"用例ID: OQ_OPE_001  |  描述: 使用真实存在的订单号查询，验证返回记录中包含该订单号","3622","OQ_OPE_001 | 以订单号为查询条件","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"用例ID: OQ_OPE_011  |  描述: 所有查询条件为空，验证接口正常返回记录列表","4004","OQ_OPE_011 | 空条件查询","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"
+        PS_001: 验证手动还款后回款统计金额变化
+        ","6208","test_ps_001_payback_summary_after_repayment","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestPaybackSummary","test_payback_summary","",""
+"用例ID: CSQ_012  |  描述: 从数据库统计订单量、投诉量，调用接口获取complaintTotalNum、completedOrderNum，校验所有店铺7天内累计投诉率","2850","CSQ_012 | 验证所有店铺7天内累计投诉率","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"随机选取一个跟进分类类型，调用 addEvent 提交跟进记录","0","ER_002 - 提交跟进记录","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestEventRecord","test_event_record","",""
+"用例ID: OQ_010  |  描述: 使用创建时间的起始日期过滤","572","OQ_010 | 按创建时间范围查询","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"","6289","UDA_001 - 修改订单收货地址完整流程","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestUpdateDeliveryAddressAPI","test_update_delivery_address_api","",""
+"用例ID: AOL_003  |  描述: 筛选今日跟进状态为'已跟进'的已分配订单，验证返回结果均符合筛选条件","786","AOL_003 | 已分配订单列表-按'今日跟进状态'筛选（已跟进）","testcases.merchant.api.post_lease_management","2026-06-11","passed","2026-06-11","TestAssignedOrderList","test_assigned_order_list_api","",""
+"用例ID: RO_006  |  描述: 按渠道条件筛选租后订单，验证返回结果渠道一致","814","RO_006 | 租后订单-按渠道筛选","testcases.merchant.api.post_lease_management","2026-06-11","passed","2026-06-11","TestRentalOrderQuery","test_rental_order","",""
+"用例ID: OQ_001  |  描述: 使用真实存在的订单号进行查询，验证返回唯一记录","552","OQ_001 | 通过订单号精确查询","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: OQ_003  |  描述: 筛选状态为‘订单完成’的订单","826","OQ_003 | 按订单状态查询（订单完成）","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: OR_005  |  描述: 检查返回数据中的在租数（idcardTransactionOrderCount）字段值","844","OR_005 | 验证在租数","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderRecordsApi","test_check_order_records","",""
+"用例ID: OQ_008  |  描述: 通过下单人手机号精确查询","552","OQ_008 | 按下单人手机号查询","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: PU_002  |  描述: 将下架商品（type=2）修改为上架（type=1），并验证数据库type变为1","793","PU_002 | 商品修改上架","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"unconditional=true查询全部坏账总金额，data直接返回数值","2800","BD_004 - 查询全部坏账金额","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOverdueOrderApi","test_overdue_order_api","",""
+"用例ID: PICC_009  |  描述: 查询chargeStatus=2(扣款失败)的投保记录，验证返回结果中所有记录扣款状态为2","684","PICC_009 | 以扣款状态为查询条件-扣款失败","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例ID: PA_008  |  描述: 获取最新商品的审核日志","678","PA_008 | 查看商品审核日志详情","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"用例ID: OST_001  |  描述: 查询当前店铺所有订单数量，与接口返回的 status=00 的 total 比较","496","OST_001 | 验证全部订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: SBA_003  |  描述: 禁用归还地址--type=1","2828","SBA_003 | 启用归还地址--type=1","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_give_back_address","",""
+"参数化条件查询: 订单号/险种/保单状态/扣款状态/组合条件","623","test_picc_query_by_condition[PICC_002]","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例ID: CSQ_09  |  描述: 组合筛选（近7日），用 SQL 独立查询已完成订单总量，验证 API 返回的该商户 completedOrderNum 与 DB 一致","2883","CSQ_09 | 多条件组合-验证某具体商户已完成订单总量","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: CSQ_002  |  描述: 验证今日筛选的起止时间与系统当前日期的 00:00:00 ~ 23:59:59 完全吻合","2441","CSQ_002 | 快捷时间筛选-今日","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: CSQ_011  |  描述: 从数据库统计订单量、投诉量，调用接口获取complaintTotalNum、completedOrderNum，双向校验投诉率","2933","CSQ_011 | 验证店铺投诉率","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: OQ_017  |  描述: 验证订单查询接口中，起租日期在最近一个月内的续租订单","425","OQ_017 | 订单查询--起租日期+续租订单","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: OQ_OPE_008  |  描述: 使用动态时间范围（当前时间往后推30天）查询，验证下单时间均在范围内","2876","OQ_OPE_008 | 以下单时间为查询条件","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"按商品名称查询续租订单（动态获取product_name）","2708","RL_005 - 按商品名称查询","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestReletOrderApi","test_relet_order_api","",""
+"用例ID: RO_002  |  描述: 未提供订单ID直接提交","2748","RO_002 | 缺少订单ID","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestRepairOrder","test_repair_order_api","",""
+"用例ID: PA_003  |  描述: 使用 productId 精确查询","298","PA_003 | 按商品编码查询","testcases.merchant.api.product","2026-06-11","failed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"用例1：不带查询条件，获取 orderId、originalOrderId、goodsName 等数据","2538","MO_001 - 无查询条件-查询补订单列表","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestMakeOrderManagement","test_make_order_api","",""
+"用例ID: COQ_003  |  描述: status=3（跟进中），验证返回记录状态均为跟进中，total 等于 progressComplaintNo（数据库独立验证）","3093","COQ_003 | 以处理状态--跟进中为查询条件","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"用例ID: AOL_005  |  描述: 同时按今日跟进状态=未跟进 和 跟进人姓名进行组合筛选","733","AOL_005 | 已分配订单列表-组合筛选（未跟进+指定跟进人）","testcases.merchant.api.post_lease_management","2026-06-11","passed","2026-06-11","TestAssignedOrderList","test_assigned_order_list_api","",""
+"用例ID: OQ_OPE_007  |  描述: 使用 channelId 过滤指定渠道（008,012,011）的订单","2864","OQ_OPE_007 | 以渠道来源为查询条件","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"","3107","完整流程：查询待审核订单 → 审核通过 → 获取归还地址 → 发货 → 生成PDF → 运营端查询验证 → 运营端确认收货 -> 验证租用中状态","testcases.merchant.scenario.order","2026-06-11","failed","2026-06-11","TestOrderFlow","test_order_flow","",""
+"用例ID: OR_001  |  描述: 检查返回数据中的成功下单数（hisTransactionOrderCount）字段值","554","OR_001 | 验证成功下单数","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderRecordsApi","test_check_order_records","",""
+"用例ID: CSQ_013  |  描述: 对于店铺 `${shop_id}`，在区间 `${today_start}` ~ `${today_end}` 。
+使用 SQL 在 DB 层统计该天的已完成订单数、投诉总量、已撤诉数，并计算投诉率与撤诉后投诉率（均格式化为带百分号字符串，如 ""1.23%""）。
+","2732","CSQ_013 | 店铺详情-按7天区间第3天校验订单/投诉/撤诉及投诉率","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: COQ_002  |  描述: status=0（待处理），验证返回记录状态均为待处理，total 等于 pendingComplaintNo（数据库独立验证）","2699","COQ_002 | 以订单状态--待处理为查询条件","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"用例ID: RO_003  |  描述: 使用不存在的订单号，应返回空列表","882","RO_003 | 租后订单-按不存在的订单号查询","testcases.merchant.api.post_lease_management","2026-06-11","passed","2026-06-11","TestRentalOrderQuery","test_rental_order","",""
+"用例ID: OST_004  |  描述: 状态为待发货（status='04'）的订单数量","602","OST_004 | 验证待发货订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"
+        无条件查询投保订单:
+        1. 第一页获取 total，计算总页数
+        2. 遍历所有分页，累计每条记录的 premiunAmt 和 insuranceAmt
+        3. 断言累计保费金额 == premiunAmtCount
+        4. 断言累计投保金额 == insuranceAmtCount
+        使用 Decimal 保证金额精度
+        ","349","PICC_001 - 无条件查询-分页遍历累计保费与投保金额校验","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例ID: ON_002  |  描述: 调用setProuctShowState接口（GET），type=1上架指定商品","2921","ON_002 | 上架商品","testcases.admin.scenario.product","2026-06-11","passed","2026-06-11","TestProductOnShelf","test_product_shelf_toggle_admin","",""
+"按下单人姓名查询续租订单（动态获取user_name）","2675","RL_004 - 按下单人姓名查询","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestReletOrderApi","test_relet_order_api","",""
+"用例ID: PA_002  |  描述: auditState=0 且 productStatus=1","200","PA_002 | 按审核状态+商品状态查询","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"用例ID: PA_004  |  描述: productName 模糊匹配","1757","PA_004 | 按商品名称模糊查询","testcases.merchant.api.product","2026-06-11","failed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"用例ID: MOFF_001  |  描述: 查询type=1的已上架商品列表，从中提取productId供下架操作使用","5641","MOFF_001 | 查询已上架商品","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductOffShelf","test_product_shelf_toggle","",""
+"参数化执行订单详情接口测试用例","0","test_order_detail[OD_004]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestOrderDetail","test_order_detail_api","",""
+"用例ID: OQ_OPE_005  |  描述: 使用真实商品编码查询，验证返回记录的 productId 均匹配","2937","OQ_OPE_005 | 以商品编码为查询条件","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"用例ID: PA_001  |  描述: auditState=0 查询待审核商品（1:审核拒绝；2：审核通过）","799","PA_001 | 按审核状态查询商品","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestProductAuditQuery","test_product_audit_query","",""
+"","1","test_rental_order_query[RO_007]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestRentalOrderQuery","test_rental_order","",""
+"用例ID: CSQ_007  |  描述: 组合筛选（近7日 + 短租），验证第一条记录的 withdrawnComplaintNum 与数据库已撤诉记录数一致","2961","CSQ_007 | 多条件组合-某店铺已撤诉投诉数验证","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: OBAR_002  |  描述: 验证当订单列表为空时的分配接口处理","637","OBAR_002 | 订单列表批量分配负责人--空订单列表","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_order_batch_assign_responsible_person_api","",""
+"用例ID: CP_003  |  描述: 查询状态为已撤诉（status=2）的投诉订单列表，验证返回记录的状态均为2","2904","CP_003 | 查询已撤诉订单","testcases.merchant.api.complaint","2026-06-11","failed","2026-06-11","TestComplaintAPI","test_complaint_api","",""
+"用例ID: OS_001  |  描述: 从数据库获取该订单所有分期期数，与接口返回的逐期比对","3654","OS_001 | 验证订单分期每期期数","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderStagesDetail","test_order_stages_detail_api","",""
+"用例ID: OQ_OPE_006  |  描述: 使用 channelProvenance=2 过滤支付宝来源订单","2608","OQ_OPE_006 | 以APP订单来源为查询条件--支付宝","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"","5051","完整流程:查询可补订单 → 获取用途 → 提交补订单 → 验证记录(含自动重试)","testcases.merchant.scenario.order","2026-06-11","skipped","2026-06-11","TestRepairOrder","test_repair_order","",""
+"按商品名称查询购买订单（动态获取productName）","2819","BO_005 - 按商品名称查询购买订单","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestBuyOutOrderApi","test_buy_out_order_api","",""
+"参数化执行订单详情接口测试用例","1","test_order_detail[OD_002]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestOrderDetail","test_order_detail_api","",""
+"","3232","完整流程：查询可补押金订单 → 补押金 → 验证补押金记录（金额+订单号）","testcases.merchant.scenario.order","2026-06-11","passed","2026-06-11","TestAddDepositOrder","test_add_deposit_order","",""
+"按下单人姓名查询购买订单（动态获取userName）","2506","BO_004 - 按下单人姓名查询购买订单","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestBuyOutOrderApi","test_buy_out_order_api","",""
+"用例ID: BH_001  |  描述: 传入有效的订单ID，应成功返回浏览历史数据","767","BH_001 | 浏览记录-正向用例（传入有效订单ID）","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderOperatorApi","test_order_operator_api","",""
+"
+        CM_002: 合同申请-诉讼-甲方乙方-审核拒绝
+        
+        流程：
+        1. 发起诉讼合同申请
+        2. 查询最新申请记录ID
+        3. 运营端审核拒绝
+        4. 验证合同状态为已拒绝
+        ","5498","test_cm_002_litigation_contract_rejection","testcases.merchant.scenario.contract-lifecycle","2026-06-11","passed","2026-06-11","TestContractManagement","test_contract_management","",""
+"参数化执行订单详情接口测试用例","1","test_order_detail[OD_003]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestOrderDetail","test_order_detail_api","",""
+"用例ID: OST_005  |  描述: 状态为待确认收货（status='05'）的订单数量","603","OST_005 | 验证待确认收货订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: ECF_003  |  描述: 无","11376","ECF_003 | 查看新增的紧急联系人","testcases.merchant.scenario.order","2026-06-11","passed","2026-06-11","TestEmergencyContactFlow","test_emergency_contact_flow","",""
+"不传查询条件，获取全部逾期订单列表，提取关键字段并计算坏账总额","222","BD_001 - 无条件查询全部逾期订单","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestOverdueOrderApi","test_overdue_order_api","",""
+"用例ID: AOL_004  |  描述: 通过跟进人姓名筛选已分配订单，验证返回结果均属于该跟进人","937","AOL_004 | 已分配订单列表-按'跟进人'筛选","testcases.merchant.api.post_lease_management","2026-06-11","passed","2026-06-11","TestAssignedOrderList","test_assigned_order_list_api","",""
+"用例ID: DPD_001  |  描述: 调用 addDraftProduct 接口保存抖音商品草稿，提取 data 字段作为 draft_id","3215","DPD_001 | 保存抖音商品到草稿箱","testcases.merchant.api.product","2026-06-11","passed","2026-06-11","TestDouyinProductDraft","test_douyin_product_draft","",""
+"用例ID: OQ_005  |  描述: 严格匹配收货人手机号（11位）","805","OQ_005 | 按收货人手机号查询","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: PICC_003  |  描述: 查询insuranceType=1(人保)的投保记录，验证返回结果中所有记录险种为1","901","PICC_003 | 以险种为查询条件-人保","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"使用步骤1提取的 productId 调用上架接口（type=1）","0","MON_002 - 上架商品","testcases.merchant.api.product","2026-06-11","skipped","2026-06-11","TestProductOnShelf","test_product_shelf_toggle","",""
+"用例ID: PICC_011  |  描述: 组合条件查询: status=2(已投保)+chargeStatus=1(扣款成功)+insuranceType=1(人保)，验证所有条件同时满足","618","PICC_011 | 投保状态+扣款状态+险种组合查询","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestPiccInsuranceOrder","test_picc_insurance_order_api","",""
+"用例ID: RO_001  |  描述: 不传任何筛选条件，查询租后订单列表，应返回分页数据","420","RO_001 | 租后订单-无条件查询（默认分页）","testcases.merchant.api.post_lease_management","2026-06-11","passed","2026-06-11","TestRentalOrderQuery","test_rental_order","",""
+"用例ID: BO_001  |  描述: 不传查询条件，获取全部购买订单列表","3028","BO_001 | 无条件查询全部购买订单","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestBuyOutOrderApi","test_buy_out_order_api","",""
+"用例ID: OQ_OPE_010  |  描述: 多条件组合查询，验证结果同时满足所有条件","1910","OQ_OPE_010 | 组合查询（订单号+订单状态+下单人姓名）","testcases.admin.api.order","2026-06-11","passed","2026-06-11","TestQueryOpeOrder","test_query_ope_order_api","",""
+"传入下单人查询指定逾期订单，验证返回数据关键字段","2753","BD_003 - 按下单人查询逾期订单","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestOverdueOrderApi","test_overdue_order_api","",""
+"参数化执行订单详情接口测试用例","1243","test_order_detail[OD_001]","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestOrderDetail","test_order_detail_api","",""
+"用例ID: COQ_007  |  描述: rentType=0（短租），orderId 从首次查询中动态获取","2923","COQ_007 | 租期类型--短租为查询条件","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
+"用例ID: COP_003  |  描述: 查询一条跟进中(status=3)投诉工单，调用处理接口将其状态改为已撤诉(status=2)，并通过DB验证状态变更","5945","COP_003 | 工单处理：跟进中 → 已撤诉","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderProcess","test_complaint_order_process_api","",""
+"","2768","完整流程：查询已分配逾期订单 → OCR验证码(失败重试-次数可配置) → 部分还款(销账) → 验证回款簿记录","testcases.merchant.scenario.order","2026-06-11","skipped","2026-06-11","TestPartialRepayment","test_partial_repayment","",""
+"用例2：以 originalOrderId 为查询条件，验证返回结果匹配","0","MO_002 - 以订单编号-查询补订单列表","testcases.merchant.api.order","2026-06-11","skipped","2026-06-11","TestMakeOrderManagement","test_make_order_api","",""
+"用例ID: OR_004  |  描述: 检查返回数据中的收货手机累计下单数（phoneSubmitOrderCount）字段值","474","OR_004 | 验证收货手机累计下单数","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderRecordsApi","test_check_order_records","",""
+"用例ID: CSQ_006  |  描述: 组合筛选（近7日 + 短租），用 SQL 独立查询投诉总量，验证 API 返回的该商户 complaintTotalNum 与 DB 一致","2807","CSQ_006 | 多条件组合-验证某具体商户--投诉总量验证","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintStatisticsQuery","test_complaint_statistics_query_api","",""
+"用例ID: AOL_006  |  描述: 验证已分配订单列表返回记录包含所有必要字段：订单编号、责任人、渠道、今日跟进状态、手机号、追期租金、追期天数、分类、上次跟进内容、跟进时间、分配时间、跟进人","748","AOL_006 | 已分配订单列表-验证列表字段完整性","testcases.merchant.api.post_lease_management","2026-06-11","failed","2026-06-11","TestAssignedOrderList","test_assigned_order_list_api","",""
+"调用 eventProgress 获取跟进分类类型列表，验证返回非空","1755","ER_001 - 获取跟进分类类型","testcases.merchant.api.post_lease_management","2026-06-11","skipped","2026-06-11","TestEventRecord","test_event_record","",""
+"用例ID: CP_004  |  描述: 查询渠道为 008 的投诉订单列表，验证返回记录的 channel 均为 008","2866","CP_004 | 按渠道来源查询投诉订单","testcases.merchant.api.complaint","2026-06-11","failed","2026-06-11","TestComplaintAPI","test_complaint_api","",""
+"用例ID: AOL_001  |  描述: 查询已分配订单列表，验证返回分页数据且包含基本字段","493","AOL_001 | 已分配订单列表-正向查询（无筛选条件）","testcases.merchant.api.post_lease_management","2026-06-11","passed","2026-06-11","TestAssignedOrderList","test_assigned_order_list_api","",""
+"用例ID: OFF_002  |  描述: 调用setProuctShowState接口，type=3下架指定商品","253","OFF_002 | 下架商品","testcases.admin.scenario.product","2026-06-11","passed","2026-06-11","TestProductOffShelf","test_product_shelf_toggle_admin","",""
+"用例ID: OQ_011  |  描述: 多条件组合查询，验证结果交集","515","OQ_011 | 组合查询：状态 + 下单人姓名 + 订单编号","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: OQ_002  |  描述: 使用数据库中不存在的订单号，应返回空列表","824","OQ_002 | 通过不存在的订单号查询","testcases.merchant.api.order","2026-06-11","passed","2026-06-11","TestOrderQuery","test_query_order_api","",""
+"用例ID: OST_003  |  描述: 状态为待审核（status='13'）的订单数量","190","OST_003 | 验证待审核订单统计","testcases.merchant.api.order","2026-06-11","failed","2026-06-11","TestStatusCount","test_status_count_api","",""
+"用例ID: COQ_004  |  描述: status=2（已撤诉），验证返回记录状态均为已撤诉，total 等于 withdrawnComplaintNo（数据库独立验证）","2595","COQ_004 | 以处理状态--已撤诉为查询条件","testcases.admin.api.after_sales_management","2026-06-11","passed","2026-06-11","TestComplaintOrderQuery","test_complaint_order_query_api","",""
