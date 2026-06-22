@@ -15,6 +15,7 @@ from common.config_manager import config_manager
 from common.database import DatabaseManager
 from common.logger import logger
 from config.config import DW_DB_CONFIG
+# (os already imported above)
 
 
 def pytest_addoption(parser):
@@ -119,4 +120,26 @@ def dw_db():
     logger.info(f"数仓数据库连接: {DW_DB_CONFIG['user']}@{DW_DB_CONFIG['host']}:{DW_DB_CONFIG['port']}")
     with DatabaseManager(db_config=DW_DB_CONFIG) as db_manager:
         yield db_manager
+
+
+def pytest_collection_modifyitems(session, config, items):
+    """，避免影响其他测试，将test_merchant_onboarding放到测试用例的最后执行，因为改用会生成新的token"""
+    target_filename = "test_merchant_onboarding.py"
+    tail = []
+    others = []
+    for item in items:
+        try:
+            item_file = os.path.basename(str(item.fspath))
+        except Exception:
+            item_file = item.nodeid.split("::")[0]
+
+        if item_file == target_filename or target_filename in str(item.fspath):
+            tail.append(item)
+        else:
+            others.append(item)
+
+    if tail:
+        items[:] = others + tail
+        logger.info(f"Reordered collection: moved {len(tail)} tests from {target_filename} to the end")
+
 

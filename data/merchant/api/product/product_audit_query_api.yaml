@@ -85,8 +85,10 @@ product_audit_tests:
       - query: |
           SELECT id, product_id 
           FROM llxz_product.ct_product
-          WHERE type = 3
+          WHERE type = 1
           AND shop_id = '${shop_id}'
+          AND channel_group_code = "001"
+          and product_type not in ('xianyu','meituan','kuaishou','')
           and delete_time is null
           ORDER BY create_time DESC 
           LIMIT 1
@@ -117,8 +119,10 @@ product_audit_tests:
       - query: |
           SELECT id, name 
           FROM llxz_product.ct_product
-          WHERE type = 3
+          WHERE type = 1
           AND shop_id = '${shop_id}'
+          AND channel_group_code = "001"
+          and product_type not in ('xianyu','meituan','kuaishou','')
           and delete_time is null
           ORDER BY create_time DESC 
           LIMIT 1
@@ -255,6 +259,8 @@ product_audit_tests:
           SELECT product_id 
           FROM llxz_product.ct_product 
           WHERE product_id IS NOT NULL AND status = 1 AND type = 1
+          AND channel_group_code = "001"
+          and product_type not in ('xianyu','meituan','kuaishou','')
           ORDER BY create_time DESC
           LIMIT 1
         columns: [ product_id ]
@@ -285,6 +291,8 @@ product_audit_tests:
           SELECT product_id
           FROM llxz_product.ct_product
           WHERE product_id IS NOT NULL AND status = 0 AND type = 2
+          AND channel_group_code = "001"
+          and product_type not in ('xianyu','meituan','kuaishou','')
           ORDER BY create_time DESC
           LIMIT 1
         columns: [ product_id ]

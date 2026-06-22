@@ -889,7 +889,7 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
             response_data = resp.json()
             response_str = json.dumps(response_data, ensure_ascii=False)[:5000]
             allure.attach(response_str, name="完整响应体", attachment_type=allure.attachment_type.JSON)
-            logger.info(f"解析后的 JSON 摘要: {response_str[:200]}...")
+            logger.info(f"解析后的 JSON 摘要: {response_str[:400]}...")
 
             # —— 响应摘要（提取 data 层关键字段）——
             _attach_response_summary(response_data)

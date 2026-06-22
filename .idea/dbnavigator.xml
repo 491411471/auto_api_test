@@ -1215,7 +1215,7 @@ LIMIT 1;]]></console>
       <regional-settings>
         <date-format value="MEDIUM" />
         <number-format value="UNGROUPED" />
-        <locale value="zh_CN" />
+        <locale value="SYSTEM_DEFAULT" />
         <use-custom-formats value="false" />
       </regional-settings>
       <environment>
