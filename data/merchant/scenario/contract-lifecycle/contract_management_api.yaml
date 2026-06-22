@@ -1,0 +1,125 @@
+# data/api/post_lease_management/contract_management_api.yaml
+# 合同管理流程测试数据
+# 接口1：/hzsx/opeShop/auditAdd（合同申请）
+# 接口2：/hzsx/opeShop/auditStatusModifyById（运营端审核）
+# 创建时间：2026-05-29
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+# ========== 用例1：合同申请（仲裁--中国海事） ==========
+contract_management_tests:
+  # 用例1：仲裁合同申请 + 审核通过
+  - case_id: CM_001
+    title: "合同申请-仲裁-中国海事-审核通过"
+    description: "发起仲裁合同申请，运营端审核通过，验证合同状态"
+    
+    # 步骤1：合同申请
+    step1_apply:
+      endpoint: "/hzsx/opeShop/auditAdd"
+      method: POST
+      body_template:
+        shopId: "${shop_id}"
+        platformChannel: 1
+        disputeResolutionType: 1  # 0是起诉，1是仲裁
+        arbitrationId: 3
+      expected_status: 200
+      validate:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.data"
+          operator: "=="
+          value: true
+    
+    # 步骤2：获取最新申请记录ID（SQL查询）
+    step2_query_id_sql: |
+      SELECT log.id
+      FROM llxz_product.ct_shop_lawsuit_arbitration_log log
+      WHERE log.shop_id = '${shop_id}'
+        AND log.change_contract_name = (
+          SELECT arbitration_name 
+          FROM llxz_product.ct_shop_lawsuit_arbitration_config config
+          WHERE config.id = 3
+        )
+      ORDER BY create_time DESC
+      LIMIT 1
+    
+    # 步骤3：运营端审核通过
+    step3_audit_pass:
+      endpoint: "/hzsx/opeShop/auditStatusModifyById"
+      method: POST
+      body_template:
+        id: "${log_id}"  # 动态填充步骤2查询到的ID
+        status: 1  # 1审核通过
+      expected_status: 200
+      validate:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.data"
+          operator: "=="
+          value: true
+    
+    # 步骤4：验证合同状态（SQL查询）
+    step4_verify_status_sql: |
+      SELECT status 
+      FROM llxz_product.ct_shop_lawsuit_arbitration_log 
+      WHERE id = ${log_id}
+    
+    expected_status: 1  # 期望的审核状态
+
+  # 用例2：诉讼合同申请 + 审核拒绝
+  - case_id: CM_002
+    title: "合同申请-诉讼-甲方乙方-审核拒绝"
+    description: "发起诉讼合同申请，运营端审核拒绝，验证合同状态"
+    
+    # 步骤1：合同申请
+    step1_apply:
+      endpoint: "/hzsx/opeShop/auditAdd"
+      method: POST
+      body_template:
+        shopId: "${shop_id}"
+        platformChannel: 1
+        disputeResolutionType: 0  # 0是起诉，1是仲裁
+        changeContractType: "01"  # 甲方乙方
+      expected_status: 200
+      validate:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.data"
+          operator: "=="
+          value: true
+    
+    # 步骤2：获取最新申请记录ID（SQL查询）
+    step2_query_id_sql: |
+      SELECT id
+      FROM llxz_product.ct_shop_lawsuit_arbitration_log
+      WHERE shop_id = '${shop_id}'
+      ORDER BY create_time DESC
+      LIMIT 1
+    
+    # 步骤3：运营端审核拒绝
+    step3_audit_reject:
+      endpoint: "/hzsx/opeShop/auditStatusModifyById"
+      method: POST
+      body_template:
+        id: "${log_id}"  # 动态填充步骤2查询到的ID
+        status: 0  # 0审核拒绝
+      expected_status: 200
+      validate:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.data"
+          operator: "=="
+          value: true
+    
+    # 步骤4：验证合同状态（SQL查询）
+    step4_verify_status_sql: |
+      SELECT status 
+      FROM llxz_product.ct_shop_lawsuit_arbitration_log 
+      WHERE id = ${log_id}
+    
+    expected_status: 0  # 期望的审核状态

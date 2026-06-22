@@ -1,0 +1,54 @@
+# 独立订单续租测试
+# 流程：查询账期详情 → 动态计算续租日期 → 执行续租
+# 接口1：/hzsx/business/order/queryOrderStagesDetail（查询账期详情）
+# 接口2：/hzsx/business/order/extendOrderRelet（续租）
+# 创建时间：2026-06-17
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  # 待测试的订单号（可替换为其他可续租订单）
+  order_id: "008OI202606092064246436626591744T"
+
+merchant:
+
+  # ==================== 步骤1：查询订单账期详情 ====================
+  query_order_stages:
+    endpoint: "/hzsx/business/order/queryOrderStagesDetail"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # ==================== 步骤2：执行续租 ====================
+  extend_order_relet:
+    endpoint: "/hzsx/business/order/extendOrderRelet"
+    method: POST
+    body_template:
+      orderId: "${order_id}"
+      startDate: "${start_date}"
+      endDate: "${end_date}"
+      day: 1
+    expected_status: 200
+    validate:
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.data.isXuZuFlag"
+        operator: "=="
+        value: 1

@@ -1,0 +1,165 @@
+# data/api/complaint/complaint_api.yaml
+# 投诉相关接口测试数据
+
+variables:
+  # 动态生成的变量（框架会自动替换）
+  random_name: "${random_name}"
+  random_phone: "${random_phone}"
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
+  excluded_order_id_2: "008OI202606092064246436626591744T"  # 续租还款测试专用订单，需排除
+
+complaint_tests:
+  # ==================== 测试用例一：投诉流程（新增投诉 + 查询验证） ====================
+  # 注意：此用例包含 SQL 获取订单信息，然后发起投诉请求，最后通过查询验证
+  # 由于需要两步操作，这里只配置投诉请求，查询验证部分在测试代码中单独处理
+  - case_id: "CP_001"
+    title: "新增投诉并验证"
+    description: "从数据库获取可投诉订单，发起投诉，然后通过订单号查询验证投诉记录存在"
+    method: POST
+    endpoint: "/hzsx/aliPay/orderComplaints/addOrderComplaints"
+    sql:
+      # 单条 SQL，返回 user_name, order_id, uid
+      query: |
+        SELECT o.order_id, o.user_name, o.uid
+        FROM llxz_order.ct_user_orders o
+        LEFT JOIN llxz_marketing.ct_order_complaints e ON o.order_id = e.order_id
+        WHERE e.order_id IS null
+        AND o.shop_id='71008738021cd3393bacbac182bd6a86af0b5c87'
+        AND o.order_id != '${excluded_order_id}'
+        AND o.order_id != '${excluded_order_id_2}'
+        LIMIT 1;
+      columns: ["user_name", "order_id", "uid"]
+    json:
+      complaintsCategoryOne: "17"
+      complaintsCategoryTwo: "19"
+      complaintsCategoryThird: "20"
+      content: "自动化测试--模拟小程序发起投诉"
+      images:
+        - "https://oss.llxzu.com/9689bb4776bf44cea01e73588e31dcc9.png"
+      name: "${user_name}"          # 从 SQL 获取的 user_name
+      orderId: "${order_id}"        # 从 SQL 获取的 order_id
+      telphone: "${random_phone}"   # 动态生成随机手机号
+      typeId: 5
+      uid: "${uid}"                 # 从 SQL 获取的 uid
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # ==================== 测试用例二：按APP查询已撤诉订单（sourceType=2） ====================
+  - case_id: "CP_002"
+    title: "按APP查询已撤诉订单"
+    description: "按APP查询已撤诉订单（sourceType=2）的投诉订单列表"
+    method: POST
+    endpoint: "/hzsx/orderComplaints/queryShopOrderComplaintsPage"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      complaintCreateTime: null
+      sourceType: "2"
+      complaintsType: ""
+      rentType: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 验证返回的 records 中所有记录的 sourceType 都是 2
+      - path: "$.data.orderComplaintsDtoPage.records[*].sourceType"
+        operator: "all_eq"
+        value: 2
+
+  # ==================== 测试用例三：按租期类型查询已撤诉订单（rentType=0） ====================
+  - case_id: "CP_003"
+    title: "按渠道来源查询已撤诉订单"
+    description: "按渠道来源查询已撤诉订单（rentType=0）的投诉订单列表"
+    method: POST
+    endpoint: "/hzsx/orderComplaints/queryShopOrderComplaintsPage"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      complaintCreateTime: null
+      channel: ""
+      complaintsType: ""
+      rentType: "0"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 验证返回的 records 中所有记录的 sourceType 都是 2
+      - path: "$.data.orderComplaintsDtoPage.records[*].rentType"
+        operator: "all_eq"
+        value: "0"
+
+  # ==================== 测试用例四：按涉诉类型查询投诉诉订单（typeId=5） ====================
+  - case_id: "CP_004"
+    title: "按涉诉类型查询投诉诉订单"
+    description: "按涉诉类型查询投诉诉订单（typeId=5--假冒伪劣品牌）的投诉订单列表"
+    method: POST
+    endpoint: "/hzsx/orderComplaints/queryShopOrderComplaintsPage"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      complaintCreateTime: null
+      sourceType: ""
+      complaintsType: ""
+      typeId: 5
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 验证返回的 records 中所有记录的 sourceType 都是 2
+      - path: "$.data.orderComplaintsDtoPage.records[*].typeId"
+        operator: "all_eq"
+        value: 5
+
+  # ==================== 测试用例五：渠道来源查询（channel=008） ====================
+  - case_id: "CP_005"
+    title: "按渠道来源查询投诉订单"
+    description: "查询渠道为 008 的投诉订单列表，验证返回记录的 channel 均为 008"
+    method: POST
+    endpoint: "/hzsx/orderComplaints/queryShopOrderComplaintsPage"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      complaintCreateTime: null
+      sourceType: ""
+      channel: "008"
+      rentType: ""
+      status: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      # 验证 records 列表中每个元素的 channel 都是 "008"
+      - path: "$.data.orderComplaintsDtoPage.records[*].channel"
+        operator: "all_eq"
+        value: "008"

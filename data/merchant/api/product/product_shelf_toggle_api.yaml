@@ -1,0 +1,166 @@
+# 商家端 - 商品上下架流程测试数据
+# 用例1: 商品下架流程（查询已上架 → 下架 → 验证已下架）
+# 用例2: 商品上架流程（查询已下架 → 上架 → 验证已上架）
+
+variables:
+  channel_group_code: "001"
+
+# ==================== 用例1: 商品下架流程 ====================
+product_off_shelf_tests:
+  # 步骤1: 查询已上架商品（type=1）
+  - case_id: "MOFF_001"
+    title: "查询已上架商品"
+    description: "查询type=1的已上架商品列表，从中提取productId供下架操作使用"
+    method: POST
+    endpoint: "/hzsx/product/selectBusinessPrdouct"
+    json:
+      pageSize: 10
+      pageNumber: 1
+      isDelete: false
+      type: "1"
+      sortField: ""
+      sortOrder: ""
+      channelGroupCode: "001"
+      productStatus: "1"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+      - path: "$.data.records"
+        operator: "type"
+        value: "list"
+
+  # 步骤2: 下架商品（type=2）
+  - case_id: "MOFF_002"
+    title: "下架商品"
+    description: "调用updateProductInfo接口，type=2下架指定商品"
+    method: POST
+    endpoint: "/hzsx/product/updateProductInfo"
+    json:
+      productId: "${product_id}"
+      type: 2
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # 步骤3: 验证商品已下架（type=2查询已下架列表，应包含该商品）
+  - case_id: "MOFF_003"
+    title: "验证商品已下架"
+    description: "查询type=2的已下架商品列表，验证该商品出现在下架列表中"
+    method: POST
+    endpoint: "/hzsx/product/selectBusinessPrdouct"
+    json:
+      pageSize: 10
+      pageNumber: 1
+      productId: "${product_id}"
+      isDelete: false
+      type: "2"
+      sortField: ""
+      sortOrder: ""
+      channelGroupCode: "001"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+# ==================== 用例2: 商品上架流程 ====================
+product_on_shelf_tests:
+  # 步骤1: 查询已下架商品（type=2）
+  - case_id: "MON_001"
+    title: "查询已下架商品"
+    description: "查询type=2的已下架商品列表，从中提取productId供上架操作使用"
+    method: POST
+    endpoint: "/hzsx/product/selectBusinessPrdouct"
+    json:
+      pageSize: 10
+      pageNumber: 1
+      productId: ""
+      isDelete: false
+      type: "2"
+      sortField: ""
+      sortOrder: ""
+      channelGroupCode: "001"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+      - path: "$.data.records"
+        operator: "type"
+        value: "list"
+
+  # 步骤2: 上架商品（type=1）
+  - case_id: "MON_002"
+    title: "上架商品"
+    description: "调用updateProductInfo接口，type=1上架指定商品"
+    method: POST
+    endpoint: "/hzsx/product/updateProductInfo"
+    json:
+      productId: "${product_id}"
+      type: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # 步骤3: 验证商品已上架（type=1查询已上架列表，应包含该商品）
+  - case_id: "MON_003"
+    title: "验证商品已上架"
+    description: "查询type=1的已上架商品列表，验证该商品出现在上架列表中"
+    method: POST
+    endpoint: "/hzsx/product/selectBusinessPrdouct"
+    json:
+      pageSize: 10
+      pageNumber: 1
+      productId: "${product_id}"
+      isDelete: false
+      type: "1"
+      sortField: ""
+      sortOrder: ""
+      channelGroupCode: "001"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true

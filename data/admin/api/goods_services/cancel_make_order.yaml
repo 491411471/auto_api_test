@@ -1,0 +1,50 @@
+# 运营端 - 订单管理：质选服务取消测试数据
+# 流程：查询待支付质选服务单 → 取消第一条质选服务单
+
+variables:
+  channelGroupId: "001"
+
+cancel_make_order_tests:
+  # ========== 步骤1：查询待支付的质选服务单 ==========
+  - case_id: "CMO_001"
+    title: "查询待支付的质选服务单"
+    description: "查询状态为待支付(01)的质选服务单，获取orderId用于后续取消操作"
+    method: POST
+    endpoint: "/hzsx/ope/order/queryOpeMakeOrderList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupId: "${channelGroupId}"
+      status: "01"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+    # 从响应中提取第一个查询结果的 orderId，供 CMO_002 取消时使用
+    extract_vars:
+      - var_name: "cancel_order_id"
+        path: "data.backstageMakeOrderDtoList.records[0].orderId"
+
+  # ========== 步骤2：取消质选服务单 ==========
+  - case_id: "CMO_002"
+    title: "取消质选服务单"
+    description: "使用上一步查询到的orderId取消质选服务单，验证取消操作成功"
+    method: POST
+    endpoint: "/hzsx/ope/order/updateOpeMakeOrder"
+    json:
+      orderId: "${cancel_order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true

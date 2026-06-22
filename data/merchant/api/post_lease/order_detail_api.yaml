@@ -1,0 +1,197 @@
+# 订单详情接口测试数据
+# 接口：/hzsx/dcm/order/detailOrder
+# 请求方法：POST
+# 接口功能：查询订单详细信息（对应"已分配"列表页操作列"详情"按钮）
+# 创建时间：2026-05-26
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/dcm/order/detailOrder"
+
+order_detail_tests:
+  # ==================== 正向用例：查询有效订单详情 ====================
+  - case_id: OD_001
+    title: "查询订单详情-正向用例（从已分配逾期订单列表获取订单号）"
+    description: "从已分配逾期订单列表中获取第一个订单号，调用订单详情接口，验证返回完整订单信息"
+    <<: *common_endpoint
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.data.orderId"
+        operator: "=="
+        value: ${order_id}
+      - path: "$.data"
+        operator: "type"
+        value: "dict"
+
+  # ==================== 正向用例：验证订单详情中的责任人信息 ====================
+  - case_id: OD_002
+    title: "查询订单详情-验证责任人字段"
+    description: "验证订单详情中是否返回责任人（responsibleName）字段"
+    <<: *common_endpoint
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.responsibleName"
+        operator: "exists"
+
+  # ==================== 正向用例：验证订单详情中的渠道信息 ====================
+  - case_id: OD_003
+    title: "查询订单详情-验证渠道字段"
+    description: "验证订单详情中是否返回渠道（channelId）信息"
+    <<: *common_endpoint
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.data.channelId"
+        operator: "exists"
+
+  # ==================== 正向用例：验证订单详情中的追期和租金信息（数据库对比） ====================
+  - case_id: OD_004
+    title: "查询订单详情-验证总租金"
+    description: "从账期表（ct_order_by_stages）查询订单的总租金与接口返回字段进行数据库对比验证"
+    <<: *common_endpoint
+    sql:
+      - query: |
+          SELECT COALESCE(MAX(total_rent), 0) AS total_rent
+          FROM llxz_order.ct_order_by_stages
+          WHERE order_id = '${order_id}'
+        column: total_rent
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.totalRent"
+        operator: "=="
+        value: ${total_rent}
+
+
+  # ==================== 正向用例：验证订单详情中的总租期数（数据库对比） ====================
+  - case_id: OD_005
+    title: "查询订单详情-验证总租期数"
+    description: "从账期表（ct_order_by_stages）查询订单的总租期数与接口返回字段进行数据库对比验证"
+    <<: *common_endpoint
+    sql:
+      - query: |
+          SELECT COUNT(*) AS total_periods
+          FROM llxz_order.ct_order_by_stages
+          WHERE order_id = '${order_id}'
+        column: total_periods
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.totalPeriods"
+        operator: "=="
+        value: ${total_periods}
+
+  # ==================== 正向用例：验证订单详情中的已还期数（数据库对比） ====================
+  - case_id: OD_006
+    title: "查询订单详情-验证已还期数"
+    description: "从账期表（ct_order_by_stages）查询订单的已还期数与接口返回字段进行数据库对比验证"
+    <<: *common_endpoint
+    sql:
+      - query: |
+          SELECT COUNT(CASE WHEN status in ('2','3') THEN 1 END) AS paid_periods  -- 已还期数
+          FROM llxz_order.ct_order_by_stages
+          WHERE order_id = '${order_id}'
+        column: paid_periods
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.paidPeriods"
+        operator: "=="
+        value: ${paid_periods}
+
+  # ==================== 正向用例：验证订单详情中的逾期总金额（数据库对比） ====================
+  - case_id: OD_007
+    title: "查询订单详情-验证逾期账期数"
+    description: "从账期表（ct_order_by_stages）查询订单的逾期账期数与接口返回字段进行数据库对比验证"
+    <<: *common_endpoint
+    sql:
+      - query: |
+          SELECT COUNT(CASE WHEN status in ('4') AND statement_date < CURDATE() THEN 1 END) AS overdue_periods  # 逾期账期数
+          FROM llxz_order.ct_order_by_stages
+          WHERE order_id = '${order_id}'
+        column: overdue_periods
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.overduePeriods"
+        operator: "=="
+        value: ${overdue_periods}
+
+  # ==================== 正向用例：验证订单详情中的累计逾期天数（数据库对比） ====================
+  - case_id: OD_008
+    title: "查询订单详情-验证累计逾期天数"
+    description: "从账期表（ct_order_by_stages）查询订单的累计逾期天数与接口返回字段进行数据库对比验证"
+    <<: *common_endpoint
+    sql:
+      - query: |
+          SELECT COALESCE(DATEDIFF(CURRENT_DATE,MIN(CASE WHEN status in ('4') AND statement_date < CURRENT_DATE THEN statement_date END))) AS overdue_days  # 累计逾期天数
+          FROM llxz_order.ct_order_by_stages
+          WHERE order_id = '${order_id}'
+        column: overdue_days
+    json:
+      orderId: ${order_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.overdueDays"
+        operator: "=="
+        value: ${overdue_days}

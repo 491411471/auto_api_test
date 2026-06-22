@@ -1,0 +1,53 @@
+# 运营端 - 订单列表：转订单接口测试数据
+# 接口：GET /hzsx/ope/order/set_order_to_shop
+# 流程：SQL获取待转单订单 → 调用转单接口 → SQL验证订单已转入目标店铺
+
+variables:
+  source_shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  target_shop_id: "2025051401305354621747200653217"
+
+set_order_to_shop_tests:
+  - case_id: "SOT_001"
+    title: "转订单 - 将订单从源店铺转入目标店铺"
+    description: "从源店铺查询状态为10的订单，调用转单接口转入目标店铺，并通过SQL验证转入成功"
+    method: GET
+    endpoint: "/hzsx/ope/order/set_order_to_shop"
+
+    # 前置SQL：从源店铺查询一条可转单的订单
+    sql:
+      query: >
+        SELECT order_id, shop_id
+        FROM llxz_order.ct_user_orders
+        WHERE shop_id = '${source_shop_id}' AND status = '10'
+        LIMIT 1
+      columns:
+        - order_id
+        - shop_id
+    # 请求参数（order_id 由前置SQL动态注入）
+    params:
+      order_id: "${order_id}"
+      shop_id: "${target_shop_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+    # 后置SQL：验证订单已转入目标店铺
+    post_sql:
+      - query: >
+          SELECT order_id, shop_id
+          FROM llxz_order.ct_user_orders
+          WHERE shop_id = '${target_shop_id}' AND order_id = '${order_id}'
+        columns:
+          - order_id
+          - shop_id
+        expected_value:
+          order_id: "${order_id}"
+          shop_id: "${target_shop_id}"
+        operator: "=="

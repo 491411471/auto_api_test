@@ -1,0 +1,210 @@
+# 运营端 - 订单管理：投保订单查询接口测试数据
+# 接口：POST /hzsx/ope/picc/queryLogPage
+# 覆盖场景：空条件、上架渠道、订单号、投保状态、扣款状态、险种、创建时间、复合查询
+
+variables: {}
+
+# ==================== 公共锚点 ====================
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/ope/picc/queryLogPage"
+
+.common_json: &common_json
+  pageNumber: 1
+  pageSize: 10
+  beginDate: ""
+  endDate: ""
+  policySelectStart: ""
+  policySelectEnd: ""
+
+picc_query_tests:
+  # ========== TC01: 空条件查询投保订单 ==========
+  - case_id: "IOQ_001"
+    title: "空条件查询投保订单"
+    description: "不带任何查询条件，验证接口正常返回数据，并提取orderId和id供后续用例使用"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 1
+    # 从响应中提取第一个查询结果的 orderId 和 id，供后续用例使用
+    extract_vars:
+      - var_name: "dynamic_order_id"
+        path: "data.piccInsurenceLogDtoList.records[0].orderId"
+      - var_name: "dynamic_record_id"
+        path: "data.piccInsurenceLogDtoList.records[0].id"
+
+  # ========== TC02: 以上架渠道为查询条件 ==========
+  - case_id: "IOQ_002"
+    title: "以上架渠道(channelId=008)为查询条件"
+    description: "使用channelId=008查询，验证返回记录的channelId均为008"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      channelId: "008"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.records[*].channelId"
+        operator: "all_eq"
+        value: "008"
+
+  # ========== TC03: 以订单号为查询条件（使用TC01提取的orderId） ==========
+  - case_id: "IOQ_003"
+    title: "以订单号为查询条件"
+    description: "使用TC01提取的orderId查询，验证返回记录的orderId均匹配"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: "${dynamic_order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.records[*].orderId"
+        operator: "all_eq"
+        value: "${dynamic_order_id}"
+
+  # ========== TC04: 以投保状态(status=1 投保中)为查询条件 ==========
+  - case_id: "IOQ_004"
+    title: "以投保状态(status=1 投保中)为查询条件"
+    description: "查询status=1的投保记录，验证返回结果中status均为1，并提取orderId供后续操作使用"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: ""
+      status: 1
+      createDates: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.records[*].status"
+        operator: "all_eq"
+        value: "1"
+    # 提取投保中(status=1)的orderId，供保险操作用例（取消投保）使用
+    extract_vars:
+      - var_name: "status_order_id"
+        path: "data.piccInsurenceLogDtoList.records[0].orderId"
+
+  # ========== TC05: 以扣款状态(chargeStatus=1)为查询条件 ==========
+  - case_id: "IOQ_005"
+    title: "以扣款状态(chargeStatus=1)为查询条件"
+    description: "查询chargeStatus=1的投保记录，验证返回结果中chargeStatus均为1"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: ""
+      chargeStatus: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.records[*].chargeStatus"
+        operator: "all_eq"
+        value: "1"
+
+  # ========== TC06: 以险种人保(insuranceType=1)为查询条件 ==========
+  - case_id: "IOQ_006"
+    title: "以险种人保(insuranceType=1)为查询条件"
+    description: "查询insuranceType=1(人保)的投保记录，验证返回结果中insuranceType均为1"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: ""
+      insuranceType: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.records[*].insuranceType"
+        operator: "all_eq"
+        value: 1
+
+  # ========== TC07: 以保单创建时间为查询条件 ==========
+  - case_id: "IOQ_007"
+    title: "以保单创建时间范围为查询条件"
+    description: "使用beginDate/endDate查询指定时间范围内的投保记录，验证createTime均在范围内"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: ""
+      createDates:
+        - "${create_date_start}"
+        - "${create_date_end}"
+      beginDate: "${begin_date}"
+      endDate: "${end_date}"
+      "insuranceType": 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.records[*].createTime"
+        operator: "all_between"
+        value:
+          - "${begin_date}"
+          - "${end_date}"
+
+  # ========== TC08: 复合查询（上架渠道 + 投保状态 + 扣款状态） ==========
+  - case_id: "IOQ_008"
+    title: "复合查询（上架渠道+投保状态+扣款状态）"
+    description: "组合channelId=008、status=1、chargeStatus=1三个条件查询，验证结果同时满足所有条件"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: ""
+      channelId: "008"
+      status: 1
+      chargeStatus: 1
+      createDates: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.records[*].channelId"
+        operator: "all_eq"
+        value: "008"
+      - path: "$.data.piccInsurenceLogDtoList.records[*].status"
+        operator: "all_eq"
+        value: "1"
+      - path: "$.data.piccInsurenceLogDtoList.records[*].chargeStatus"
+        operator: "all_eq"
+        value: "1"

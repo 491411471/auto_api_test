@@ -1,0 +1,253 @@
+# 运营端 - 商品管理：商品审核-商品查询接口测试数据
+# 接口：POST /hzsx/examineProduct/selectExaminePoroductList
+# 覆盖场景：空条件查询、商品名称、商品编码、店铺编码、店铺名称、创建时间、库存状态(7天内)、库存状态(已过期)、已上架、已下架
+
+variables:
+  channelGroupCode: "001"
+
+# ==================== 公共锚点 ====================
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+
+.common_json: &common_json
+  pageNumber: 1
+  pageSize: 10
+  newAuditState: 1
+  channelGroupCode: "001"
+  sortField: ""
+  sortOrder: ""
+  buyOutQueryMy: "all"
+  businessModel: ""
+  creatTime: null
+  categoryId: null
+
+examine_product_tests:
+  # ========== TC01: 空条件查询待审核商品 ==========
+  - case_id: "EP_001"
+    title: "空条件查询待审核商品"
+    description: "使用默认查询条件查询待审核商品列表，随机选中一条商品提取商品名称/商品编号/店铺名称/店铺编号"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      auditState: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records"
+        operator: "not_empty"
+
+  # ========== TC02: 以商品名称为查询条件 ==========
+  - case_id: "EP_002"
+    title: "以商品名称为查询条件"
+    description: "使用商品名称查询，验证返回的商品名称均与查询条件一致"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: "${product_name}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].name"
+        operator: "contains"
+        value: "${product_name}"
+
+  # ========== TC03: 以商品编码为查询条件 ==========
+  - case_id: "EP_003"
+    title: "以商品编码为查询条件"
+    description: "使用商品编码查询，验证返回的商品编码均与查询条件一致"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: ""
+      productId: "${product_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].productId"
+        operator: "all_eq"
+        value: "${product_id}"
+
+  # ========== TC04: 以店铺编码为查询条件 ==========
+  - case_id: "EP_004"
+    title: "以店铺编码为查询条件"
+    description: "使用店铺编码查询，验证返回的店铺编码均与查询条件一致"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: ""
+      productId: ""
+      shopId: "${shop_id}"
+      shopName: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].shopId"
+        operator: "all_eq"
+        value: "${shop_id}"
+
+  # ========== TC05: 以店铺名称为查询条件 ==========
+  - case_id: "EP_005"
+    title: "以店铺名称为查询条件"
+    description: "使用店铺名称查询，验证返回的店铺名称均与查询条件一致"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: "${shop_name}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].shopName"
+        operator: "contains"
+        value: "${shop_name}"
+
+  # ========== TC06: 以创建时间为查询条件 ==========
+  - case_id: "EP_006"
+    title: "以创建时间为查询条件"
+    description: "使用创建时间范围查询，验证返回的商品创建时间均在查询范围内"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      createDate:
+        - "${create_date_start}"
+        - "${create_date_end}"
+      creatTime:
+        - "${create_time_start}"
+        - "${create_time_end}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].createTime"
+        operator: "all_between"
+        value:
+          - "${create_time_start}"
+          - "${create_time_end}"
+
+  # ========== TC07: 以库存状态(7天内)为查询条件 ==========
+  - case_id: "EP_007"
+    title: "以库存状态(7天内)为查询条件"
+    description: "查询库存将在7天内过期的商品，验证返回商品的库存剩余天数均小于7"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      createDate: null
+      skusInventoryMinDayType: "productsSkuWill"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].skusInventoryMinDayNum"
+        operator: "all_le"
+        value: 7
+
+  # ========== TC08: 以库存状态(已过期)为查询条件 ==========
+  - case_id: "EP_008"
+    title: "以库存状态(已过期)为查询条件"
+    description: "查询库存已过期的商品，验证返回商品的库存剩余天数均小于0"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      createDate: null
+      skusInventoryMinDayType: "productsSkuDelisted"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].skusInventoryMinDayNum"
+        operator: "all_lt"
+        value: 0
+
+  # ========== TC09: 以已上架状态为查询条件 ==========
+  - case_id: "EP_009"
+    title: "以已上架状态为查询条件"
+    description: "查询已上架商品(type=1)，验证返回商品的上架状态均为已上架(type=1)"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      auditState: ""
+      type: "1"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].type"
+        operator: "all_eq"
+        value: 1
+
+  # ========== TC10: 以已下架为查询条件 ==========
+  - case_id: "EP_010"
+    title: "以已下架为查询条件"
+    description: "查询已下架商品(type=2)，验证返回商品的上架状态均为已下架(type=2)"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      auditState: ""
+      type: "2"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].type"
+        operator: "all_eq"
+        value: 2

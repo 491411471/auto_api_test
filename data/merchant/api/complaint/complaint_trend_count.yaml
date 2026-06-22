@@ -1,0 +1,71 @@
+# 投诉趋势 - 投诉量（按 businessModel 分类，逐日 SQL 比对）
+# 用例1：businessModel=0（短租），校验 complaintsCount vs SQL complaints_type=0
+# 用例2：businessModel=1（长租），校验 complaintsCount vs SQL complaints_type=1
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  start_time: "${start_time}"   # 由测试代码动态注入（当前日期向前推7天）
+  end_time: "${end_time}"       # 由测试代码动态注入（当前日期）
+
+api_config:
+  method: POST
+  endpoint: "/hzsx/orderComplaints/queryOrderShopComplaintsAnalysisPageNew"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+
+allure:
+  epic: "商家端"
+  feature: "数据报表"
+  story: "投诉趋势 - 投诉量"
+
+complaint_trend_count_tests:
+
+  # 用例1：短租每日投诉量
+  - case_id: "CTC_001"
+    title: "短租每日投诉量"
+    description: "businessModel=0，校验 complaintsCount 与 SQL complaints_type=0 逐日比对"
+    business_model: "0"
+    api_field: "complaintsCount"
+    daily_sql:
+      query: >
+        SELECT DATE(create_time) AS stat_date,
+               COUNT(*) AS complaint_cnt
+        FROM llxz_marketing.ct_order_complaints
+        WHERE delete_time IS NULL
+        AND create_time BETWEEN '${start_time}' AND '${end_time}'
+        AND shop_id='${shop_id}'
+        AND business_model = 0
+        GROUP BY DATE(create_time)
+        ORDER BY stat_date
+      multiple: true
+      columns:
+        - stat_date
+        - complaint_cnt
+
+  # 用例2：长租每日投诉量
+  - case_id: "CTC_002"
+    title: "长租每日投诉量"
+    description: "businessModel=1，校验 complaintsCount 与 SQL complaints_type=1 逐日比对"
+    business_model: "1"
+    api_field: "complaintsCount"
+    daily_sql:
+      query: >
+        SELECT DATE(create_time) AS stat_date,
+               COUNT(*) AS complaint_cnt
+        FROM llxz_marketing.ct_order_complaints
+        WHERE delete_time IS NULL
+        AND create_time BETWEEN '${start_time}' AND '${end_time}'
+        AND shop_id='${shop_id}'
+        AND business_model = 1
+        GROUP BY DATE(create_time)
+        ORDER BY stat_date
+      multiple: true
+      columns:
+        - stat_date
+        - complaint_cnt

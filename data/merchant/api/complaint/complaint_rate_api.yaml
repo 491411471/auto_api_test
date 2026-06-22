@@ -1,0 +1,75 @@
+# 投诉率统计验证
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  date_start: "${date_start}"
+  date_end: "${date_end}"
+
+complaint_rate_tests:
+  - case_id: "CR_001"
+    title: "验证店铺投诉率"
+    description: "从数据库统计订单量、投诉量，调用接口获取complaintTotalNum、completedOrderNum，双向校验投诉率"
+    method: POST
+    endpoint: "/hzsx/orderComplaints/queryShopOrderComplaintsPage"
+    # ---- SQL 1: 订单总量 ----
+    sql:
+      # 第一条 SQL：订单总量
+      - query: >
+          SELECT COUNT(*) AS completed_order_num
+          FROM llxz_order.ct_user_orders
+          WHERE status IN ('01','04','05','06','07','08','09','10','12','13','14')
+          AND create_time BETWEEN '${date_start}' AND '${date_end}'
+          AND channel_id IN ('005','007','008','009','011','012','082','085')
+          AND (delete_time = '2001-01-01 00:00:00' OR delete_time IS NULL)
+          AND withhold_type IS NOT NULL
+          AND shop_id='${shop_id}'
+        column: completed_order_num
+
+      # 第二条 SQL：投诉总量
+      - query: >
+          SELECT COUNT(*) AS complaint_total_num
+          FROM llxz_marketing.ct_order_complaints
+          WHERE delete_time IS NULL
+          AND create_time BETWEEN '${date_start}' AND '${date_end}'
+          AND shop_id='${shop_id}'
+        column: complaint_total_num
+
+    # ---- API 请求参数 ----
+    params:
+      pageNumber: 1
+      pageSize: 10
+      status: ""
+      startTime: "${date_start}"
+      endTime: "${date_end}"
+    # ---- 响应断言 ----
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+    # ---- 提取变量（字段在 data.records[0] 内） ----
+    extract_vars:
+      - var_name: "api_complaint_total"
+        path: "data.records[0].complaintTotalNum"
+      - var_name: "api_completed_order"
+        path: "data.records[0].completedOrderNum"
+
+    # ---- 后置 SQL 校验（可选） ----
+    post_sql:
+      - query: >
+          SELECT
+            (SELECT COUNT(*) FROM llxz_marketing.ct_order_complaints
+             WHERE delete_time IS NULL
+             AND create_time BETWEEN '${date_start}' AND '${date_end}'
+             AND shop_id='${shop_id}') AS complaint_total,
+            (SELECT COUNT(*) FROM llxz_order.ct_user_orders
+             WHERE status IN ('01','04','05','06','07','08','09','10','12','13','14')
+             AND create_time BETWEEN '${date_start}' AND '${date_end}'
+             AND channel_id IN ('005','007','008','009','011','012','082','085')
+             AND (delete_time = '2001-01-01 00:00:00' OR delete_time IS NULL)
+             AND withhold_type IS NOT NULL
+             AND shop_id='${shop_id}') AS order_total
+        columns: ["complaint_total", "order_total"]

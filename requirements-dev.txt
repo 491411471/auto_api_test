@@ -1,0 +1,33 @@
+# 开发依赖
+# 用于代码质量检查、格式化、类型检查等
+
+# 代码格式化
+black==23.11.0
+
+# 代码风格检查
+flake8==6.1.0
+flake8-bugbear==23.11.28
+flake8-comprehensions==3.14.0
+
+# 类型检查
+mypy==1.7.0
+types-requests==2.31.0.10
+types-PyYAML==6.0.12.12
+
+# YAML 检查
+yamllint==1.33.0
+
+# 测试覆盖率
+pytest-cov==4.1.0
+
+# Pre-commit 钩子
+pre-commit==3.5.0
+
+# 环境变量管理
+python-dotenv==1.0.0
+
+# 并发日志处理
+concurrent-log-handler==0.9.24
+
+# 启动http服务
+# python -m http.server 8080 --bind 0.0.0.0

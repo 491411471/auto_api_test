@@ -1,0 +1,100 @@
+# 运营报表 - 近7天每日运营数据验证（进件量/下单量/发货量/发货率）
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  start_date: "${start_date}"          # 由测试代码动态注入（API 请求参数，格式 YYYY-MM-DD）
+  end_date: "${end_date}"              # 由测试代码动态注入（API 请求参数，格式 YYYY-MM-DD）
+  day_date: "${day_date}"            # 由测试代码动态注入（当天日期，格式 YYYY-MM-DD）
+  next_day_date: "${next_day_date}"  # 由测试代码动态注入（次日日期，格式 YYYY-MM-DD）
+
+# ---- API 公共配置（所有用例共用） ----
+api_config:
+  method: POST
+  endpoint: "/hzsx/bigdata/userOrders/queryUserOrdersStatistics"
+  params:
+    startTime: "${start_date}"
+    endTime: "${end_date}"
+    shopId: "${shop_id}"
+    titleType: "zrrtj"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+
+# ---- 4 个指标校验用例，每个用例对应一个 API 响应字段 ----
+operational_report_tests:
+
+  # 用例1：进件量 jjl
+  - case_id: "OR_001"
+    title: "近7天每日进件量"
+    description: "校验每日进件量（jjl），SQL SUM vs API jjl 字段"
+    api_field: "jjl"
+    daily_sql:
+      query: >
+        SELECT COALESCE(SUM(t.jjl), 0) AS metric_value,
+        DATE(t.create_time) AS stat_date
+        FROM llxz.view_l2_dwd_merchant_operation_statistics t
+        WHERE t.create_time >= '${day_date} 00:00:00'
+        AND t.create_time < '${next_day_date} 00:00:00'
+        AND t.shop_id = '${shop_id}'
+        AND t.channel_id IN ('011', '066', '012', '005', '007', '008', '085', '074')
+        GROUP BY DATE(t.create_time)
+      column: metric_value
+
+  # 用例2：下单量 xdl
+  - case_id: "OR_002"
+    title: "近7天每日下单量"
+    description: "校验每日下单量（xdl），SQL SUM vs API xdl 字段"
+    api_field: "xdl"
+    daily_sql:
+      query: >
+        SELECT COALESCE(SUM(t.xdl), 0) AS metric_value,
+        DATE(t.create_time) AS stat_date
+        FROM llxz.view_l2_dwd_merchant_operation_statistics t
+        WHERE t.create_time >= '${day_date} 00:00:00'
+        AND t.create_time < '${next_day_date} 00:00:00'
+        AND t.shop_id = '${shop_id}'
+        AND t.channel_id IN ('011', '066', '012', '005', '007', '008', '085', '074')
+        GROUP BY DATE(t.create_time)
+      column: metric_value
+
+  # 用例3：发货量 fhl
+  - case_id: "OR_003"
+    title: "近7天每日发货量"
+    description: "校验每日发货量（fhl），SQL SUM vs API fhl 字段"
+    api_field: "fhl"
+    daily_sql:
+      query: >
+        SELECT COALESCE(SUM(t.fhl), 0) AS metric_value,
+        DATE(t.create_time) AS stat_date
+        FROM llxz.view_l2_dwd_merchant_operation_statistics t
+        WHERE t.create_time >= '${day_date} 00:00:00'
+        AND t.create_time < '${next_day_date} 00:00:00'
+        AND t.shop_id = '${shop_id}'
+        AND t.channel_id IN ('011', '066', '012', '005', '007', '008', '085', '074')
+        GROUP BY DATE(t.create_time)
+      column: metric_value
+
+  # 用例4：发货率 fhlRate（百分比字符串，如 "100.00%"）
+  - case_id: "OR_004"
+    title: "近7天每日发货率"
+    description: "校验每日发货率（fhlRate），SQL 计算 fhl/xdl 百分比 vs API fhlRate 字段"
+    api_field: "fhlRate"
+    daily_sql:
+      query: >
+        SELECT
+        CASE
+          WHEN COALESCE(SUM(t.xdl), 0) = 0 THEN '0.00%%'
+          ELSE CONCAT(CAST(ROUND(COALESCE(SUM(t.fhl), 0) * 100.0 / SUM(t.xdl), 2) AS CHAR), '%%')
+        END AS metric_value,
+        DATE(t.create_time) AS stat_date
+        FROM llxz.view_l2_dwd_merchant_operation_statistics t
+        WHERE t.create_time >= '${day_date} 00:00:00'
+        AND t.create_time < '${next_day_date} 00:00:00'
+        AND t.shop_id = '${shop_id}'
+        AND t.channel_id IN ('011', '066', '012', '005', '007', '008', '085', '074')
+        GROUP BY DATE(t.create_time)
+      column: metric_value

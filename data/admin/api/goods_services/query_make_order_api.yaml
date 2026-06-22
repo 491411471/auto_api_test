@@ -1,0 +1,176 @@
+# 运营端 - 订单管理：质选服务查询接口测试数据
+# 接口：POST /hzsx/ope/order/queryOpeMakeOrderList
+# 覆盖场景：无查询条件、商品品种、商品名称、商户ID、支付时间范围、订单号、复合查询
+
+variables:
+  channelGroupId: "001"
+  test_shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  test_order_id: "011OI202606112064965043826065408T"
+
+# ==================== 公共锚点 ====================
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/ope/order/queryOpeMakeOrderList"
+
+.common_json: &common_json
+  pageNumber: 1
+  pageSize: 10
+  channelGroupId: "001"
+
+make_order_query_tests:
+  # ========== TC01: 无查询条件 ==========
+  - case_id: "MQ_001"
+    title: "无查询条件查询质选服务订单"
+    description: "仅使用分页和渠道参数查询，验证接口正常返回数据"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.total"
+        operator: ">="
+        value: 1
+
+  # ========== TC02: 商品品种为查询条件(租赁商铺 bizType=0) ==========
+  - case_id: "MQ_002"
+    title: "以商品品种(租赁商铺)为查询条件"
+    description: "使用bizType=0查询租赁商品，验证返回记录的bizType均为0"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      bizType: 0
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records[*].bizType"
+        operator: "all_eq"
+        value: 0
+
+  # ========== TC03: 以商品名称为查询条件(质选服务) ==========
+  - case_id: "MQ_003"
+    title: "以商品名称(质选服务)为查询条件"
+    description: "使用goodsName='质选服务'查询，验证返回记录的goodsName均为'质选服务'"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      goodsName: "质选服务"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records[*].goodsName"
+        operator: "all_eq"
+        value: "质选服务"
+
+  # ========== TC04: 查询商户下的质选服务订单 ==========
+  - case_id: "MQ_004"
+    title: "以商户ID为查询条件"
+    description: "使用shopId查询指定商户的质选服务订单，验证返回记录的shopId均匹配"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      createTime: null
+      shopId: "${test_shop_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records[*].shopId"
+        operator: "all_eq"
+        value: "${test_shop_id}"
+
+  # ========== TC05: 以支付时间为查询条件 ==========
+  - case_id: "MQ_005"
+    title: "以支付时间范围为查询条件"
+    description: "使用paymentTimeStart/paymentTimeEnd查询，验证返回记录的paymentTime均在时间范围内"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      createDate:
+        - "${create_date_start}"
+        - "${create_date_end}"
+      createTime: null
+      paymentTimeStart: "${payment_time_start}"
+      paymentTimeEnd: "${payment_time_end}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records[*].paymentTime"
+        operator: "all_between"
+        value:
+          - "${payment_time_start}"
+          - "${payment_time_end}"
+
+  # ========== TC06: 以订单号为查询条件 ==========
+  - case_id: "MQ_006"
+    title: "以订单号为查询条件"
+    description: "使用orderId查询关联订单，验证返回记录的originalOrderId均等于查询条件中的orderId"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: "${test_order_id}"
+      createDate: null
+      createTime: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records[*].originalOrderId"
+        operator: "all_eq"
+        value: "${test_order_id}"
+
+  # ========== TC07: 复合查询（商品名称 + 商户ID + 订单状态） ==========
+  - case_id: "MQ_007"
+    title: "复合查询（商品名称+商户ID+订单状态）"
+    description: "组合goodsName、shopId、status三个条件查询，验证结果同时满足所有条件"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      goodsName: "质选服务"
+      shopId: "${test_shop_id}"
+      status: "10"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records[*].goodsName"
+        operator: "all_eq"
+        value: "质选服务"
+      - path: "$.data.backstageMakeOrderDtoList.records[*].shopId"
+        operator: "all_eq"
+        value: "${test_shop_id}"
+      - path: "$.data.backstageMakeOrderDtoList.records[*].status"
+        operator: "all_eq"
+        value: "10"

@@ -1,0 +1,300 @@
+# 运营端 - 订单列表查询接口测试数据
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  shop_name: "sass人人享租1"
+  
+
+# ==================== 公共锚点 ====================
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/ope/order/queryOpeOrderByCondition"
+
+.common_json: &common_json
+  pageNumber: 1
+  pageSize: 10
+  queryType: "queryPageList"
+  isQueryHistory: false
+
+# 公共 SQL 锚点：仅查询 ct_user_orders 表（无 JOIN，避免跨库权限问题）
+.common_pre_sql: &common_pre_sql
+  query: >
+    SELECT o.order_id, o.product_id, o.user_name, o.status, o.shop_id
+    FROM llxz_order.ct_user_orders o
+    WHERE o.shop_id = '${shop_id}' AND o.status = '06'
+    ORDER BY o.create_time DESC LIMIT 1
+  columns:
+    - order_id
+    - product_id
+    - user_name
+    - status
+    - shop_id
+
+ope_order_query_tests:
+  # ========== 1. 以订单号为查询条件 ==========
+  - case_id: "OQ_OPE_001"
+    title: "以订单号为查询条件"
+    description: "使用真实存在的订单号查询，验证返回记录中包含该订单号"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      telephone: ""
+      addressUserPhone: ""
+      orderId: "${order_id}"
+      guangGaoId: ""
+    sql:
+      <<: *common_pre_sql
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+      - path: "$.data.records[0].orderId"
+        operator: "=="
+        value: "${order_id}"
+
+  # ========== 2. 以下单人姓名为查询条件 ==========
+  - case_id: "OQ_OPE_002"
+    title: "以下单人姓名为查询条件"
+    description: "使用真实下单人姓名查询，验证返回记录中均包含该姓名"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      userName: "${user_name}"
+      telephone: ""
+      addressUserPhone: ""
+      orderId: ""
+      guangGaoId: ""
+    sql:
+      <<: *common_pre_sql
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].realName"
+        operator: "all_eq"
+        value: "${user_name}"
+
+  # ========== 3. 以订单状态为查询条件 ==========
+  - case_id: "OQ_OPE_003"
+    title: "以订单状态为查询条件"
+    description: "使用真实订单状态查询，验证返回记录的 status 均匹配"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      userName: ""
+      telephone: ""
+      addressUserPhone: ""
+      status: "${status}"
+      orderId: ""
+      guangGaoId: ""
+    sql:
+      <<: *common_pre_sql
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].status"
+        operator: "all_eq"
+        value: "${status}"
+
+  # ========== 4. 以店铺名称为查询条件 ==========
+  - case_id: "OQ_OPE_004"
+    title: "以店铺名称为查询条件"
+    description: "使用真实店铺名称查询，验证返回记录的 shopid 均匹配"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      userName: ""
+      telephone: ""
+      addressUserPhone: ""
+      orderId: ""
+      shopName: "${shop_name}"
+      guangGaoId: ""
+    sql:
+      <<: *common_pre_sql
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].shopid"
+        operator: "all_eq"
+        value: "${shop_id}"
+
+  # ========== 5. 以商品编码为查询条件 ==========
+  - case_id: "OQ_OPE_005"
+    title: "以商品编码为查询条件"
+    description: "使用真实商品编码查询，验证返回记录的 productId 均匹配"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      userName: ""
+      telephone: ""
+      addressUserPhone: ""
+      orderId: ""
+      productId: "${product_id}"
+      guangGaoId: ""
+    sql:
+      <<: *common_pre_sql
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].productId"
+        operator: "all_eq"
+        value: "${product_id}"
+
+  # ========== 6. 以APP订单来源为查询条件--支付宝 ==========
+  - case_id: "OQ_OPE_006"
+    title: "以APP订单来源为查询条件--支付宝"
+    description: "使用 channelProvenance=2 过滤支付宝来源订单"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      channelProvenance: "2"
+      guangGaoId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # ========== 7. 以渠道来源为查询条件 ==========
+  - case_id: "OQ_OPE_007"
+    title: "以渠道来源为查询条件"
+    description: "使用 channelId 过滤指定渠道（008,012,011）的订单"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      channelId: "008,012,011"
+      guangGaoId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].channelId"
+        operator: "all_in"
+        value: ["008", "012", "011"]
+
+  # ========== 8. 以下单时间为查询条件 ==========
+  - case_id: "OQ_OPE_008"
+    title: "以下单时间为查询条件"
+    description: "使用动态时间范围（当前时间往后推30天）查询，验证下单时间均在范围内"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      channelId: ""
+      guangGaoId: ""
+      createTimeStart: "${create_time_start}"
+      createTimeEnd: "${create_time_end}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].placeOrderTime"
+        operator: "all_between"
+        value: ["${create_time_start}", "${create_time_end}"]
+
+  # ========== 9. 以下单人手机号为查询条件 ==========
+  - case_id: "OQ_OPE_009"
+    title: "以下单人手机号为查询条件"
+    description: "使用真实下单人手机号查询，验证返回记录非空"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      telephone: "17355006295"
+      channelId: ""
+      guangGaoId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # ========== 10. 组合查询：订单号 + 订单状态 + 下单人姓名 ==========
+  - case_id: "OQ_OPE_010"
+    title: "组合查询（订单号+订单状态+下单人姓名）"
+    description: "多条件组合查询，验证结果同时满足所有条件"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      userName: "${user_name}"
+      telephone: ""
+      addressUserPhone: ""
+      orderId: "${order_id}"
+      status: "${status}"
+      guangGaoId: ""
+    sql:
+      <<: *common_pre_sql
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[0].orderId"
+        operator: "=="
+        value: "${order_id}"
+      - path: "$.data.records[*].status"
+        operator: "all_eq"
+        value: "${status}"
+      - path: "$.data.records[*].realName"
+        operator: "all_eq"
+        value: "${user_name}"
+
+  # ========== 11. 空条件查询 ==========
+  - case_id: "OQ_OPE_011"
+    title: "空条件查询"
+    description: "所有查询条件为空，验证接口正常返回记录列表"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      telephone: ""
+      addressUserPhone: ""
+      orderId: ""
+      guangGaoId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true

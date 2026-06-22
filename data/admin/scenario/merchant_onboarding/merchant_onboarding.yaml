@@ -1,0 +1,148 @@
+# 商家入驻流程测试数据
+# 运营端 - 商家入驻 - 完整注册流程（6步）
+
+variables:
+  channel_group_code: "001"
+  company_name: "福州立租网络科技有限公司"
+  business_license_url: "https://oss.llxzu.com/999bc48b37a64c2984124006be653776.jpg"
+  run_type: "摄影器材及其他租赁"
+  login_timestamp: "91140181606202605"
+
+# ==================== 第一步：获取注册码 ====================
+step1_generate_reg_code:
+  case_id: "MOB_001"
+  step_id: "step1_generate_reg_code"
+  title: "获取注册码"
+  description: "调用generateRegCdByGroupCodeNew接口获取注册码，提取data字段供后续注册使用"
+  method: POST
+  endpoint: "/hzsx/user/generateRegCdByGroupCodeNew"
+  json:
+    channelGroupCode: "${channel_group_code}"
+    companyName: "${company_name}"
+    businessLicenseUrl: "${business_license_url}"
+    runType: "${run_type}"
+  expected_status: 200
+  validate_data:
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data"
+      operator: "is_not_none"
+  extract_vars:
+    - registry_code: "data"
+
+# ==================== 第二步：提交注册店铺信息 ====================
+# 注意：mobile 和 userNameReq 由 Python 代码动态生成并注入变量
+step2_register:
+  case_id: "MOB_002"
+  step_id: "step2_register"
+  title: "提交注册店铺信息"
+  description: "调用register接口注册新店铺，mobile和userNameReq为动态生成数据"
+  method: POST
+  endpoint: "/hzsx/user/register"
+  json:
+    mobile: "${mobile}"
+    userNameReq: "${user_name_req}"
+    userType: "SHOP"
+    channelGroupCode: "${channel_group_code}"
+    registryCode: "${registry_code}"
+  expected_status: 200
+  validate_data:
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+
+# ==================== 第三步：获取图片验证码（配置数据） ====================
+# 注意：此步骤返回二进制图片，需Python代码处理OCR，不通过execute_test_case执行
+step3_captcha:
+  case_id: "MOB_003"
+  step_id: "step3_captcha"
+  title: "解析注册登录的图片验证码"
+  description: "调用getVerificationCodeOfSmsLogin获取图片验证码，使用ddddocr识别，最多重试5次"
+  endpoint: "/hzsx/user/getVerificationCodeOfSmsLogin"
+  method: POST
+  json:
+    mobile: "${mobile}"
+    clientType: "SHOP"
+  max_retries: 5
+
+# ==================== 第四步：校验图片验证码 ====================
+step4_verify_code:
+  case_id: "MOB_004"
+  step_id: "step4_verify_code"
+  title: "校验图片验证码"
+  description: "调用sendVerifyCodeOfSmsLogin校验图片验证码"
+  method: POST
+  endpoint: "/hzsx/user/sendVerifyCodeOfSmsLogin"
+  json:
+    clientType: "SHOP"
+    mobile: "${mobile}"
+    verifyCode: "${captcha_code}"
+    timestamp: "${login_timestamp}"
+  expected_status: 200
+  validate_data:
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data"
+      operator: "=="
+      value: true
+
+# ==================== 第五步：使用验证码登录 ====================
+# 注意：loginV2 接口 businessSuccess=False 但 data.token 有效（已知约定），仅断言 token 非空
+step5_login:
+  case_id: "MOB_005"
+  step_id: "step5_login"
+  title: "使用验证码登录"
+  description: "调用loginV2接口使用验证码登录，提取token和shopId"
+  method: POST
+  endpoint: "/hzsx/user/loginV2"
+  json:
+    userType: "SHOP"
+    mobile: "${mobile}"
+    smsLoginVerifyCode: "${captcha_code}"
+    loginTimestamp: "${login_timestamp}"
+    useVersion: 2
+    source: "SHOP"
+  expected_status: 200
+  validate_data:
+    - path: "$.data.token"
+      operator: "is_not_none"
+
+# ==================== 第六步：进入店铺 ====================
+step6_enter_shop:
+  case_id: "MOB_006"
+  step_id: "step6_enter_shop"
+  title: "进入店铺"
+  description: "通过SQL查询用户ID和最新shopId，调用changeLogin接口进入店铺"
+  method: POST
+  endpoint: "/hzsx/user/changeLogin"
+  sql:
+    - query: "SELECT id AS user_backstage_id FROM llxz_user.`ct_backstage_user` WHERE name = '${user_name_req}'"
+      column: "user_backstage_id"
+    - query: "SELECT shop_id AS new_shop_id FROM llxz_product.ct_shop ORDER BY create_time DESC LIMIT 1"
+      column: "new_shop_id"
+  json:
+    id: "${user_backstage_id}"
+    shopId: "${new_shop_id}"
+    userVersion: 2
+    source: "SHOP"
+  expected_status: 200
+  validate_data:
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.token"
+      operator: "is_not_none"

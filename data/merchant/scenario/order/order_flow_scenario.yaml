@@ -1,0 +1,205 @@
+# 订单状态流转场景 - 数据驱动版本
+# 配合 BaseScenarioTest.run_scenario_from_yaml() 使用
+# 每个步骤的数据格式与单接口 YAML 的 case 一致，可被 execute_test_case 直接消费
+
+scenario_name: "订单状态流转"
+description: "查询已签约待审核订单 -> 审核通过 -> 获取归还地址 -> 发货 -> 创建PDF -> 运营端查询验证 -> 确认收货 -> 租用中"
+
+# 全局变量
+variables:
+  shop_id: "${shop_id}"  # 由测试代码注入
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
+  excluded_order_id_2: "008OI202606092064246436626591744T"  # 续租还款测试专用订单，需排除
+
+steps:
+  # ============ 步骤1：审核通过 ============
+  - step_name: "审核通过"
+    client: "merchant"
+    
+    # 以下字段兼容 execute_test_case 的 case 结构
+    case:
+      case_id: "FLOW_AUDIT"
+      title: "审核通过"
+      method: POST
+      endpoint: "/hzsx/business/order/telephoneAuditOrder"
+      
+      # 先通过 SQL 获取订单号
+      sql:
+        query: "SELECT order_id FROM llxz_order.ct_user_orders WHERE shop_id='${shop_id}' AND status='13' AND face_auth_status='03' AND channel_provenance NOT IN (6,8) AND withhold_type IS NOT NULL AND delete_time IS NULL AND order_id != '${excluded_order_id}' AND order_id != '${excluded_order_id_2}' ORDER BY create_time DESC LIMIT 1"
+        column: "order_id"
+      
+      json:
+        auditRemark: "自动化测试--订单审核通过"
+        deliveryMethod: "SELFPICK"
+        sendTime: null
+        orderId: "${order_id}"
+        remark: "自动化测试--订单审核通过"
+        orderAuditStatus: "01"
+        isFormBusinessShopOrderAudit: 1
+      
+      expected_status: 200
+      validate_data:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.rpcResult"
+          operator: "=="
+          value: "SUCCESS"
+        - path: "$.errorMessage"
+          operator: "=="
+          value: null
+      
+      # 提取订单号供后续步骤使用
+      extract_vars:
+        - var_name: "order_id"
+          path: "data"
+
+  # ============ 步骤2：获取归还地址列表 ============
+  - step_name: "获取归还地址列表"
+    client: "merchant"
+    case:
+      case_id: "FLOW_ADDRESS"
+      title: "获取归还地址"
+      method: GET
+      endpoint: "/hzsx/busShop/getOrdersBackAddressOptList"
+      params:
+        orderId: "${order_id}"
+      expected_status: 200
+      validate_data:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.data"
+          operator: "not_empty"
+          value: null
+      
+      # 注意：获取地址后需要随机选择一个，这个逻辑无法在 YAML 中完成
+      # 需要由测试代码处理（见后续的 extra_vars 或 response_handler）
+
+  # ============ 步骤3：发货 ============
+  - step_name: "发货"
+    client: "merchant"
+    case:
+      case_id: "FLOW_DELIVERY"
+      title: "发货"
+      method: POST
+      endpoint: "/hzsx/business/order/orderDelivery2"
+      json:
+        orderId: "${order_id}"
+        returnAddressIdList: "${return_address_ids}"
+        expressId: ""
+        expressNo: ""
+        color: "黑色"
+        sendWay: "02"
+        type: "bussiness"
+        number: 1
+        modify: false
+        generateOrderContract: true
+        deviceInfoDtoList:
+          - code: ""
+            color: "黑色"
+            pictures: []
+        receverInfo: "广东省东莞市中堂镇江南村忠心坊九巷11号江南村村民委员会"
+        deviceInfo: "99新王浩宇测试商品333331/2"
+      expected_status: 200
+      validate_data:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.data"
+          operator: "=="
+          value: true
+        - path: "$.errorMessage"
+          operator: "=="
+          value: null
+
+  # ============ 步骤4：创建PDF ============
+  - step_name: "生成订单PDF"
+    client: "merchant"
+    case:
+      case_id: "FLOW_PDF"
+      title: "生成PDF"
+      method: GET
+      endpoint: "/hzsx/ope/order/creatPdf"
+      params:
+        orderId: "${order_id}"
+        color: "黑色"
+        code: ""
+      expected_status: 200
+      validate_data:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.data"
+          operator: "not_empty"
+          value: null
+
+  # ============ 步骤5：运营端查询验证 ============
+  - step_name: "运营端查询订单"
+    client: "admin"
+    case:
+      case_id: "FLOW_OPE_QUERY"
+      title: "运营端查询订单"
+      method: POST
+      endpoint: "/hzsx/ope/order/queryOpeOrderByCondition"
+      json:
+        pageNumber: 1
+        pageSize: 10
+        queryType: "queryPageList"
+        isQueryHistory: false
+        orderId: "${order_id}"
+        guangGaoId: ""
+      expected_status: 200
+      validate_data:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.data.records"
+          operator: "not_empty"
+          value: null
+
+  # ============ 步骤6：运营端确认收货 ============
+  - step_name: "运营端确认收货"
+    client: "merchant"
+    case:
+      case_id: "FLOW_CONFIRM"
+      title: "确认收货"
+      method: GET
+      endpoint: "/hzsx/ope/order/userConfirmReceipt"
+      params:
+        orderId: "${order_id}"
+      expected_status: 200
+      validate_data:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.rpcResult"
+          operator: "=="
+          value: "SUCCESS"
+
+  # ============ 步骤7：验证租用中状态 ============
+  - step_name: "验证订单状态为租用中"
+    client: "admin"
+    case:
+      case_id: "FLOW_VERIFY"
+      title: "验证租用中状态"
+      method: POST
+      endpoint: "/hzsx/ope/order/queryOpeOrderByCondition"
+      json:
+        pageNumber: 1
+        pageSize: 10
+        queryType: "queryPageList"
+        isQueryHistory: false
+        orderId: "${order_id}"
+        guangGaoId: ""
+      expected_status: 200
+      validate_data:
+        - path: "$.businessSuccess"
+          operator: "=="
+          value: true
+        - path: "$.data.records[0].status"
+          operator: "=="
+          value: "06"
+        - path: "$.data.records"
+          operator: "not_empty"
+          value: null

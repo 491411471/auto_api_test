@@ -1,0 +1,53 @@
+# 运营端 - 订单列表：关闭订单接口测试数据
+# 接口：POST /hzsx/ope/order/closeUserOrderAndRefundPrice
+# 流程：SQL获取租用中订单 → 调用关闭订单接口 → SQL验证订单状态变为10
+
+variables:
+  exclude_order_id: "008OI202606022061759565939113984T"
+  excluded_order_id_2: "008OI202606092064246436626591744T"  # 续租还款测试专用订单，需排除
+
+admin_close_order_tests:
+  - case_id: "CO_001"
+    title: "关闭订单并退款"
+    description: "查询租用中('01', '02', '03', '04', '05')状态的订单，调用关闭订单接口，验证订单状态变为10（关闭）"
+    method: POST
+    endpoint: "/hzsx/ope/order/closeUserOrderAndRefundPrice"
+    # 前置SQL：查询状态为租用中('01', '02', '03', '04', '05')的订单
+    sql:
+      query: >
+        select order_id
+        from llxz_order.ct_user_orders
+        where status in ('01', '02', '03', '04', '05')
+          and delete_time is null
+          and order_id not in ('${exclude_order_id}', '${excluded_order_id_2}')
+        order by create_time
+        limit 1;
+      columns:
+        - order_id
+    # 请求参数（orderId 由前置SQL动态注入）
+    json:
+      orderId: "${order_id}"
+      closeReason: "自动化测试关闭订单"
+      closeType: "07"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+    # 后置SQL：验证关闭后订单状态为10
+    post_sql:
+      - query: >
+          SELECT status
+          FROM llxz_order.ct_user_orders
+          WHERE order_id = '${order_id}'
+        columns:
+          - status
+        expected_value:
+          status: "10"
+        operator: "=="

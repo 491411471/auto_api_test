@@ -1,0 +1,406 @@
+# 商家端 - 抖音新建商品（草稿箱）测试数据
+# 步骤1: 保存草稿箱 → 提取 draft_id → SQL 查询 product_id
+# 步骤2: 查询草稿箱验证商品存在
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  channel_group_code: "001"
+  login_id: 1000196
+
+# ==================== 抖音新建商品草稿箱流程 ====================
+douyin_product_draft_tests:
+  # 步骤1: 保存草稿箱
+  - case_id: "DPD_001"
+    title: "保存抖音商品到草稿箱"
+    description: "调用 addDraftProduct 接口保存抖音商品草稿，提取 data 字段作为 draft_id"
+    method: POST
+    endpoint: "/hzsx/product/addDraftProduct"
+    json:
+      categoryIds: [4944, 4945]
+      name: "${product_name}"
+      dealOfDouYin: 9999
+      title: "${product_name}"
+      createDate:
+        - "${create_date_start}"
+        - "${create_date_end}"
+      oldNewDegree: 1
+      labels: []
+      rentOneFree: "0"
+      speFirstName: "规格1"
+      colorSpecs:
+        name: "颜色"
+        opeSpecId: 1
+        values:
+          - name: "1"
+          - name: "11"
+      speSecName: "规格2"
+      specSecond:
+        name: "规格"
+        opeSpecId: 2
+        values:
+          - name: "2"
+          - name: "22"
+      productSkuses:
+        - cycs:
+            - days: "29"
+              price: ""
+              salePrice: "130.00"
+              montyNum: "1"
+              dayOrMonth: "day"
+              periodRent: "1"
+              firstRent: "1"
+              depositAmount: "100"
+          skuBuyOutSupport: 0
+          depositPrice: 0
+          inventory: "100"
+          memo: null
+          marketPrice: "100"
+          platformSpecValue: null
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "1"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "2"
+            - opeSpecId: 3
+              platformSpecName: "品牌"
+              platformSpecValue: "3"
+          salePrice: "130.00"
+        - cycs:
+            - days: "29"
+              price: ""
+              salePrice: "130.00"
+              montyNum: "1"
+              dayOrMonth: "day"
+              periodRent: "1"
+              firstRent: "1"
+              depositAmount: "100"
+          skuBuyOutSupport: 0
+          depositPrice: 0
+          inventory: "100"
+          memo: null
+          marketPrice: "100"
+          platformSpecValue: null
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "1"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "22"
+            - opeSpecId: 3
+              platformSpecName: "品牌"
+              platformSpecValue: "3"
+          salePrice: "130.00"
+        - cycs:
+            - days: "29"
+              price: ""
+              salePrice: "130.00"
+              montyNum: "1"
+              dayOrMonth: "day"
+              periodRent: "1"
+              firstRent: "1"
+              depositAmount: "100"
+          skuBuyOutSupport: 0
+          depositPrice: 0
+          inventory: "100"
+          memo: null
+          marketPrice: "100"
+          platformSpecValue: null
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "11"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "2"
+            - opeSpecId: 3
+              platformSpecName: "品牌"
+              platformSpecValue: "3"
+          salePrice: "130.00"
+        - cycs:
+            - days: "29"
+              price: ""
+              salePrice: "130.00"
+              montyNum: "1"
+              dayOrMonth: "day"
+              periodRent: "1"
+              firstRent: "1"
+              depositAmount: "100"
+          skuBuyOutSupport: 0
+          depositPrice: 0
+          inventory: "100"
+          memo: null
+          marketPrice: "100"
+          platformSpecValue: null
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "11"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "22"
+            - opeSpecId: 3
+              platformSpecName: "品牌"
+              platformSpecValue: "3"
+          salePrice: "130.00"
+      images:
+        - isMain: null
+          src: "https://oss.llxzu.com/8acfe831282f4cfea8df900c92df760d.png"
+          uid: 1
+          url: "https://oss.llxzu.com/8acfe831282f4cfea8df900c92df760d.png"
+          width: 700
+          height: 700
+      detail: "<p>自动化测试--抖音商品-${product_name}</p>"
+      parameters: []
+      address:
+        - "110000"
+        - "110100"
+        - "110102"
+      freightType: "PAY"
+      type: 1
+      addIds: [515]
+      customLeaseTerm: "1"
+      speThirdName: "规格3"
+      spethird:
+        opeSpecId: 3
+        platformSpecName: "品牌"
+        platformSpecValue: ""
+        values:
+          - name: "3"
+      productOfDouYin: 1
+      soldStart: "${sold_start}"
+      soldEnd: "${sold_end}"
+      isBuyout: 0
+      buyOutSupport: 0
+      specs:
+        - name: "颜色"
+          opeSpecId: 1
+          values:
+            - name: "1"
+            - name: "11"
+        - name: "规格"
+          opeSpecId: 2
+          values:
+            - name: "2"
+            - name: "22"
+      draft: ""
+      categoryId: 4945
+      isTable: false
+      province: "110000"
+      city: "110100"
+      channelGroupCode: "001"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "is_not_none"
+    extract_vars:
+      - var_name: "draft_id"
+        path: "$.data"
+
+  # 步骤2: 查询草稿箱验证商品存在
+  - case_id: "DPD_002"
+    title: "查询草稿箱验证抖音商品"
+    description: "使用 SQL 获取的 product_id 查询草稿箱，验证商品存在"
+    method: POST
+    endpoint: "/hzsx/product/selectBusinessPrdouct"
+    json:
+      pageSize: 10
+      pageNumber: 1
+      productId: "${product_id}"
+      type: "5"
+      productOfDouYin: 1
+      channelGroupCode: "001"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+      - path: "$.data.records[0].productId"
+        operator: "=="
+        value: "${product_id}"
+
+  # 步骤3: 从草稿箱发布商品
+  - case_id: "DPD_003"
+    title: "从草稿箱发布抖音商品"
+    description: "使用草稿箱中的商品信息调用发布接口，完成商品上架"
+    method: POST
+    endpoint: "/hzsx/product/updateBusProduct"
+    json:
+      categoryId: 4945
+      categoryIds: [4944, 4945]
+      name: "${product_name}"
+      title: "${product_name}"
+      oldNewDegree: 1
+      labels: []
+      buyOutSupport: 0
+      productSkuses:
+        - marketPrice: 100
+          depositPrice: 0
+          inventory: 100
+          salePrice: 130
+          cycs:
+            - dayOrMonth: "day"
+              montyNum: 1
+              days: 29
+              salePrice: 130
+              firstRent: 1
+              periodRent: 1
+              depositAmount: 100
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "1"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "2"
+          sort: 1
+          skuBuyOutSupport: 0
+        - marketPrice: 100
+          depositPrice: 0
+          inventory: 100
+          salePrice: 130
+          cycs:
+            - dayOrMonth: "day"
+              montyNum: 1
+              days: 29
+              salePrice: 130
+              firstRent: 1
+              periodRent: 1
+              depositAmount: 100
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "1"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "22"
+          sort: 2
+          skuBuyOutSupport: 0
+        - marketPrice: 100
+          depositPrice: 0
+          inventory: 100
+          salePrice: 130
+          cycs:
+            - dayOrMonth: "day"
+              montyNum: 1
+              days: 29
+              salePrice: 130
+              firstRent: 1
+              periodRent: 1
+              depositAmount: 100
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "11"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "2"
+          sort: 3
+          skuBuyOutSupport: 0
+        - marketPrice: 100
+          depositPrice: 0
+          inventory: 100
+          salePrice: 130
+          cycs:
+            - dayOrMonth: "day"
+              montyNum: 1
+              days: 29
+              salePrice: 130
+              firstRent: 1
+              periodRent: 1
+              depositAmount: 100
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "11"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "22"
+          sort: 4
+          skuBuyOutSupport: 0
+      type: 1
+      detail: "<p>自动化测试--抖音商品-${product_name}</p>"
+      province: "110000"
+      city: "110100"
+      freightType: "PAY"
+      addIds: [515]
+      images:
+        - uid: "8acfe831282f4cfea8df900c92df760d"
+          src: "https://oss.llxzu.com/8acfe831282f4cfea8df900c92df760d.png"
+          url: "https://oss.llxzu.com/8acfe831282f4cfea8df900c92df760d.png"
+          width: 700
+          height: 700
+      id: "${draft_id}"
+      productId: "${product_id}"
+      parameters: []
+      specs:
+        - name: "颜色"
+          opeSpecId: 1
+          values:
+            - name: "1"
+            - name: "11"
+        - name: "规格"
+          opeSpecId: 2
+          values:
+            - name: "2"
+            - name: "22"
+      channelGroupCode: "001"
+      speFirstName: "规格1"
+      speSecName: "规格2"
+      speThirdName: ""
+      displayUnicomCard: 0
+      customLeaseTerm: "1"
+      productOfDouYin: 1
+      dealOfDouYin: 9999
+      soldStart: "${sold_start}"
+      soldEnd: "${sold_end}"
+      rentOneFree: "0"
+      draft: "draft"
+      operationType: 0
+      createDate:
+        - "${create_date_start}"
+        - "${create_date_end_pub}"
+      colorSpecs:
+        name: "颜色"
+        opeSpecId: 1
+        values:
+          - name: "1"
+          - name: "11"
+      specSecond:
+        name: "规格"
+        opeSpecId: 2
+        values:
+          - name: "2"
+          - name: "22"
+      address:
+        - "110000"
+        - "110100"
+      isBuyout: 0
+      isTable: false
+      shopId: "${shop_id}"
+      loginId: ${login_id}
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true

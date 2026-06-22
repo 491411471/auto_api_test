@@ -1,0 +1,133 @@
+# 逾期订单接口测试数据
+# 接口：/hzsx/ope/order/getTotalBadDebtAmount
+# 方法：POST
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+overdue_order_tests:
+  # ==================== 场景一：无条件查询全部逾期订单 ====================
+  - case_id: BD_001
+    title: "无条件查询全部逾期订单"
+    description: "不传查询条件，获取全部逾期订单列表，提取关键字段并计算坏账总额"
+    method: POST
+    endpoint: "/hzsx/business/order/queryOverDueOrdersByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10000
+      version: 1
+    expected_status: 200
+    extract_fields:
+      - badDebt
+      - badDebtReserves
+      - buyOutAmount
+      - price
+      - orderId
+      - realName
+      - overdueDays
+      - productName
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "exists"
+      - path: "$.data.records"
+        operator: "exists"
+      - path: "$.data.total"
+        operator: ">="
+        value: 0
+        type_check: "int"
+
+  # ==================== 场景二：按订单号查询逾期订单 ====================
+  - case_id: BD_002
+    title: "按订单号查询逾期订单"
+    description: "传入orderId查询指定逾期订单，验证返回数据关键字段"
+    method: POST
+    endpoint: "/hzsx/business/order/queryOverDueOrdersByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      version: 1
+      orderId: "${test_order_id}"
+    expected_status: 200
+    extract_fields:
+      - badDebt
+      - badDebtReserves
+      - buyOutAmount
+      - price
+      - orderId
+      - realName
+      - overdueDays
+      - productName
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "exists"
+      - path: "$.data.records"
+        operator: "exists"
+
+  # ==================== 场景三：按下单人姓名查询逾期订单 ====================
+  - case_id: BD_003
+    title: "按下单人姓名查询逾期订单"
+    description: "传入orderId查询指定逾期订单，验证返回数据关键字段"
+    method: POST
+    endpoint: "/hzsx/business/order/queryOverDueOrdersByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      version: 1
+      userName: "${user_name}"
+    expected_status: 200
+    extract_fields:
+      - badDebt
+      - badDebtReserves
+      - buyOutAmount
+      - price
+      - orderId
+      - realName
+      - overdueDays
+      - productName
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "exists"
+      - path: "$.data.records"
+        operator: "exists"
+
+  # ==================== 场景四：查询全部坏账金额 ====================
+  - case_id: BD_004
+    title: "查询全部坏账金额"
+    description: "unconditional=true查询全部坏账总金额，data直接返回数值"
+    method: POST
+    endpoint: "/hzsx/ope/order/getTotalBadDebtAmount"
+    json:
+      pageNumber: 1
+      pageSize: 10000
+      version: 1
+      unconditional: true
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "exists"
+      - path: "$.data"
+        operator: ">="
+        value: 0
+        type_check: "float"
+
+

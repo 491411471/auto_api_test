@@ -1,0 +1,36 @@
+.env
+.env.local
+.env.*.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtualenv
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Logs and reports
+*.log
+logs/
+reports/
+reports/allure_results/
+reports/allure_html/data/attachments/
+
+# pytest caches
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Byte-compiled / optimized / DLL files
+*.so
+

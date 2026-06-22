@@ -1,0 +1,411 @@
+# 运营端 - 售后管理 - 投诉订单查询接口测试数据
+variables:
+  ChannelGroupId: "001"
+  channelGroupCode: "001"
+
+# ==================== 公共锚点（仅 mapping 可用 <<: 合并） ====================
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/orderComplaints/queryOrderComplaintsPageNew"
+
+.common_json: &common_json
+  pageNumber: 1
+  pageSize: 10
+  ChannelGroupId: "001"
+  shopName: null
+  complaintsType: ""
+  rentType: ""
+  complaintCreateTime: null
+  orderLabel: ""
+  sceneLabel: ""
+  channelGroupCode: "001"
+
+# 注意：YAML <<: 合并键仅支持 mapping，sequence（列表）必须内联书写，
+# 因此 extract_vars 和 validate_data 在每个用例中直接展开。
+
+complaint_order_query_tests:
+  # ========== 用例1：以商户条件查询(shopNamesass人人享租1) ==========
+  - case_id: "COQ_001"
+    title: "空值查询条件--投诉订单查询"
+    description: "以空值为条件，验证接口正常返回，total 等于数据库记录数（SQL 独立验证）"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      status: ""
+      sourceType: ""
+    extract_vars:
+      - var_name: resp_total
+        path: data.orderComplaintsDtoPage.total
+    post_sql:
+      - query: |
+          SELECT COUNT(*) AS cnt
+          FROM llxz_marketing.ct_order_complaints
+          WHERE channel IN ('005', '007', '008', '009', '011', '012', '082', '085') 
+          and delete_time IS NULL;
+        column: "cnt"
+        expected_value: "${resp_total}"
+        operator: "=="
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.orderComplaintsDtoPage.total"
+        operator: ">="
+        value: 0
+
+  # ========== 用例2：以订单状态--待处理为查询条件 ==========
+  - case_id: "COQ_002"
+    title: "以订单状态--待处理为查询条件"
+    description: "status=0（待处理），验证返回记录状态均为待处理，total 等于 pendingComplaintNo（数据库独立验证）"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      status: "0"
+      sourceType: null
+    extract_vars:
+      - var_name: resp_total
+        path: data.orderComplaintsDtoPage.total
+    post_sql:
+      - query: |
+          SELECT COUNT(*) AS cnt
+          FROM llxz_marketing.ct_order_complaints
+          WHERE channel IN ('005', '007', '008', '009', '011', '012', '082', '085') 
+          AND status = 0 
+          AND delete_time IS NULL;
+        column: "cnt"
+        expected_value: "${resp_total}"
+        operator: "=="
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.orderComplaintsDtoPage.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.orderComplaintsDtoPage.records[*].status"
+        operator: "all_eq"
+        value: 0
+
+  # ========== 用例3：以处理状态--跟进中为查询条件 ==========
+  - case_id: "COQ_003"
+    title: "以处理状态--跟进中为查询条件"
+    description: "status=3（跟进中），验证返回记录状态均为跟进中，total 等于 progressComplaintNo（数据库独立验证）"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      status: "3"
+      sourceType: null
+    extract_vars:
+      - var_name: resp_total
+        path: data.orderComplaintsDtoPage.total
+    post_sql:
+      - query: |
+          SELECT COUNT(*) AS cnt
+          FROM llxz_marketing.ct_order_complaints
+          WHERE channel IN ('005', '007', '008', '009', '011', '012', '082', '085')
+          AND status = 3
+          AND delete_time IS NULL;
+        column: "cnt"
+        expected_value: "${resp_total}"
+        operator: "=="
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.orderComplaintsDtoPage.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.orderComplaintsDtoPage.records[*].status"
+        operator: "all_eq"
+        value: 3
+
+  # ========== 用例4：以处理状态--已撤诉为查询条件 ==========
+  - case_id: "COQ_004"
+    title: "以处理状态--已撤诉为查询条件"
+    description: "status=2（已撤诉），验证返回记录状态均为已撤诉，total 等于 withdrawnComplaintNo（数据库独立验证）"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      status: "2"
+      sourceType: null
+    extract_vars:
+      - var_name: resp_total
+        path: data.orderComplaintsDtoPage.total
+    post_sql:
+      - query: |
+          SELECT COUNT(*) AS cnt
+          FROM llxz_marketing.ct_order_complaints
+          WHERE channel IN ('005', '007', '008', '009', '011', '012', '082', '085')
+          AND status = 2
+          AND delete_time IS NULL;
+        column: "cnt"
+        expected_value: "${resp_total}"
+        operator: "=="
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.orderComplaintsDtoPage.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.orderComplaintsDtoPage.records[*].status"
+        operator: "all_eq"
+        value: 2
+
+  # ========== 用例5：以处理状态--已完成为查询条件 ==========
+  - case_id: "COQ_005"
+    title: "以处理状态--已完成为查询条件"
+    description: "status=1（已完成），验证返回记录状态均为已完成，total 等于 finishComplaintNo（数据库独立验证）"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      status: "1"
+      sourceType: null
+    extract_vars:
+      - var_name: resp_total
+        path: data.orderComplaintsDtoPage.total
+    post_sql:
+      - query: |
+          SELECT COUNT(*) AS cnt
+          FROM llxz_marketing.ct_order_complaints
+          WHERE channel IN ('005', '007', '008', '009', '011', '012', '082', '085')
+          AND status = 1
+          AND delete_time IS NULL;
+        column: "cnt"
+        expected_value: "${resp_total}"
+        operator: "=="
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.orderComplaintsDtoPage.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.orderComplaintsDtoPage.records[*].status"
+        operator: "all_eq"
+        value: 1
+
+  # ========== 用例6：以订单号查询条件（固定订单号） ==========
+  - case_id: "COQ_006"
+    title: "以订单号查询条件"
+    description: "使用固定订单号查询，验证接口正常返回"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: "008OI202506061930898664272826368"
+      status: ""
+      sourceType: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # ========== 用例7：租期类型--短租为查询条件 ==========
+  - case_id: "COQ_007"
+    title: "租期类型--短租为查询条件"
+    description: "rentType=0（短租），orderId 从首次查询中动态获取"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: "${first_order_id}"
+      status: ""
+      sourceType: null
+      rentType: "0"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # ========== 用例8：租期类型--长租为查询条件 ==========
+  - case_id: "COQ_008"
+    title: "租期类型--长租为查询条件"
+    description: "rentType=1（长租），orderId 从首次查询中动态获取"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: "${first_order_id}"
+      status: ""
+      sourceType: null
+      rentType: "1"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # ========== 用例9：以app来源为查询条件--支付宝 ==========
+  - case_id: "COQ_009"
+    title: "以app来源为查询条件--支付宝"
+    description: "sourceType=2（支付宝），验证接口正常返回"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: ""
+      status: ""
+      sourceType: "2"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # ========== 用例10：以订单号为查询条件（精确匹配） ==========
+  - case_id: "COQ_010"
+    title: "以订单号为查询条件"
+    description: "使用精确订单号查询，验证返回结果的订单号与查询条件一致"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: "008OI202605212057406435675140096T"
+      status: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.orderComplaintsDtoPage.total"
+        operator: ">="
+        value: 1
+      - path: "$.data.orderComplaintsDtoPage.records[*].orderId"
+        operator: "all_eq"
+        value: "008OI202605212057406435675140096T"
+
+  # ========== 用例11：以渠道来源为查询条件 ==========
+  - case_id: "COQ_011"
+    title: "以渠道来源为查询条件"
+    description: "channels=[008,012]，验证返回记录的渠道来源均为零零享或寻租"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: ""
+      status: ""
+      channels:
+        - "008"
+        - "012"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.orderComplaintsDtoPage.records[*].channel"
+        operator: "all_in"
+        value: ["008", "012"]
+
+  # ========== 用例12：涉诉类型为查询条件--假冒伪劣品牌 ==========
+  - case_id: "COQ_012"
+    title: "涉诉类型为查询条件--假冒伪劣品牌"
+    description: "typeId=5（假冒伪劣品牌），验证接口正常返回"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      orderId: ""
+      typeId: 5
+      status: ""
+      channels: []
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+# ==================== 工单上报测试数据 ====================
+add_off_order_complaint_tests:
+  - case_id: "COQ_013"
+    title: "工单上报"
+    description: "SQL 预查询一条无投诉记录的订单，动态填充参数并调用工单上报接口"
+    method: POST
+    endpoint: "/hzsx/orderComplaints/addOffOrderComplaints"
+    sql:
+      query: |
+        SELECT
+        o.order_id,
+        o.status,
+        o.create_time,
+        o.rent_start,
+        o.unrent_time,
+        o.shop_id AS order_shop_id,  -- 防止字段名冲突
+        e.name,
+        e.scene_label,
+        e.order_label,
+        e.business_model,
+        e.shop_id AS complaint_shop_id, -- 防止字段名冲突
+        e.channel
+        FROM llxz_order.ct_user_orders o
+         LEFT JOIN llxz_marketing.ct_order_complaints e
+                   ON o.order_id = e.order_id
+        WHERE o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87'
+        AND e.order_id IS NULL  -- 核心：过滤掉有关联投诉的订单
+        LIMIT 1;
+      columns: ["order_id", "shop_id", "channel", "source_type", "status"]
+    json:
+      orderId: "${order_id}"
+      shopId: "${shop_id}"
+      channel: "${channel}"
+      sourceType: "${source_type}"
+      complaintsCategoryOne: 17
+      complaintsCategoryTwo: 22
+      complaintsCategoryThird: 50
+      typeId: 5
+      complaintCreateTime: "${complaint_time}"
+      telphone: "mm:16b7b1f8360af342790b8448ebc1c565a16a"
+      complaintsType: 0
+      complaintsChannel: 9
+      content: "[自动化测试] 后端工单上报测试，此条数据由自动化测试脚本生成"
+      images: ["https://oss.llxzu.com/78f3d4009839426589e9d199d52f5473.jpg"]
+      status: "${status}"
+      result: "[自动化测试] 后端工单处理结果，此条数据由自动化测试脚本生成"
+      resultImages: []
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true

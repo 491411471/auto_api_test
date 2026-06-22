@@ -1,0 +1,266 @@
+# 投保订单查询接口测试数据
+# 接口: POST /hzsx/ope/picc/queryLogPage
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/ope/picc/queryLogPage"
+
+picc_query_tests:
+  # ==================== 用例2: 以订单号为查询条件 ====================
+  - case_id: PICC_002
+    title: "以订单号为查询条件"
+    description: "从无条件查询第一页records[0]获取orderId，再以此为条件查询，验证返回结果中orderId匹配"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: "${order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 1
+      - path: "$.data.piccInsurenceLogDtoList.records[*].orderId"
+        operator: "all_eq"
+        value: "${order_id}"
+
+  # ==================== 用例3: 以险种为查询条件-人保 ====================
+  - case_id: PICC_003
+    title: "以险种为查询条件-人保"
+    description: "查询insuranceType=1(人保)的投保记录，验证返回结果中所有记录险种为1"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      insuranceType: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 1
+      - path: "$.data.piccInsurenceLogDtoList.records[*].insuranceType"
+        operator: "all_eq"
+        value: 1
+
+  # ==================== 用例4: 以险种为查询条件-天安财险 ====================
+  - case_id: PICC_004
+    title: "以险种为查询条件-天安财险"
+    description: "查询insuranceType=2(天安财险)的投保记录，验证返回结果中所有记录险种为2"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      insuranceType: 2
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.piccInsurenceLogDtoList.records[*].insuranceType"
+        operator: "all_eq"
+        value: 2
+
+  # ==================== 用例5: 以保单状态为查询条件-投保中 ====================
+  - case_id: PICC_005
+    title: "以保单状态为查询条件-投保中"
+    description: "查询status=1(投保中)的投保记录，验证返回结果中所有记录状态为1"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      status: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.piccInsurenceLogDtoList.records[*].status"
+        operator: "all_eq"
+        value: "1"
+
+  # ==================== 用例6: 以保单状态为查询条件-已投保 ====================
+  - case_id: PICC_006
+    title: "以保单状态为查询条件-已投保"
+    description: "查询status=2(已投保)的投保记录，验证返回结果中所有记录状态为2"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      status: 2
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.piccInsurenceLogDtoList.records[*].status"
+        operator: "all_eq"
+        value: "2"
+
+  # ==================== 用例7: 以保单状态为查询条件-已取消 ====================
+  - case_id: PICC_007
+    title: "以保单状态为查询条件-已取消"
+    description: "查询status=3(已取消)的投保记录，验证返回结果中所有记录状态为3"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      status: 3
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.piccInsurenceLogDtoList.records[*].status"
+        operator: "all_eq"
+        value: "3"
+
+  # ==================== 用例8: 以扣款状态为查询条件-扣款成功 ====================
+  - case_id: PICC_008
+    title: "以扣款状态为查询条件-扣款成功"
+    description: "查询chargeStatus=1(扣款成功)的投保记录，验证返回结果中所有记录扣款状态为1"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      chargeStatus: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.piccInsurenceLogDtoList.records[*].chargeStatus"
+        operator: "all_eq"
+        value: "1"
+
+  # ==================== 用例9: 以扣款状态为查询条件-扣款失败 ====================
+  - case_id: PICC_009
+    title: "以扣款状态为查询条件-扣款失败"
+    description: "查询chargeStatus=2(扣款失败)的投保记录，验证返回结果中所有记录扣款状态为2"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      chargeStatus: 2
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.piccInsurenceLogDtoList.records[*].chargeStatus"
+        operator: "all_eq"
+        value: "2"
+
+  # ==================== 用例10: 以扣款状态为查询条件-已退款 ====================
+  - case_id: PICC_010
+    title: "以扣款状态为查询条件-已退款"
+    description: "查询chargeStatus=3(已退款)的投保记录，验证返回结果中所有记录扣款状态为3"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      chargeStatus: 3
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.piccInsurenceLogDtoList.records[*].chargeStatus"
+        operator: "all_eq"
+        value: "3"
+
+  # ==================== 用例11: 投保状态+扣款状态+险种组合查询 ====================
+  - case_id: PICC_011
+    title: "投保状态+扣款状态+险种组合查询"
+    description: "组合条件查询: status=2(已投保)+chargeStatus=1(扣款成功)+insuranceType=1(人保)，验证所有条件同时满足"
+    <<: *common_endpoint
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: ""
+      status: 2
+      chargeStatus: 1
+      insuranceType: 1
+      policySele: null
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.piccInsurenceLogDtoList.total"
+        operator: ">="
+        value: 0
+      - path: "$.data.piccInsurenceLogDtoList.records[*].status"
+        operator: "all_eq"
+        value: "2"
+      - path: "$.data.piccInsurenceLogDtoList.records[*].chargeStatus"
+        operator: "all_eq"
+        value: "1"
+      - path: "$.data.piccInsurenceLogDtoList.records[*].insuranceType"
+        operator: "all_eq"
+        value: 1

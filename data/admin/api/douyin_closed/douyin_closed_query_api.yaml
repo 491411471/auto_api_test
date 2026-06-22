@@ -1,0 +1,47 @@
+# 运营端 - 抖音关单查询接口测试数据
+# 接口：POST /hzsx/ope/order/queryOpeOrderByCondition
+# 流程：前置SQL获取抖音渠道已关闭订单 → 按订单号查询 → 验证返回数据与SQL结果一致
+
+douyin_closed_query_tests:
+  - case_id: "DCQ_001"
+    title: "抖音关单查询-验证订单号、下单人姓名和订单状态"
+    description: "通过SQL查询抖音渠道(channel_provenance=2)已关闭(status=10)的订单，使用订单号调用查询接口，验证返回的订单号、下单人姓名(realName)和订单状态与SQL查询结果一致"
+    method: POST
+    endpoint: "/hzsx/ope/order/queryOpeOrderByCondition"
+    # 前置SQL：查询抖音渠道已关闭的订单
+    sql:
+      query: >
+        SELECT order_id, user_name, status
+        FROM llxz_order.ct_user_orders
+        WHERE channel_provenance = '2' AND status = '10'
+        LIMIT 1
+      columns:
+        - order_id
+        - user_name
+        - status
+    # 请求参数（orderId 由前置SQL动态注入）
+    json:
+      pageNumber: 1
+      pageSize: 10
+      queryType: "queryPageList"
+      isQueryHistory: false
+      orderId: "${order_id}"
+    expected_status: 200
+    validate_data:
+      # 基础响应校验
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 核心校验：订单号、下单人姓名、订单状态与SQL查询结果一致
+      - path: "$.data.records[0].orderId"
+        operator: "=="
+        value: "${order_id}"
+      - path: "$.data.records[0].realName"
+        operator: "=="
+        value: "${user_name}"
+      - path: "$.data.records[0].status"
+        operator: "=="
+        value: "${status}"

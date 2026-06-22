@@ -1,0 +1,69 @@
+# 投诉分析 - 近7天每日投诉订单数量验证（3个SQL维度 × 7天）
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  start_time: "${start_time}"   # 由测试代码动态注入（当前日期向前推7天）
+  end_time: "${end_time}"       # 由测试代码动态注入（当前日期）
+
+# ---- API 公共配置（所有用例共用） ----
+api_config:
+  method: POST
+  endpoint: "/hzsx/orderComplaints/queryOrderShopComplaintsAnalysisPageNew"
+  params:
+    businessModel: ""
+    startTime: "${start_time}"
+    endTime: "${end_time}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+
+# ---- 3 个 SQL 校验用例，每个用例对应一个 API 响应字段 ----
+complaint_daily_analysis_tests:
+
+  # 用例1：投诉订单总数 → 对比 API 字段 complaintsCount
+  - case_id: "CDA_001"
+    title: "近7天每日投诉订单总数"
+    description: "无类型过滤，统计每日全部投诉量，与 API complaintsCount 字段比对"
+    api_field: "complaintsCount"
+    daily_sql:
+      query: >
+        SELECT COUNT(*) AS complaint_total_num
+        FROM llxz_marketing.ct_order_complaints
+        WHERE delete_time IS NULL
+        AND create_time BETWEEN '${day_start}' AND '${day_end}'
+        AND shop_id='${shop_id}'
+      column: complaint_total_num
+
+  # 用例2：内部投诉订单数 → 对比 API 字段 onLineComplaintsNum
+  - case_id: "CDA_002"
+    title: "近7天每日内部投诉订单数"
+    description: "过滤 complaints_type=0（内部投诉），与 API onLineComplaintsNum 字段比对"
+    api_field: "onLineComplaintsNum"
+    daily_sql:
+      query: >
+        SELECT COUNT(*) AS complaint_total_num
+        FROM llxz_marketing.ct_order_complaints
+        WHERE delete_time IS NULL
+        AND create_time BETWEEN '${day_start}' AND '${day_end}'
+        AND shop_id='${shop_id}'
+        AND complaints_type = 0
+      column: complaint_total_num
+
+  # 用例3：外部投诉订单数 → 对比 API 字段 offLineComplaintsNum
+  - case_id: "CDA_003"
+    title: "近7天每日外部投诉订单数"
+    description: "过滤 complaints_type=1（外部投诉），与 API offLineComplaintsNum 字段比对"
+    api_field: "offLineComplaintsNum"
+    daily_sql:
+      query: >
+        SELECT COUNT(*) AS complaint_total_num
+        FROM llxz_marketing.ct_order_complaints
+        WHERE delete_time IS NULL
+        AND create_time BETWEEN '${day_start}' AND '${day_end}'
+        AND shop_id='${shop_id}'
+        AND complaints_type = 1
+      column: complaint_total_num

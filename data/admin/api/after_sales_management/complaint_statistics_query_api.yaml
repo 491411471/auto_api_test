@@ -1,0 +1,675 @@
+# ---
+# 运营端 - 售后管理 - 投诉统计查询接口测试数据
+#
+# 接口1：POST /hzsx/orderComplaints/queryComplaintStatisticsPage  (列表查询，用例1-9)
+# 接口2：POST /hzsx/orderComplaints/getOrderComplaintsShopDetial (详情查询，用例10)
+#
+# 变量说明：
+#   - 日期变量（由 Python 运行时注入）：
+#       ${today_start}  今日 00:00:00
+#       ${today_end}    今日 23:59:59
+#       ${days_7_start}  近7日起始
+#       ${days_30_start} 近30日起始
+#       ${common_end}    通用结束时间（当天 23:59:59）
+
+variables:
+  channelGroupCode: "001"
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/orderComplaints/queryComplaintStatisticsPage"
+
+complaint_statistics_query_tests:
+
+  # ========== CSQ_001: 默认加载（近7日） ==========
+  - case_id: "CSQ_001"
+    title: "默认加载-近7日查询验证接口正常投诉单总数"
+    description: "不输入任何筛选条件，使用近7日默认时间范围查询，验证接口正常投诉单总数返回及分页数据"
+    <<: *common_endpoint
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      shopName: ""
+      rentType: ""
+      formShopCompOrderMagnitude: ""
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    extract_vars:
+      - var_name: resp_completed_order_num
+        path: "data.records[0].opeComplaintOrderNum"
+      - var_name: resp_size
+        path: "data.size"
+      - var_name: resp_current
+        path: "data.current"
+    post_sql:
+      - query: |
+          SELECT COUNT(*) AS cnt
+          FROM llxz_marketing.ct_order_complaints
+          WHERE delete_time IS NULL
+          AND create_time >= '${days_7_start}'
+          AND create_time <= '${common_end}'
+           AND channel in ('004', '005', '007', '008', '009', '011', '012', '082', '085')
+        column: "cnt"
+        expected_value: "${resp_completed_order_num}"
+        operator: "=="
+    expected_status: 200
+    validate_data:
+      # 第1层：基础响应
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.size"
+        operator: "=="
+        value: 10
+      - path: "$.data.current"
+        operator: "=="
+        value: 1
+      # 第2层：结果结构（records 必须为列表）
+      - path: "$.data.records"
+        operator: "is_not_none"
+
+  # ========== CSQ_002: 今日筛选 ==========
+  - case_id: "CSQ_002"
+    title: "快捷时间筛选-今日"
+    description: "验证今日筛选的起止时间与系统当前日期的 00:00:00 ~ 23:59:59 完全吻合"
+    <<: *common_endpoint
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      shopName: ""
+      rentType: ""
+      formShopCompOrderMagnitude: ""
+      startDate: "${today_start}"
+      endDate: "${today_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # ========== CSQ_003: 近7日筛选 ==========
+  - case_id: "CSQ_003"
+    title: "快捷时间筛选-近7日"
+    description: "验证近7日筛选的起止时间为当前日期向前推7天 00:00:00 至当天 23:59:59"
+    <<: *common_endpoint
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      shopName: ""
+      rentType: ""
+      formShopCompOrderMagnitude: ""
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+
+  # ========== CSQ_004: 近30日筛选 ==========
+  - case_id: "CSQ_004"
+    title: "快捷时间筛选-近30日"
+    description: "验证近30日筛选的起止时间为当前日期向前推30天 00:00:00 至当天 23:59:59"
+    <<: *common_endpoint
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      shopName: ""
+      rentType: ""
+      formShopCompOrderMagnitude: ""
+      startDate: "${days_30_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # ========== CSQ_005: 多条件-订单总量验证 ==========
+  - case_id: "CSQ_005"
+    title: "多条件组合-某具体商户已完成订单总量验证"
+    description: "组合筛选（近7日 + 短租），验证第一条记录的 completedOrderNum 与数据库独立查询一致"
+    <<: *common_endpoint
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: "${shop_id}"
+      rentType: ""
+      formShopCompOrderMagnitude: ""
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    extract_vars:
+      - var_name: completed_order_num
+        path: "data.records[0].completedOrderNum"
+        default: 0
+    post_sql:
+      - query: |
+          SELECT COUNT(*) AS cnt
+          FROM llxz_order.ct_user_orders
+          WHERE shop_id = '${shop_id}'
+          AND delete_time IS NULL
+          AND create_time >= '${days_7_start}'
+          AND create_time <= '${common_end}'
+          AND channel_id in ('004', '005', '007', '008', '009', '011', '012', '082', '085')
+          AND status IN ('01', '04', '05', '06', '07', '08', '09', '10', '12', '13', '14')
+          AND withhold_type is not null
+        column: "cnt"
+        expected_value: "${completed_order_num}"
+        operator: "=="
+    expected_status: 200
+    validate_data:
+      # 第1层：基础响应
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # ========== CSQ_006: 多条件-投诉总量验证 ==========
+  - case_id: "CSQ_006"
+    title: "多条件组合-验证某具体商户--投诉总量验证"
+    description: "组合筛选（近7日 + 短租），用 SQL 独立查询投诉总量，验证 API 返回的该商户 complaintTotalNum 与 DB 一致"
+    <<: *common_endpoint
+    # 前置 SQL：独立数据源，获取目标商户近7日投诉总量
+    sql:
+      query: |
+        SELECT COUNT(*) AS sql_complaint_total
+        FROM llxz_marketing.ct_order_complaints
+        WHERE shop_id = '${shop_id}'
+        AND delete_time IS NULL
+        AND create_time >= '${days_7_start}'
+        AND create_time <= '${common_end}'
+        AND channel in ('004', '005', '007', '008', '009', '011', '012', '082', '085')
+      column: "sql_complaint_total"
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      shopId: "${shop_id}"
+      rentType: ""
+      formShopCompOrderMagnitude: ""
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 核心断言：API 返回的目标商户 complaintTotalNum 与 SQL 独立查询一致
+      - path: "$.data.records[0].complaintTotalNum"
+        operator: "=="
+        value: "${sql_complaint_total}"
+
+  # ========== CSQ_007: 多条件-已撤诉数据验证 ==========
+  - case_id: "CSQ_007"
+    title: "多条件组合-某店铺已撤诉投诉数验证"
+    description: "组合筛选（近7日 + 短租），验证第一条记录的 withdrawnComplaintNum 与数据库已撤诉记录数一致"
+    <<: *common_endpoint
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      shopId: "${shop_id}"
+      rentType: "0"
+      formShopCompOrderMagnitude: ""
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    extract_vars:
+      - var_name: withdrawn_num
+        path: "data.records[0].withdrawnComplaintNum"
+        default: 0
+    post_sql:
+      - query: |
+          SELECT COUNT(*) AS cnt
+          FROM llxz_marketing.ct_order_complaints
+          WHERE shop_id = '${shop_id}'
+          AND status = 2
+          AND business_model = 0
+          AND delete_time IS NULL
+          AND create_time >= '${days_7_start}'
+          AND create_time <= '${common_end}'
+        column: "cnt"
+        expected_value: "${withdrawn_num}"
+        operator: "=="
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].shopId"
+        operator: "not_empty"
+
+
+  # ========== CSQ_08: 多条件-已完成订单总量验证 ==========
+  - case_id: "CSQ_08"
+    title: "多条件组合-验证某具体商户已完成订单总量"
+    description: "组合筛选（近7日），用 SQL 独立查询已完成订单总量，验证 API 返回的该商户 completedOrderNum 与 DB 一致"
+    <<: *common_endpoint
+    # 前置 SQL：独立数据源，获取目标商户近7日已完成订单总量
+    sql:
+      query: |
+        SELECT COUNT(*) AS sql_completed_order_num
+        FROM llxz_order.ct_user_orders
+        WHERE status IN ('01', '04', '05', '06', '07', '08', '09', '10', '12', '13', '14')
+        AND create_time BETWEEN '${days_7_start}' AND '${common_end}'
+        AND channel_id IN ('005', '007', '008', '009', '011', '012', '082', '085')
+        AND (delete_time = '2001-01-01 00:00:00' OR delete_time IS NULL)
+        AND withhold_type IS NOT NULL
+        AND shop_id = '${shop_id}'
+      column: "sql_completed_order_num"
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      shopId: "${shop_id}"
+      rentType: ""
+      formShopCompOrderMagnitude: ""
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 核心断言：API 返回的目标商户 completedOrderNum 与 SQL 独立查询一致
+      - path: "$.data.records[0].opeOrderNum"
+        operator: "=="
+        value: "${sql_completed_order_num}"
+        type_check: int
+
+  # ========== CSQ_09: 多条件-已完成订单总量验证 ==========
+  - case_id: "CSQ_09"
+    title: "多条件组合-验证某具体商户已完成订单总量"
+    description: "组合筛选（近7日），用 SQL 独立查询已完成订单总量，验证 API 返回的该商户 completedOrderNum 与 DB 一致"
+    <<: *common_endpoint
+    # 前置 SQL：独立数据源，获取目标商户近7日已完成订单总量
+    sql:
+      query: |
+        SELECT COUNT(*) AS sql_completed_order_num
+        FROM llxz_order.ct_user_orders
+        WHERE status IN ('01', '04', '05', '06', '07', '08', '09', '10', '12', '13', '14')
+        AND create_time BETWEEN '${days_7_start}' AND '${common_end}'
+        AND channel_id IN ('005', '007', '008', '009', '011', '012', '082', '085')
+        AND (delete_time = '2001-01-01 00:00:00' OR delete_time IS NULL)
+        AND withhold_type IS NOT NULL
+      column: "sql_completed_order_num"
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      rentType: ""
+      formShopCompOrderMagnitude: ""
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 核心断言：API 返回的目标商户 completedOrderNum 与 SQL 独立查询一致
+      - path: "$.data.records[0].opeOrderNum"
+        operator: "=="
+        value: "${sql_completed_order_num}"
+        type_check: int
+
+  # ========== CSQ_010: 多条件-投诉率计算公式验证 ==========
+  - case_id: "CSQ_010"
+    title: "多条件组合-验证投诉率计算公式"
+    description: |
+      组合筛选（近7日），验证投诉率计算公式：
+        complaintRate = complaintTotalNum / completedOrderNum * 100%
+      Python 层交叉验证：用 SQL 独立数据源计算期望值，与 API 返回值对比。
+      订单总量为 0 时，投诉率应为 0.00%。
+    <<: *common_endpoint
+    json:
+      pageSize: 10
+      pageNum: 1
+      categoryId: null
+      orderStartNum: ""
+      orderEndNum: ""
+      channelGroupCode: "001"
+      shopId: "${shop_id}"
+      rentType: ""
+      formShopCompOrderMagnitude: ""
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      sortOrder: "descend"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  - case_id: "CSQ_011"
+    title: "验证店铺投诉率"
+    description: "从数据库统计订单量、投诉量，调用接口获取complaintTotalNum、completedOrderNum，双向校验投诉率"
+    method: POST
+    endpoint: "/hzsx/orderComplaints/queryComplaintStatisticsPage"
+    # ---- SQL 1: 订单总量 ----
+    sql:
+      # 第一条 SQL：订单总量
+      - query: |
+          SELECT
+          COALESCE(c.complaint_total_num, 0) AS complaint_total_num,
+          COALESCE(o.completed_order_num, 0) AS completed_order_num,
+          -- 计算投诉率（处理除数为0的情况）
+          CASE
+              WHEN COALESCE(o.completed_order_num, 0) = 0 THEN 0
+              ELSE concat(ROUND(COALESCE(c.complaint_total_num, 0) * 100.0 / o.completed_order_num, 2),'%%')
+              END AS complaint_rate_percent
+          FROM
+          -- 子查询1：计算已完成订单数
+          (SELECT COUNT(*) AS completed_order_num
+           FROM llxz_order.ct_user_orders
+           WHERE status IN ('01', '04', '05', '06', '07', '08', '09', '10', '12', '13', '14')
+             AND create_time BETWEEN '${days_7_start}' AND '${common_end}'
+             AND channel_id IN ('005', '007', '008', '009', '011', '012', '082', '085')
+             AND (delete_time = '2001-01-01 00:00:00' OR delete_time IS NULL)
+             AND withhold_type IS NOT NULL
+             AND shop_id = '${shop_id}'
+          ) o
+              CROSS JOIN
+          -- 子查询2：计算投诉总数
+              (SELECT COUNT(*) AS complaint_total_num
+               FROM llxz_marketing.ct_order_complaints
+               WHERE delete_time IS NULL
+           AND create_time BETWEEN '${days_7_start}' AND '${common_end}'
+           AND shop_id = '${shop_id}'
+           AND channel IN ('004', '005', '007', '008', '009', '011', '012', '082', '085')
+          ) c
+        columns:
+          - complaint_total_num
+          - completed_order_num
+          - complaint_rate_percent
+    # ---- API 请求参数 ----
+    json:
+      pageNum: 1
+      pageSize: 10
+      categoryId: null
+      channelGroupCode: "001"
+      shopId: "${shop_id}"
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      formShopCompOrderMagnitude: ""
+      orderEndNum: ""
+      orderStartNum: ""
+      rentType: ""
+    # ---- 响应断言 ----
+    min_count: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 核心断言：SQL 计算的投诉率与 API 返回的投诉率一致
+      - path: "$.data.records[0].completedOrderRateShow"
+        operator: "=="
+        value: "${complaint_rate_percent}"
+
+
+  - case_id: "CSQ_012"
+    title: "验证所有店铺7天内累计投诉率"
+    description: "从数据库统计订单量、投诉量，调用接口获取complaintTotalNum、completedOrderNum，校验所有店铺7天内累计投诉率"
+    method: POST
+    endpoint: "/hzsx/orderComplaints/queryComplaintStatisticsPage"
+    # ---- SQL 1: 订单总量 ----
+    sql:
+      # 第一条 SQL：订单总量
+      - query: |
+          WITH order_stats AS (
+            -- 全平台订单总量
+            SELECT COUNT(*) AS completed_order_num
+            FROM llxz_order.ct_user_orders
+            WHERE status IN ('01', '04', '05', '06', '07', '08', '09', '10', '12', '13', '14')
+              AND create_time BETWEEN '${days_7_start}' AND '${common_end}'
+              AND channel_id IN ('005', '007', '008', '009', '011', '012', '082', '085')
+              AND (delete_time = '2001-01-01 00:00:00' OR delete_time IS NULL)
+              AND withhold_type IS NOT NULL
+          ),
+          complaint_stats AS (
+            -- 全平台投诉总量
+            SELECT COUNT(*) AS complaint_total_num
+            FROM llxz_marketing.ct_order_complaints
+            WHERE delete_time IS NULL
+              AND create_time BETWEEN '${days_7_start}' AND '${common_end}'
+              AND channel IN ('004', '005', '007', '008', '009', '011', '012', '082', '085')
+          ),
+          withdrawn_stats AS (
+            -- 全平台已撤诉
+            SELECT COUNT(*) AS withdrawn_num
+            FROM llxz_marketing.ct_order_complaints
+            WHERE status = 2
+              -- AND business_model = 0
+              AND delete_time IS NULL
+              AND create_time BETWEEN '${days_7_start}' AND '${common_end}'
+              AND channel IN ('004', '005', '007', '008', '009', '011', '012', '082', '085')
+          )
+          SELECT
+            os.completed_order_num,
+            cs.complaint_total_num,
+            ws.withdrawn_num,
+            -- 计算撤诉后投诉率：(投诉总量 - 已撤诉量) / 订单总量 * 100%%
+            CONCAT(ROUND((COALESCE(cs.complaint_total_num, 0) - COALESCE(ws.withdrawn_num, 0)) * 100.0 / NULLIF(os.completed_order_num, 0),2),'%%') AS complaint_rate_after_withdrawn
+          FROM order_stats os
+            CROSS JOIN complaint_stats cs
+            CROSS JOIN withdrawn_stats ws
+        columns:
+          - complaint_total_num
+          - completed_order_num
+          - withdrawn_num
+          - complaint_rate_after_withdrawn
+    # ---- API 请求参数 ----
+    json:
+      pageNum: 1
+      pageSize: 10
+      categoryId: null
+      channelGroupCode: "001"
+      startDate: "${days_7_start}"
+      endDate: "${common_end}"
+      sortField: "completedOrderRateShow"
+      formShopCompOrderMagnitude: ""
+      orderEndNum: ""
+      orderStartNum: ""
+      rentType: ""
+    # ---- 响应断言 ----
+    min_count: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 核心断言：SQL 计算的投诉率与 API 返回的投诉率一致
+      - path: "$.data.records[0].opeComplaintRateStr"
+        operator: "=="
+        value: "${complaint_rate_after_withdrawn}"
+
+
+# ========== CSQ_013: 店铺详情按区间第3天交叉校验 ==========
+  - case_id: "CSQ_013"
+    title: "店铺详情-按7天区间第3天校验订单/投诉/撤诉及投诉率"
+    description: |
+      对于店铺 `${shop_id}`，在区间 `${today_start}` ~ `${today_end}` 。
+      使用 SQL 在 DB 层统计该天的已完成订单数、投诉总量、已撤诉数，并计算投诉率与撤诉后投诉率（均格式化为带百分号字符串，如 "1.23%"）。
+    method: POST
+    endpoint: "/hzsx/orderComplaints/getOrderComplaintsShopDetial"
+    # 单条 SQL 使用两个子查询（按第3天）并返回多列供断言
+    sql:
+      query: |
+        SELECT
+          COALESCE(o.completed_order_num, 0) AS completed_order_num,
+          COALESCE(c.complaint_total_num, 0) AS complaint_total_num,
+          COALESCE(w.withdrawn_num, 0) AS withdrawn_num,
+          CASE WHEN COALESCE(o.completed_order_num, 0) = 0
+               THEN '0.00%%'
+               ELSE CONCAT(ROUND(COALESCE(c.complaint_total_num,0) * 100.0 / o.completed_order_num, 2), '%%')
+          END AS complaint_rate_percent,
+          CASE WHEN COALESCE(o.completed_order_num, 0) = 0
+               THEN '0.00%%'
+               ELSE CONCAT(ROUND((COALESCE(c.complaint_total_num,0) - COALESCE(w.withdrawn_num,0)) * 100.0 / o.completed_order_num, 2), '%%')
+          END AS complaint_rate_after_withdrawn
+        FROM
+          (SELECT COUNT(*) AS completed_order_num
+           FROM llxz_order.ct_user_orders
+           WHERE status IN ('01','04','05','06','07','08','09','10','12','13','14')
+             AND create_time BETWEEN '${today_start}' AND '${today_end}'
+             AND channel_id IN ('005','007','008','009','011','012','082','085')
+             AND (delete_time = '2001-01-01 00:00:00' OR delete_time IS NULL)
+             AND withhold_type IS NOT NULL
+             AND shop_id = '${shop_id}') o,
+          (SELECT COUNT(*) AS complaint_total_num
+           FROM llxz_marketing.ct_order_complaints
+           WHERE delete_time IS NULL
+             AND create_time BETWEEN '${today_start}' AND '${today_end}'
+             AND shop_id = '${shop_id}'
+             AND channel IN ('004','005','007','008','009','011','012','082','085')) c,
+          (SELECT COUNT(*) AS withdrawn_num
+           FROM llxz_marketing.ct_order_complaints
+           WHERE status = 2
+             -- AND business_model = 0
+             AND delete_time IS NULL
+             AND create_time BETWEEN '${today_start}' AND '${today_end}'
+             AND shop_id = '${shop_id}'
+             AND channel IN ('004','005','007','008','009','011','012','082','085')) w
+      columns:
+        - completed_order_num
+        - complaint_total_num
+        - withdrawn_num
+        - complaint_rate_percent
+        - complaint_rate_after_withdrawn
+    json:
+      pageNum: 1
+      pageSize: 10
+      shopId: "${shop_id}"
+      startDate: "${today_start}"
+      endDate: "${today_end}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      # 订单总量
+      - path: "$.data.records[0].completedOrderNum"
+        operator: "=="
+        value: "${completed_order_num}"
+
+      # 投诉总量
+      - path: "$.data.records[0].complaintTotalNum"
+        operator: "=="
+        value: "${complaint_total_num}"
+
+      # 已撤诉
+      - path: "$.data.records[0].withdrawnComplaintNum"
+        operator: "=="
+        value: "${withdrawn_num}"
+
+      # 投诉率（映射到 completedOrderRateShow 根据你的说明）
+      - path: "$.data.records[0].completedOrderRateShow"
+        operator: "=="
+        value: "${complaint_rate_percent}"
+      # 撤诉后投诉率（映射到 onwithdrawnComplaintNumRate）
+      - path: "$.data.records[0].onwithdrawnComplaintNumRate"
+        operator: "=="
+        value: "${complaint_rate_after_withdrawn}"
+
+

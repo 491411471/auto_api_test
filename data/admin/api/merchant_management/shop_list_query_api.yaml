@@ -1,0 +1,485 @@
+# 运营端 - 商家管理 - 商家列表查询接口测试数据
+# 接口：POST /hzsx/opeShop/toShopExamineListV2
+# 场景：多条件查询商家列表（平台、店铺名称、店铺编码、续期状态、账户状态、注销状态、托管模式、清退状态、组合查询）
+
+variables:
+  channelGroupCode: "001"
+  pageSize: 10
+  pageNumber: 1
+
+shop_list_query_tests:
+  # ==================== 测试用例1：以平台为查询条件 ====================
+  - case_id: "SLQ_001"
+    title: "以平台为查询条件"
+    description: "仅以 channelGroupCode=001 查询商家列表，验证接口常规响应"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+
+  # ==================== 测试用例2：以店铺名称为查询条件 ====================
+  - case_id: "SLQ_002"
+    title: "以店铺名称为查询条件"
+    description: "以 shopName=sass人人享租1 查询，验证 records 非空且所有 name 字段均等于查询条件"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: "sass人人享租1"
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].name"
+        operator: "all_eq"
+        value: "sass人人享租1"
+
+  # ==================== 测试用例3：以店铺编码为查询条件 ====================
+  - case_id: "SLQ_003"
+    title: "以店铺编码为查询条件"
+    description: "以 shopId 查询，验证 records 非空且所有 shopId 字段均等于查询条件"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: "71008738021cd3393bacbac182bd6a86af0b5c87"
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].shopId"
+        operator: "all_eq"
+        value: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+  # ==================== 测试用例4：以续期已支付为查询条件 ====================
+  - case_id: "SLQ_004"
+    title: "以续期已支付为查询条件"
+    description: "以 extensionStatus=1 查询，验证 records 非空且所有 extensionStatus 字段均等于1"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      extensionStatus: 1
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].extensionStatus"
+        operator: "all_eq"
+        value: 1
+
+  # ==================== 测试用例5：以续期未支付为查询条件 ====================
+  - case_id: "SLQ_005"
+    title: "以续期未支付为查询条件"
+    description: "以 extensionStatus=0 查询，验证 records 非空且所有 extensionStatus 字段均等于0"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      extensionStatus: 0
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].extensionStatus"
+        operator: "all_eq"
+        value: 0
+
+  # ==================== 测试用例6：以账户状态为查询条件--已开通 ====================
+  - case_id: "SLQ_006"
+    title: "以账户状态为查询条件--已开通"
+    description: "以 accountStatus=1 查询，验证 records 非空且所有 accountStatus 字段均等于1"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      accountStatus: 1
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].accountStatus"
+        operator: "all_eq"
+        value: 1
+
+  # ==================== 测试用例7：以账户状态为查询条件--未开通 ====================
+  - case_id: "SLQ_007"
+    title: "以账户状态为查询条件--未开通"
+    description: "以 accountStatus=0 查询，验证 records 非空且所有 accountStatus 字段均等于0"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      accountStatus: 0
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].accountStatus"
+        operator: "all_eq"
+        value: 0
+
+  # ==================== 测试用例8：以注销状态为查询条件--已注销 ====================
+  - case_id: "SLQ_008"
+    title: "以注销状态为查询条件--已注销"
+    description: "以 cancelled=1 查询，验证 records 非空且所有 cancelled 字段均等于1"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      cancelled: 1
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].cancelled"
+        operator: "all_eq"
+        value: 1
+
+  # ==================== 测试用例9：以注销状态为查询条件--未注销 ====================
+  - case_id: "SLQ_009"
+    title: "以注销状态为查询条件--未注销"
+    description: "以 cancelled=0 查询，验证 records 非空且所有 cancelled 字段均等于0"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      cancelled: 0
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].cancelled"
+        operator: "all_eq"
+        value: 0
+
+  # ==================== 测试用例10：以托管模式--是为查询条件 ====================
+  - case_id: "SLQ_010"
+    title: "以托管模式--是 为查询条件"
+    description: "以 hostingStatus=1 查询，验证 records 非空且所有 hostingStatus 字段均等于1"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      hostingStatus: 1
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].hostingStatus"
+        operator: "all_in"   # 关键点：使用 all_in
+        value: [ 1, 2 ]      # 关键点：YAML List 格式
+
+  # ==================== 测试用例11：以托管模式--否为查询条件 ====================
+  - case_id: "SLQ_011"
+    title: "以托管模式--否 为查询条件"
+    description: "以 hostingStatus=0 查询，验证 records 非空且所有 hostingStatus 字段均等于0"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      hostingStatus: 0
+      clearOutStatus: null
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].hostingStatus"
+        operator: "all_eq"
+        value: 0
+
+  # ==================== 测试用例12：以清退状态--已清退为查询条件 ====================
+  - case_id: "SLQ_012"
+    title: "以清退状态--已清退 为查询条件"
+    description: "以 clearOutStatus=1 查询，验证 records 非空且所有 clearOutTime 字段均不为空"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      hostingStatus: 0
+      clearOutStatus: 1
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].clearOutTime"
+        operator: "all_not_eq"
+        value: null
+
+  # ==================== 测试用例13：以清退状态--未清退为查询条件 ====================
+  - case_id: "SLQ_013"
+    title: "以清退状态--未清退 为查询条件"
+    description: "以 clearOutStatus=0 查询，验证 records 非空且所有 clearOutTime 字段均为空"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      clearOutStatus: 0
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].clearOutTime"
+        operator: "all_eq"
+        value: null
+
+  # ==================== 测试用例14：组合查询 ====================
+  - case_id: "SLQ_014"
+    title: "组合查询--续期已支付+未注销+未清退"
+    description: "以 extensionStatus=1、cancelled=0、clearOutStatus=0 组合查询，验证各条件字段均符合预期"
+    method: POST
+    endpoint: "/hzsx/opeShop/toShopExamineListV2"
+    expected_status: 200
+    json:
+      pageSize: 10
+      pageNumber: 1
+      experienceScoreSort: null
+      channelGroupCode: "001"
+      shopName: ""
+      shopId: ""
+      name: ""
+      extensionStatus: 1
+      cancelled: 0
+      clearOutStatus: 0
+      createTimeStart: ""
+      createTimeEnd: ""
+      status: 2
+      renewalDateStart: ""
+      renewalDateEnd: ""
+    min_count: 1
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "data.records[*].cancelled"
+        operator: "all_eq"
+        value: 0
+      - path: "data.records[*].extensionStatus"
+        operator: "all_eq"
+        value: 1
+      - path: "data.records[*].clearOutTime"
+        operator: "all_eq"
+        value: null

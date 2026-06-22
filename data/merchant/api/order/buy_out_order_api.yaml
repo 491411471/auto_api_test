@@ -1,0 +1,151 @@
+# 购买订单查询接口测试数据
+# 接口：/hzsx/business/order/queryBuyOutOrdersByCondition
+# 方法：POST
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+# SQL预查询：获取购买订单 order_id（一次查询，全类共享）
+# userName、productName、state 由 BO_001 API 响应动态提取
+pre_query_sql: |
+  SELECT id, uid, order_id
+  FROM llxz_order.ct_user_order_buy_out
+  WHERE shop_id = '${shop_id}'
+    AND channel_id IN ('004','007','008','009','011','012','085')
+    AND delete_time IS NULL
+  ORDER BY id DESC
+  LIMIT 1;
+
+buy_out_order_tests:
+
+  # ==================== 场景一：无条件查询全部购买订单 ====================
+  - case_id: BO_001
+    title: "无条件查询全部购买订单"
+    description: "不传查询条件，获取全部购买订单列表"
+    method: POST
+    endpoint: "/hzsx/business/order/queryBuyOutOrdersByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 100
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "exists"
+        type_check: "int"
+
+  # ==================== 场景二：按订单号查询 ====================
+  - case_id: BO_002
+    title: "按订单号查询购买订单"
+    description: "使用SQL预查询获取的order_id精确查询购买订单"
+    method: POST
+    endpoint: "/hzsx/business/order/queryBuyOutOrdersByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: "${order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "length_gt"
+        value: 0
+      - path: "$.data.records[*].orderId"
+        operator: "all_eq"
+        value: "${order_id}"
+
+  # ==================== 场景三：按订单状态查询 ====================
+  - case_id: BO_003
+    title: "按订单状态查询购买订单"
+    description: "使用API响应动态获取的state查询该状态的购买订单"
+    method: POST
+    endpoint: "/hzsx/business/order/queryBuyOutOrdersByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      status: "${state}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "exists"
+      - path: "$.data.records[*].state"
+        operator: "all_eq"
+        value: "${state}"
+
+  # ==================== 场景四：按下单人姓名查询 ====================
+  - case_id: BO_004
+    title: "按下单人姓名查询购买订单"
+    description: "使用API响应动态获取的userName查询该用户的购买订单"
+    method: POST
+    endpoint: "/hzsx/business/order/queryBuyOutOrdersByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      productName: ""
+      userName: "${user_name}"
+      orderId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "exists"
+      - path: "$.data.records[*].userName"
+        operator: "all_eq"
+        value: "${user_name}"
+
+  # ==================== 场景五：按商品名称查询 ====================
+  - case_id: BO_005
+    title: "按商品名称查询购买订单"
+    description: "使用API响应动态获取的productName模糊查询购买订单"
+    method: POST
+    endpoint: "/hzsx/business/order/queryBuyOutOrdersByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      productName: "${product_name}"
+      orderId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "length_gt"
+        value: 0
+      - path: "$.data.records[*].productName"
+        operator: "all_eq"
+        value: "${product_name}"

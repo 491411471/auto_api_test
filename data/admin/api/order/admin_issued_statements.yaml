@@ -1,0 +1,177 @@
+# 运营端 - 订单列表：完结订单接口测试数据
+# 接口：POST /hzsx/business/order/merchantsIssuedStatements
+# 流程：SQL获取待结算/租用中订单 → 调用完结订单接口 → SQL验证订单状态变为09
+
+variables:
+  exclude_order_id: "008OI202606022061759565939113984T"
+  excluded_order_id_2: "008OI202606092064246436626591744T"  # 续租还款测试专用订单，需排除
+
+admin_issued_statements_tests:
+  - case_id: "MIS_001"
+    title: "状态完好完结订单"
+    description: "查询待结算或租用中的订单，以完好状态(settlementType=01)完结，验证订单状态变为09"
+    method: POST
+    endpoint: "/hzsx/business/order/merchantsIssuedStatements"
+    # 前置SQL：查询状态为租用中(06)的订单
+    sql:
+      query: >
+        SELECT order_id
+        FROM llxz_order.ct_user_orders
+        WHERE status IN ('06')
+          AND order_id NOT IN ('${exclude_order_id}', '${excluded_order_id_2}')
+        ORDER BY create_time ASC
+        LIMIT 1
+      columns:
+        - order_id
+    # 请求参数（orderId 由前置SQL动态注入）
+    json:
+      orderId: "${order_id}"
+      settlementType: "01"
+      damageAmount: 0
+      lossAmount: 0
+      penaltyAmount: 0
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+    # 后置SQL：验证完结后订单状态为09
+    post_sql:
+      - query: >
+          SELECT status
+          FROM llxz_order.ct_user_orders
+          WHERE order_id = '${order_id}'
+        columns:
+          - status
+        expected_value:
+          status: "09"
+        operator: "=="
+
+  - case_id: "MIS_002"
+    title: "状态损坏完结订单"
+    description: "查询待结算或租用中的订单，以损坏状态(settlementType=02)完结，审核通过后验证订单状态变为09"
+    method: POST
+    endpoint: "/hzsx/business/order/merchantsIssuedStatements"
+    # 前置SQL：查询状态为租用中(06)的订单
+    sql:
+      query: >
+        SELECT order_id
+        FROM llxz_order.ct_user_orders
+        WHERE status IN ('06')
+          AND order_id NOT IN ('${exclude_order_id}', '${excluded_order_id_2}')
+        ORDER BY create_time ASC
+        LIMIT 1,1
+      columns:
+        - order_id
+    # 步骤一请求参数（orderId 由前置SQL动态注入，damageAmount=3 表示损坏赔偿）
+    json:
+      orderId: "${order_id}"
+      settlementType: "02"
+      damageAmount: 3
+      lossAmount: 0
+      penaltyAmount: 0
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+
+  # 用例3 - 完结申请单审核通过
+  - case_id: "MIS_003"
+    title: "完结申请单--审核通过"
+    # 从完结申请日志表获取 applyId，JOIN 订单表确保订单仍为租用中(06)
+    sql:
+      query: >
+        SELECT a.id, a.order_id
+        FROM llxz_order.ct_shop_order_complete_apply_log a
+        INNER JOIN llxz_order.ct_user_orders o ON a.order_id = o.order_id
+        WHERE a.status = '00'
+          AND a.settlement_type != '01'
+          AND o.status IN ('06')
+          AND a.order_id NOT IN ('${exclude_order_id}', '${excluded_order_id_2}')
+        ORDER BY a.create_time ASC
+        LIMIT 1
+      columns:
+        - id
+        - order_id
+    method: POST
+    endpoint: "/hzsx/order/completeApply/verifyOrderCompleteApply"
+    json:
+      orderId: "${order_id}"
+      applyId: "${id}"
+      status: "01"
+    # 业务约束跳过：接口返回以下错误时跳过用例（非技术故障）
+    skip_on:
+      - "支付宝状态推进异常"
+      - "暂不允许完结订单"
+      - "闲鱼订单验货"
+      - "调用验货上传附件API异常"
+      - "订单状态已更新，请刷新"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+    # 后置SQL：验证完结后订单状态为09（在所有步骤完成后执行）
+    post_sql:
+      - query: >
+          SELECT status
+          FROM llxz_order.ct_user_orders
+          WHERE order_id = '${order_id}'
+        columns:
+          - status
+        expected_value:
+          status: "09"
+        operator: "=="
+
+  # 用例4 - 完结申请单审核拒绝
+  - case_id: "MIS_004"
+    title: "完结申请单--审核拒绝"
+    # 从完结申请日志表获取 applyId
+    sql:
+      query: >
+        SELECT id,order_id FROM llxz_order.ct_shop_order_complete_apply_log
+        WHERE status='00'  -- 完结申请单状态为00 待审核
+          AND order_id NOT IN ('${exclude_order_id}', '${excluded_order_id_2}')
+        order by create_time
+        limit 1;
+      columns:
+        - id
+        - order_id
+    method: POST
+    endpoint: "/hzsx/order/completeApply/verifyOrderCompleteApply"
+    json:
+      orderId: "${order_id}"
+      applyId: "${id}"
+      status: "02"
+      refusalCause: 自动填充能反应自动化测试 id 审核拒绝的理由
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+

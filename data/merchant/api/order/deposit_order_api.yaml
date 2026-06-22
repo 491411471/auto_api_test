@@ -1,0 +1,103 @@
+# 补押金管理 - 查询与取消
+variables:
+  shopId: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+# ==================== 公共锚点 ====================
+.common_query_endpoint: &common_query_endpoint
+  method: POST
+  endpoint: "/hzsx/business/order/getDepositOrderList"
+
+.common_query_json: &common_query_json
+  pageNumber: 1
+  pageSize: 10
+  shopId: "${shopId}"
+
+# ==================== 测试用例 ====================
+deposit_order_tests:
+  # 用例1：无查询条件查询补押金列表
+  - case_id: DO_001
+    title: "无查询条件-查询补押金列表"
+    description: "不带任何查询条件，查询补押金列表，获取originalOrderId等数据"
+    <<: *common_query_endpoint
+    json:
+      <<: *common_query_json
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records"
+        operator: "length_gt"
+        value: 0
+    extract_vars:
+      - var_name: "query_original_order_id"
+        path: "data.records[0].originalOrderId"
+
+  # 用例2：以订单号为查询条件
+  - case_id: DO_002
+    title: "以订单编号-查询补押金列表"
+    description: "使用originalOrderId作为orderId查询条件，验证返回结果中包含该订单"
+    <<: *common_query_endpoint
+    json:
+      <<: *common_query_json
+      orderId: "${query_original_order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records"
+        operator: "length_gt"
+        value: 0
+      - path: "$.data.records[*].originalOrderId"
+        operator: "all_contain"
+        value: "${query_original_order_id}"
+
+  # 用例3：以订单状态-待支付为查询条件
+  - case_id: DO_003
+    title: "以订单状态待支付-查询补押金列表"
+    description: "以orderStatus=01(待支付)为查询条件，验证返回的所有记录orderStatus均为01，并提取orderId用于取消"
+    <<: *common_query_endpoint
+    json:
+      <<: *common_query_json
+      orderStatus: "01"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].orderStatus"
+        operator: "all_eq"
+        value: "01"
+    extract_vars:
+      - var_name: "cancel_deposit_order_id"
+        path: "data.records[0].orderId"
+
+  # 用例4：取消补押金
+  - case_id: DO_004
+    title: "取消补押金"
+    description: "使用用例3中获取到的待支付补押金orderId，调用取消接口进行取消"
+    method: GET
+    endpoint: "/hzsx/business/order/cancelDepositOrder"
+    params:
+      orderId: "${cancel_deposit_order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true

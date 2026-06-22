@@ -1,0 +1,64 @@
+# 部分还款-销账业务流程
+flow_name: "部分还款-销账流程"
+description: "固定订单号 → OCR获取验证码 → 部分还款(销账) → 验证回款簿记录"
+
+# 固定测试订单（专门用于测试流程的已分配逾期订单）
+fixed_order:
+  order_id: "008OI202606092064246436626591744T"
+
+# 还款参数配置
+repayment:
+  amount: 1        # 还款金额
+  period: 2          # 还款期数（兜底默认值，实际从订单分期数据动态获取）
+  type: "OFFLINE"    # 还款方式: OFFLINE-线下还款
+
+# 验证码配置
+captcha:
+  mobile: "13811680671"    # 获取验证码的手机号
+  client_type: "SHOP"      # 客户端类型
+  max_retries: 5           # OCR识别最大重试次数
+
+# ========== 步骤1：查询订单分期详情（获取还款期数） ==========
+step_order_stages:
+  endpoint: "/hzsx/business/order/queryOrderStagesDetail"
+  method: POST
+  expected_status: 200
+
+# ========== 步骤2a：获取验证码图片 ==========
+step_get_captcha:
+  endpoint: "/hzsx/user/getVerificationCodeWithMobile"
+  method: POST
+
+# ========== 步骤2b：执行部分还款（销账） ==========
+step_repayment:
+  endpoint: "/hzsx/ope/order/partialRepaymentV3"
+  method: POST
+  expected_status: 200
+  validate:
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.partMoney"
+      operator: "=="
+      value: "${amount}"
+
+# ========== 步骤3：查询回款簿 ==========
+step_payback_book:
+  endpoint: "/hzsx/dcm/order/payBackBook"
+  method: POST
+  body:
+    pageNum: 1
+    pageSize: 10
+    tabName: "7"
+  expected_status: 200
+  # 回款簿记录异步生成重试配置（还款成功后数据有延迟）
+  retry:
+    max_attempts: 5          # 最大重试次数
+    interval_seconds: 2      # 每次重试间隔（秒）
+  validate:
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.records"
+      operator: "length_gt"
+      value: 0

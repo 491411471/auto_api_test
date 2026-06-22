@@ -1,0 +1,50 @@
+# data/api/post_lease_management/payback_summary_api.yaml
+# 回款统计接口测试数据
+# 接口：/hzsx/dcm/payback/paybackSummary（查询回款统计摘要）
+# 接口：/hzsx/ope/order/partialRepaymentV3（部分还款-销账）
+# 创建时间：2026-05-28
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+# ========== 回款统计查询 ==========
+payback_summary_tests:
+  - case_id: PS_001
+    title: "查询回款统计摘要"
+    description: "调用paybackSummary接口获取回款总金额、待追回总金额和回款率"
+    method: GET
+    endpoint: "/hzsx/dcm/payback/paybackSummary"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.paybackTotalAmount"
+        operator: "exists"
+      - path: "$.data.paybackUnAmount"
+        operator: "exists"
+      - path: "$.data.paybackRate"
+        operator: "exists"
+
+# ========== 部分还款配置（供 Python 侧使用） ==========
+repayment:
+  amount: 0.01       # 还款金额
+  period: 2          # 还款期数（实际从订单分期数据动态获取）
+  type: "OFFLINE"    # 还款方式: OFFLINE-线下还款
+
+captcha:
+  mobile: "13811680671"
+  client_type: "SHOP"
+  max_retries: 5
+
+step_get_captcha:
+  endpoint: "/hzsx/user/getVerificationCodeWithMobile"
+  method: POST
+
+step_repayment:
+  endpoint: "/hzsx/ope/order/partialRepaymentV3"
+  method: POST
+  expected_status: 200

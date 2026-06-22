@@ -1,0 +1,265 @@
+# 运营端 - 商品管理：商品审核-商品操作接口测试数据
+# 覆盖场景：查看并提交商品、编辑商品(展示详情→保存草稿→编辑提交)、隐藏/显示商品、锁开/锁关、开启/关闭多台设备
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+examine_product_operation_tests:
+  # ========== TC1 步骤一：查看商品详情 ==========
+  - case_id: "EPO_001"
+    title: "查看商品详情"
+    description: "通过SQL获取两组商品数据，调用商品详情接口，提取image_item_id/product_spec_id供后续提交"
+    method: GET
+    endpoint: "/hzsx/examineProduct/selectExamineProductDetail"
+    sql:
+      - query: >
+          SELECT id, product_id
+          FROM llxz_product.ct_product
+          WHERE status = 1
+          AND shop_id = '${shop_id}'
+          AND delete_time IS NULL
+          ORDER BY create_time DESC
+          LIMIT 1,2
+        columns:
+          - id
+          - product_id
+        multiple: true
+        var_prefix:
+          first: 0
+          second: 1
+    params:
+      productId: "${first_product_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "is_not_none"
+    extract_vars:
+      - var_name: image_item_id
+        path: "$.data.zfbProductImageItems[0].id"
+        default: ""
+      - var_name: product_spec_id
+        path: "$.data.productSkuses[0].cycs[0].id"
+        default: ""
+
+  # ========== TC2 步骤一：编辑商品-展示详情 ==========
+  - case_id: "EPO_003"
+    title: "编辑商品-展示详情"
+    description: "通过SQL获取第二组商品的id，调用编辑详情接口获取商品数据"
+    method: GET
+    endpoint: "/hzsx/product/selectProductEdit"
+    params:
+      id: "${second_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "is_not_none"
+
+  # ========== TC2 步骤二：修改内容并保存草稿箱 ==========
+  - case_id: "EPO_004"
+    title: "修改内容并保存草稿箱"
+    description: "将修改后的商品数据保存到草稿箱"
+    method: POST
+    endpoint: "/hzsx/product/addDraftProduct"
+    json: "${_draft_body}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # ========== TC2 步骤三：从草稿箱中获取目标内容详情 ==========
+  - case_id: "EPO_005"
+    title: "从草稿箱中获取草稿详情"
+    description: "通过SQL查询草稿箱中的id，调用草稿详情接口验证草稿保存成功"
+    method: GET
+    endpoint: "/hzsx/product/selectOpeProductDraft"
+    sql:
+      - query: >
+          SELECT id
+          FROM llxz_product.ct_product_draft
+          WHERE product_id = '${second_product_id}'
+          ORDER BY create_time DESC
+          LIMIT 1
+        column: id
+    params:
+      id: "${id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "is_not_none"
+
+  # ========== TC3：隐藏商品 ==========
+  - case_id: "EPO_006"
+    title: "隐藏商品"
+    description: "隐藏指定商品(type=3)，通过SQL验证商品type已变更为3"
+    method: GET
+    endpoint: "/hzsx/product/setProuctShowState"
+    params:
+      productId: "${first_product_id}"
+      type: 3
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+    post_sql:
+      - query: >
+          SELECT type
+          FROM llxz_product.ct_product
+          WHERE product_id = '${first_product_id}'
+        column: type
+        expected_value: 3
+        operator: "=="
+
+  # ========== TC4：显示商品 ==========
+  - case_id: "EPO_007"
+    title: "显示商品"
+    description: "显示指定商品(type=1)，通过SQL验证商品type已变更为1"
+    method: GET
+    endpoint: "/hzsx/product/setProuctShowState"
+    params:
+      productId: "${first_product_id}"
+      type: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+    post_sql:
+      - query: >
+          SELECT type
+          FROM llxz_product.ct_product
+          WHERE product_id = '${first_product_id}'
+        column: type
+        expected_value: 1
+        operator: "=="
+
+  # ========== TC6：商品锁开 ==========
+  - case_id: "EPO_008"
+    title: "商品锁开"
+    description: "使用第一组商品的id设置lockState=0(未上锁)，通过SQL验证lock_state已变更为0"
+    method: POST
+    endpoint: "/hzsx/examineProduct/lockExamineProduct"
+    json:
+      id: "${first_id}"
+      lockState: 0
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+    post_sql:
+      - query: >
+          SELECT lock_state
+          FROM llxz_product.ct_product
+          WHERE id = ${first_id}
+        column: lock_state
+        expected_value: 0
+        operator: "=="
+
+  # ========== TC7：商品锁关 ==========
+  - case_id: "EPO_009"
+    title: "商品锁关"
+    description: "使用第一组商品的id设置lockState=1(已上锁)，通过SQL验证lock_state已变更为1"
+    method: POST
+    endpoint: "/hzsx/examineProduct/lockExamineProduct"
+    json:
+      id: "${first_id}"
+      lockState: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+    post_sql:
+      - query: >
+          SELECT lock_state
+          FROM llxz_product.ct_product
+          WHERE id = ${first_id}
+        column: lock_state
+        expected_value: 1
+        operator: "=="
+
+  # ========== TC8：开启多台设备 ==========
+  - case_id: "EPO_010"
+    title: "开启多台设备"
+    description: "开启指定商品的多台设备开关(isOpen=true)，验证接口返回成功"
+    method: GET
+    endpoint: "/hzsx/product/openQuantitySwitch"
+    params:
+      productId: "${second_product_id}"
+      isOpen: "true"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ========== TC9：关闭多台设备 ==========
+  - case_id: "EPO_011"
+    title: "关闭多台设备"
+    description: "关闭指定商品的多台设备开关(isOpen=false)，验证接口返回成功"
+    method: GET
+    endpoint: "/hzsx/product/openQuantitySwitch"
+    params:
+      productId: "${second_product_id}"
+      isOpen: "false"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true

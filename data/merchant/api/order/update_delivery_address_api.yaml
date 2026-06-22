@@ -1,0 +1,95 @@
+# data/merchant/api/order/update_delivery_address_api.yaml
+# 修改订单收货地址 全流程测试数据
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
+
+update_delivery_address_tests:
+
+  # ==================== 完整流程：新增地址 → 修改收货地址 → 查询验证 ====================
+  - case_id: "UDA_001"
+    title: "修改订单收货地址完整流程"
+    description: |
+      三步流程：
+      1. 从SQL获取可修改收货地址的订单（status='13' 下单待审核）的 order_id 和 uid
+      2. 通过 uid 调用新增收货地址接口，获取 new_address_id
+      3. 调用修改收货地址接口，将 newAddressId 绑定到订单
+      4. 查询收货地址修改记录，验证修改成功
+
+    # 步骤0：从数据库获取可修改收货地址的订单
+    sql:
+      query: |
+        SELECT order_id, uid
+        FROM llxz_order.ct_user_orders
+        WHERE shop_id = '${shop_id}'
+          AND status = '13'
+          AND order_id != '${excluded_order_id}'
+          AND (delete_time IS NULL OR delete_time <= '2001-01-01 00:00:00')
+        ORDER BY create_time DESC
+        LIMIT 1;
+      columns: ["order_id", "uid"]
+
+    # 步骤1：新增用户收货地址
+    step1:
+      endpoint: "/llxz-api-web/hzsx/userAddress/addUserAddress"
+      method: POST
+      json:
+        areaStr: "包河区"
+        cityStr: "合肥市"
+        isDefault: 0
+        provinceStr: "安徽省"
+        realname: "北京市海淀区紫金大厦"
+        street: "安徽省-合肥市-包河区-烟墩街道遵义路滨湖顺园南区"
+        telephone: "13811680671"
+        uid: "${uid}"
+      expected_status: 200
+
+    # 步骤2：修改订单收货地址（newAddressId 由步骤1响应 data 动态注入）
+    step2:
+      # 执行步骤2前：清理该订单已有的收货地址修改记录，避免重复数据导致接口报错
+      pre_sql:
+        query: |
+          DELETE FROM llxz_order.ct_order_delivery_address_update
+          WHERE order_id = '${order_id}';
+      endpoint: "/llxz-api-web/hzsx/api/order/updateOrderDeliveryAddress"
+      method: POST
+      json:
+        uid: "${uid}"
+        orderId: "${order_id}"
+        newAddressId: "${new_address_id}"
+      expected_status: 200
+      validate_data:
+        - path: "$.data"
+          operator: "=="
+          value: True
+
+    # 步骤3：查询收货地址修改记录验证
+    step3:
+      endpoint: "/hzsx/business/order/getOrderDeliveryAddressUpdatePage"
+      method: POST
+      json:
+        pageNumber: 1
+        pageSize: 10
+        orderId: "${order_id}"
+      expected_status: 200
+
+    # 步骤3 的断言规则
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      # 验证 records 不为空（存在修改记录）
+      - path: "$.data.records"
+        operator: "length_gt"
+        value: 0
+      # 验证第一条记录的 orderId 与查询的 order_id 一致
+      - path: "$.data.records[0].orderId"
+        operator: "=="
+        value: "${order_id}"

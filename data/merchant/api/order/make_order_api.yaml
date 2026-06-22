@@ -1,0 +1,136 @@
+# 补订单管理 - 查询与取消
+variables:
+  channelGroupId: "001"
+
+# ==================== 公共锚点 ====================
+.common_query_endpoint: &common_query_endpoint
+  method: POST
+  endpoint: "/hzsx/business/order/queryMakeOrderList"
+
+.common_query_json: &common_query_json
+  pageNumber: 1
+  pageSize: 10
+  channelGroupId: "001"
+
+# ==================== 测试用例 ====================
+make_order_tests:
+  # 用例1：无查询条件查询补订单列表
+  - case_id: MO_001
+    title: "无查询条件-查询补订单列表"
+    description: "不带任何查询条件，查询补订单列表，获取orderId、originalOrderId、goodsName等数据"
+    <<: *common_query_endpoint
+    json:
+      <<: *common_query_json
+      orderId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records"
+        operator: "length_ge"
+        value: 0
+    # [新增] 从响应中提取变量，供后续用例使用
+    extract_vars:
+      - var_name: "query_order_id"
+        path: "data.backstageMakeOrderDtoList.records[0].originalOrderId"
+      - var_name: "goods_name"
+        path: "data.backstageMakeOrderDtoList.records[0].goodsName"
+
+  # 用例2：以订单编号为查询条件
+  - case_id: MO_002
+    title: "以订单编号-查询补订单列表"
+    description: "使用originalOrderId作为orderId查询条件，验证返回结果中包含该订单"
+    <<: *common_query_endpoint
+    json:
+      <<: *common_query_json
+      orderId: "${query_order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records"
+        operator: "length_ge"
+        value: 0
+      - path: "$.data.backstageMakeOrderDtoList.records[*].originalOrderId"
+        operator: "all_contain"
+        value: "${query_order_id}"
+
+  # 用例3：以订单状态-待支付为查询条件
+  - case_id: MO_003
+    title: "以订单状态待支付-查询补订单列表"
+    description: "以status=01(待支付)为查询条件，验证返回的所有记录status均为01，并提取orderId用于取消"
+    <<: *common_query_endpoint
+    json:
+      <<: *common_query_json
+      orderId: ""
+      status: "01"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records"
+        operator: "length_ge"
+        value: 0
+      - path: "$.data.backstageMakeOrderDtoList.records[*].status"
+        operator: "all_eq"
+        value: "01"
+    # [新增] 从响应中提取待支付订单的 orderId，供用例5取消时使用
+    extract_vars:
+      - var_name: "cancel_order_id"
+        path: "data.backstageMakeOrderDtoList.records[0].orderId"
+
+  # 用例4：以订单类型为查询条件
+  - case_id: MO_004
+    title: "以订单类型-查询补订单列表"
+    description: "使用goodsName作为订单类型查询条件，验证返回结果中的goodsName匹配"
+    <<: *common_query_endpoint
+    json:
+      <<: *common_query_json
+      orderId: ""
+      goodsName: "${goods_name}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.backstageMakeOrderDtoList.records"
+        operator: "length_ge"
+        value: 0
+      - path: "$.data.backstageMakeOrderDtoList.records[*].goodsName"
+        operator: "all_eq"
+        value: "${goods_name}"
+
+  # 用例5：取消补订单
+  - case_id: MO_005
+    title: "取消补订单"
+    description: "使用用例3中获取到的待支付补订单orderId，调用取消接口进行取消"
+    method: POST
+    endpoint: "/hzsx/ope/order/updateOpeMakeOrder"
+    json:
+      orderId: "${cancel_order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true

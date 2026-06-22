@@ -1,0 +1,67 @@
+# 运营端 - 订单管理：保险订单操作测试数据
+# 接口：修改险种、取消投保、分配投保
+# 数据来源：依赖投保订单查询测试中提取的动态变量
+
+variables: {}
+
+picc_operation_tests:
+  # ========== OP01: 修改险种 ==========
+  - case_id: "IOP_001"
+    title: "修改险种"
+    description: "使用查询阶段提取的record_id，将险种修改为2(天安财险)，验证接口返回成功"
+    method: POST
+    endpoint: "/hzsx/ope/picc/updateLog"
+    json:
+      insuranceType: 2
+      id: "${dynamic_record_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ========== OP02: 取消投保订单 ==========
+  - case_id: "IOP_002"
+    title: "取消投保订单"
+    description: "使用投保状态(status=1)查询中提取的orderId，调用取消投保接口"
+    method: GET
+    endpoint: "/hzsx/ope/picc/cancelInsured"
+    params:
+      orderId: "${status_order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ========== OP03: 分配投保订单 ==========
+  # 注意：需要先查询投保中(status=1)的订单号，由 Python 代码动态获取后注入变量
+  - case_id: "IOP_003"
+    title: "分配投保订单"
+    description: "查询投保中的订单号，将其分配给险种1(人保)"
+    method: POST
+    endpoint: "/hzsx/ope/picc/selectInsurance"
+    json:
+      orderIds:
+        - "${assign_order_id}"
+      insuranceType: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true

@@ -1,0 +1,87 @@
+# 紧急联系人管理流程
+flow_name: "新增并查看紧急联系人流程"
+description: "识别新增紧急联系人信息 → 保存新增紧急联系人 → 查看新增的紧急联系人"
+
+variables:
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
+  excluded_order_id_2: "008OI202606092064246436626591744T"  # 续租还款测试专用订单，需排除
+
+# 测试订单配置
+test_order:
+  contact_count: 2  # 生成的联系人数量
+  # content 字段将由测试脚本动态生成，格式："姓名+关系类型+电话号码\n姓名+关系类型+电话号码"
+  # order_id 将通过 SQL 查询动态获取，无需在此配置
+
+# ========== 步骤1：识别新增紧急联系人信息 ==========
+step_identify_contact:
+  case_id: "ECF_001"
+  title: "识别新增紧急联系人信息"
+  description: "通过SQL查询获取未添加紧急联系人的订单，然后调用识别接口"
+  endpoint: "/hzsx/user/addEmergenceContractContent"
+  method: POST
+  # 通过 SQL 查询动态获取订单ID
+  sql:
+    query: |
+      SELECT o.order_id
+      FROM llxz_order.ct_user_orders o
+      LEFT JOIN llxz_user.ct_user_emergency e ON o.order_id COLLATE utf8mb4_unicode_ci = e.order_id COLLATE utf8mb4_unicode_ci
+      WHERE e.order_id IS NULL
+        AND o.shop_id COLLATE utf8mb4_unicode_ci = '71008738021cd3393bacbac182bd6a86af0b5c87'
+        AND o.order_id COLLATE utf8mb4_unicode_ci != '${excluded_order_id}'
+        AND o.order_id COLLATE utf8mb4_unicode_ci != '${excluded_order_id_2}'
+      LIMIT 1;
+    columns: ["order_id"]
+  body:
+    orderId: "${order_id}"
+    content: "${content}"
+  expected_status: 200
+  validate:
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.errorMessage"
+      operator: "=="
+      value: null
+    - path: "$.data.list"
+      operator: "length_gt"
+      value: 0
+
+# ========== 步骤2：保存新增紧急联系人 ==========
+step_save_contact:
+  case_id: "ECF_002"
+  title: "保存新增紧急联系人"
+  description: "将识别到的紧急联系人信息保存到数据库"
+  endpoint: "/hzsx/user/saveEmergenceContractContent"  # 保存接口（与识别接口不同）
+  method: POST
+  body:
+    orderId: "${order_id}"
+    orderList: "${order_list}"  # 从步骤1的响应中获取并转换格式
+  expected_status: 200
+  validate:
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data"
+      operator: "=="
+      value: true
+
+# ========== 步骤3：查看新增的紧急联系人 ==========
+step_query_contact:
+  case_id: "ECF_003"
+  title: "查看新增的紧急联系人"
+  description: "查询已保存的紧急联系人信息并验证"
+  endpoint: "/hzsx/user/getEmergenceContracts"  # 查询接口（POST方式，仅传orderId）
+  method: POST
+  body:
+    orderId: "${order_id}"
+  expected_status: 200
+  validate:
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.list"
+      operator: "length_gt"
+      value: 0
+    - path: "$.data.havePermission"
+      operator: "=="
+      value: true

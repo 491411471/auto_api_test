@@ -1,0 +1,89 @@
+variables:
+  province: "110000"
+  city: "110100"
+  area: "110101"
+  # 动态变量（在测试代码中生成并注入）
+  street: ""
+  warehouse_name: ""
+  total_quantity: 1000
+  available_quantity: 1000
+  uuid_1: ""
+  uuid_2: ""
+  warehouse_id: 31
+  category_ids:
+    - 10
+    - 117
+    - 5443
+
+warehouse_management_tests:
+  - case_id: "WM_001"
+    title: "新增仓库-动态生成街道和仓库名称"
+    description: "使用动态生成的街道地址和仓库名称调用新增仓库接口，验证返回成功"
+    method: POST
+    endpoint: "/hzsx/warehouse/editWarehouseAddress"
+    json:
+      province: ${province}
+      city: ${city}
+      area: ${area}
+      street: ${street}
+      warehouseName: ${warehouse_name}
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  - case_id: "WM_002"
+    title: "新增商品库存-动态生成多个字段"
+    description: "使用动态生成的UUID、可用数量、仓库ID等字段调用新增商品库存接口，验证返回成功"
+    method: POST
+    endpoint: "/hzsx/warehouse/addProductStock"
+    json:
+      totalQuantity: ${total_quantity}
+      availableQuantity: ${available_quantity}
+      categoryIds: ${category_ids}
+      productStockVersionDTOList:
+        - productStockDetailVOList:
+            - uuid: ${uuid_1}
+              warehouseId: ${warehouse_id}
+              versionQuantity: 1000
+              shippingList: "${shipping_list_1}"
+              accessoryName: "${accessory_name_1}"
+              accessoryQuantity: 100
+              expressList:
+                - "1"
+          versionName: "版本一"
+        - productStockDetailVOList:
+            - uuid: ${uuid_2}
+              warehouseId: ${warehouse_id}
+              versionQuantity: 1000
+              shippingList: "${shipping_list_2}"
+              accessoryName: "${accessory_name_2}"
+              accessoryQuantity: 100
+              expressList:
+                - "0"
+                - "1"
+          versionName: "版本二"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null

@@ -1,0 +1,178 @@
+# 商品上下架流程测试数据
+# 运营端 - 商品管理 - 单个商品下架/上架流程
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  channel_group_code: "001"
+
+# ==================== 用例1: 商品下架流程 ====================
+product_off_shelf_tests:
+  # 步骤1: 查询已上架商品（commonStatus=3）
+  - case_id: "OFF_001"
+    title: "查询私域已上架商品"
+    description: "查询commonStatus=3的已上架商品列表，从中提取productId供下架操作使用"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      newAuditState: 1
+      channelGroupCode: "001"
+      sortField: ""
+      sortOrder: ""
+      type: "1"
+      buyOutQueryMy: "all"
+      creatTime: null
+      businessModel: ""
+      shopName: "sass人人享租1"
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # 步骤2: 下架商品（type=3）
+  - case_id: "OFF_002"
+    title: "下架商品"
+    description: "调用setProuctShowState接口，type=3下架指定商品"
+    method: GET
+    endpoint: "/hzsx/product/setProuctShowState"
+    params:
+      productId: "${product_id}"
+      type: 3
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # 步骤3: 验证商品已下架（用 productId 精确查询已上架列表，不应包含该商品）
+  - case_id: "OFF_003"
+    title: "验证商品已下架"
+    description: "用 productId 精确查询已上架商品列表，验证该商品已不在上架列表中"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      newAuditState: 2
+      channelGroupCode: "001"
+      sortField: ""
+      sortOrder: ""
+      productId: "${product_id}"
+      type: ""
+      commonStatus: 3
+      buyOutQueryMy: "all"
+      creatTime: null
+      businessModel: ""
+      zfbAuditState: ""
+      updateTimeKssj: ""
+      updateTimeJssj: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+# ==================== 用例2: 商品上架流程 ====================
+product_on_shelf_tests:
+  # 步骤1: 查询已下架商品（commonStatus=3, type=2）
+  - case_id: "ON_001"
+    title: "查询私域已下架商品"
+    description: "查询type=2的已下架商品列表，从中提取productId供上架操作使用"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      auditState: ""
+      businessModel: ""
+      buyOutQueryMy: "all"
+      categoryId: null
+      channelGroupCode: "001"
+      creatTime: null
+      newAuditState: 1
+      pageNumber: 1
+      pageSize: 10
+      shopName: "sass人人享租1"
+      type: "2"
+      sortField: ""
+      sortOrder: ""
+
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # 步骤2: 上架商品（type=1, GET）
+  - case_id: "ON_002"
+    title: "上架商品"
+    description: "调用setProuctShowState接口（GET），type=1上架指定商品"
+    method: GET
+    endpoint: "/hzsx/product/setProuctShowState"
+    params:
+      productId: "${product_id}"
+      type: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+
+  # 步骤3: 验证商品已上架（用 productId 精确查询已下架列表，不应包含该商品）
+  - case_id: "ON_003"
+    title: "验证商品已上架"
+    description: "用 productId 精确查询已下架商品列表，验证该商品已不在下架列表中"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      newAuditState: 2
+      channelGroupCode: "001"
+      sortField: ""
+      sortOrder: ""
+      productId: "${product_id}"
+      type: "2"
+      commonStatus: 3
+      buyOutQueryMy: "all"
+      creatTime: null
+      businessModel: ""
+      zfbAuditState: ""
+      updateTimeKssj: ""
+      updateTimeJssj: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true

@@ -1,0 +1,150 @@
+# 已分配订单列表查询接口测试数据
+# 接口：/hzsx/dcm/order/list
+# 请求方法：POST
+# 接口功能：查询已分配订单列表（对应"已分配"标签页），支持按"今日跟进状态"和"跟进人"筛选
+# 创建时间：2026-05-26
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/dcm/order/list"
+
+.common_json: &common_json
+  assignStatus: 1
+  followStatus: "0"
+  followTimeDesc: 0
+  overdueDaysDesc: 1
+  overdueTime: "0"
+  pageNum: 1
+  pageSize: 10
+  tabName: "0"
+
+assigned_order_list_tests:
+  # ==================== 正向用例：查询已分配订单列表 ====================
+  - case_id: AOL_001
+    title: "已分配订单列表-正向查询（无筛选条件）"
+    description: "查询已分配订单列表，验证返回分页数据且包含基本字段"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records"
+        operator: "type"
+        value: "list"
+      - path: "$.data.searchCount"
+        operator: "=="
+        value: True
+
+  # ==================== 筛选条件：按今日跟进状态筛选 ====================
+  - case_id: AOL_002
+    title: "已分配订单列表-按'今日跟进状态'筛选（未跟进）"
+    description: "筛选今日跟进状态为'未跟进'的已分配订单，验证返回结果均符合筛选条件"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      followStatus: "0"   # 0-未跟进
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records"
+        operator: "type"
+        value: "list"
+
+  - case_id: AOL_003
+    title: "已分配订单列表-按'今日跟进状态'筛选（已跟进）"
+    description: "筛选今日跟进状态为'已跟进'的已分配订单，验证返回结果均符合筛选条件"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      followStatus: "1"    # 1-已跟进
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records"
+        operator: "type"
+        value: "list"
+
+  # ==================== 筛选条件：按跟进人筛选 ====================
+  - case_id: AOL_004
+    title: "已分配订单列表-按'跟进人'筛选"
+    description: "通过跟进人姓名筛选已分配订单，验证返回结果均属于该跟进人"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      memberId: "1000196"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+
+  # ==================== 组合筛选：跟进状态 + 跟进人 ====================
+  - case_id: AOL_005
+    title: "已分配订单列表-组合筛选（未跟进+指定跟进人）"
+    description: "同时按今日跟进状态=未跟进 和 跟进人姓名进行组合筛选"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      followStatus: "0"
+      memberId: "1000196"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # ==================== 验证列表字段完整性 ====================
+  - case_id: AOL_006
+    title: "已分配订单列表-验证列表字段完整性"
+    description: "验证已分配订单列表返回记录包含所有必要字段：订单编号、责任人、渠道、今日跟进状态、手机号、追期租金、追期天数、分类、上次跟进内容、跟进时间、分配时间、跟进人"
+    skip_on_empty_records: true
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.data.records[0].userName"
+        operator: "exists"
+      - path: "$.data.records[0].channelId"
+        operator: "exists"
+      - path: "$.data.records[0].shopName"
+        operator: "exists"
+      - path: "$.data.records[0].overdueDays"
+        operator: "exists"
+      - path: "$.data.records[0].badPayRent"
+        operator: "exists"
+      - path: "$.data.records[0].statusDescription"
+        operator: "exists"
+      - path: "$.data.records[0].orderId"
+        operator: "exists"
+
+

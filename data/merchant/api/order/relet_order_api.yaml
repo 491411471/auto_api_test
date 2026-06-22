@@ -1,0 +1,167 @@
+# 续租订单查询接口测试数据
+# 接口：/hzsx/business/order/queryReletOrderByCondition
+# 方法：POST
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+  excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
+
+# SQL预查询：获取续租订单的order_id、status、user_name、product_name（一次查询，全类共享）
+pre_query_sql: |
+  SELECT
+      o.id,
+      o.order_id,
+      o.status,
+      o.uid,
+      o.product_id,
+      o.user_name,
+      p.name AS product_name
+  FROM llxz_order.ct_user_orders o
+      LEFT JOIN llxz_product.ct_product p
+          ON o.product_id = p.product_id
+  WHERE o.channel_id IN ('004', '007', '008', '009', '011', '012', '085')
+    AND o.type IN ('03', '13')
+    AND o.shop_id = '${shop_id}'
+    AND (o.delete_time <= '2001-01-01 00:00:00' OR o.delete_time IS NULL)
+    AND o.rent_start IS NOT NULL
+    AND o.order_id != '${excluded_order_id}'
+  ORDER BY o.id DESC
+  LIMIT 1;
+
+relet_order_tests:
+
+  # ==================== 场景一：无条件查询全部续租订单 ====================
+  - case_id: RL_001
+    title: "无条件查询全部续租订单"
+    description: "不传查询条件，获取全部续租订单列表"
+    method: POST
+    endpoint: "/hzsx/business/order/queryReletOrderByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 100
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "exists"
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+        type_check: "int"
+
+  # ==================== 场景二：按订单号查询 ====================
+  - case_id: RL_002
+    title: "按订单号查询续租订单"
+    description: "使用SQL预查询获取的order_id精确查询续租订单"
+    method: POST
+    endpoint: "/hzsx/business/order/queryReletOrderByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      orderId: "${order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "length_gt"
+        value: 0
+      - path: "$.data.records[*].orderId"
+        operator: "all_eq"
+        value: "${order_id}"
+
+  # ==================== 场景三：按订单状态查询 ====================
+  - case_id: RL_003
+    title: "按订单状态查询续租订单"
+    description: "使用SQL预查询获取的status查询该状态的续租订单"
+    method: POST
+    endpoint: "/hzsx/business/order/queryReletOrderByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      status: "${status}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "exists"
+      - path: "$.data.records[*].status"
+        operator: "all_eq"
+        value: "${status}"
+
+  # ==================== 场景四：按下单人姓名查询 ====================
+  - case_id: RL_004
+    title: "按下单人姓名查询续租订单"
+    description: "使用SQL预查询获取的user_name查询该用户的续租订单"
+    method: POST
+    endpoint: "/hzsx/business/order/queryReletOrderByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      productName: ""
+      userName: "${user_name}"
+      orderId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "exists"
+      # API响应中下单人姓名字段为 realName
+      - path: "$.data.records[*].realName"
+        operator: "all_eq"
+        value: "${user_name}"
+
+  # ==================== 场景五：按商品名称查询 ====================
+  - case_id: RL_005
+    title: "按商品名称查询续租订单"
+    description: "使用SQL预查询获取的product_name查询包含该商品的续租订单"
+    method: POST
+    endpoint: "/hzsx/business/order/queryReletOrderByCondition"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      productName: "${product_name}"
+      orderId: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.records"
+        operator: "length_gt"
+        value: 0
+      - path: "$.data.records[*].productName"
+        operator: "all_contain"
+        value: "${product_name}"

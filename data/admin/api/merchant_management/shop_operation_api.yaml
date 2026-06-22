@@ -1,0 +1,203 @@
+# 运营端 - 商家管理 - 商家列表操作接口测试数据
+# 接口：修改通讯信息、修改店铺信息、提交店铺修改
+# 场景：修改客服电话、联系邮箱、支付宝账号、店铺手机号、基础信息、结算账户、提交审核
+
+variables:
+  shop_id: "2025041702585837981744873138304"
+  origin_str: "OPE"
+
+# ==================== 修改通讯信息（用例1-3，参数化） ====================
+update_tel_info_tests:
+  # 用例1：修改客服电话
+  - case_id: "SOP_001"
+    title: "修改通讯信息--客服电话"
+    description: "调用 aloneUpdateShopTelAboutInfo 修改客服电话为随机手机号"
+    method: POST
+    endpoint: "/hzsx/opeShop/aloneUpdateShopTelAboutInfo"
+    expected_status: 200
+    json:
+      shopId: "${shop_id}"
+      originStr: "OPE"
+      updateType: "customerServiceTel"
+      contentStr: "${content_str}"
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # 用例2：修改联系邮箱
+  - case_id: "SOP_002"
+    title: "修改通讯信息--联系邮箱"
+    description: "调用 aloneUpdateShopTelAboutInfo 修改联系邮箱为随机邮箱地址"
+    method: POST
+    endpoint: "/hzsx/opeShop/aloneUpdateShopTelAboutInfo"
+    expected_status: 200
+    json:
+      shopId: "${shop_id}"
+      originStr: "OPE"
+      updateType: "contactsEmail"
+      contentStr: "${content_str}"
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # 用例3：修改支付宝账号
+  - case_id: "SOP_003"
+    title: "修改通讯信息--支付宝账号"
+    description: "调用 aloneUpdateShopTelAboutInfo 修改支付宝账号为随机支付宝号"
+    method: POST
+    endpoint: "/hzsx/opeShop/aloneUpdateShopTelAboutInfo"
+    expected_status: 200
+    json:
+      shopId: "${shop_id}"
+      originStr: "OPE"
+      updateType: "alipayZfbAccount"
+      contentStr: "${content_str}"
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+# ==================== 店铺信息修改（用例4-7） ====================
+shop_update_tests:
+  # 用例4：修改店铺信息--手机号
+  - case_id: "SOP_004"
+    title: "修改店铺信息--手机号"
+    description: "调用 updateShopMainTel 修改店铺主手机号"
+    method: GET
+    endpoint: "/hzsx/user/updateShopMainTel"
+    expected_status: 200
+    params:
+      shopId: "${shop_id}"
+      newMobile: "${new_mobile}"
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # 用例5：修改店铺信息--基础信息
+  - case_id: "SOP_005"
+    title: "修改店铺信息--基础信息"
+    description: "调用 updateShopStepOne 修改店铺基础信息（名称、logo、门头照、描述等）"
+    method: POST
+    endpoint: "/hzsx/busShop/updateShopStepOne"
+    expected_status: 200
+    json:
+      name: "NQ"
+      logo: "https://oss.llxzu.com/c22de8f4472b4076954693aa41288969.png"
+      doorHeadPhotos:
+        - "https://oss.llxzu.com/7febacb1709f425bbc23983b0cfd9fea.png"
+      shopId: "${shop_id}"
+      description: "${description}"
+      hyType: "137"
+      businessAddress: null
+      businessTime: "08:30-18:00"
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # 用例6：修改店铺信息--结算账户修改
+  - case_id: "SOP_006"
+    title: "修改店铺信息--结算账户修改"
+    description: "调用 updateShopStepTwoZfb 修改结算支付宝账户信息"
+    method: POST
+    endpoint: "/hzsx/busShop/updateShopStepTwoZfb"
+    expected_status: 200
+    json:
+      zfbName: "${zfb_name}"
+      zfbCode: "${zfb_code}"
+      shopId: "${shop_id}"
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # 用例7：提交店铺修改信息
+  - case_id: "SOP_007"
+    title: "提交店铺修改信息"
+    description: "调用 auditShopStep 提交店铺修改审核，isLocked 和 channelId 动态切换"
+    method: POST
+    endpoint: "/hzsx/busShop/auditShopStep"
+    expected_status: 200
+    json:
+      shopId: "${shop_id}"
+      isLocked: "${is_locked}"
+      shopOnOffLineType: 0
+      channelId: "${channel_id}"
+      cateId: []
+      contractTime: "2025-01-01"
+      startTime: "2025-04-17"
+      endTime: "2027-04-11"
+      contractPhoto: "https://oss.llxzu.com/a5498011ffdd42d48e0b57d0ff6c2c12.gif"
+      categories: []
+      auditRefusedCodes: []
+      status: 5
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.httpStatus"
+        operator: "=="
+        value: 200
+      - path: "$.data"
+        operator: "=="
+        value: true

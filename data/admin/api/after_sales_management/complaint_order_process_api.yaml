@@ -1,0 +1,172 @@
+# 运营端 - 售后管理 - 工单处理接口测试数据
+# 接口：POST /hzsx/orderComplaints/modifyOrderComplaints
+# 场景：投诉工单状态流转（待处理→跟进中→已完结/已撤诉）
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+complaint_order_process_tests:
+  # ========== 用例1：待处理 → 跟进中 ==========
+  - case_id: "COP_001"
+    title: "工单处理：待处理 → 跟进中"
+    description: "查询一条待处理(status=0)投诉工单，调用处理接口将其状态改为跟进中(status=3)，并通过DB验证状态变更"
+    verify_on_business_error: true
+    method: POST
+    endpoint: "/hzsx/orderComplaints/modifyOrderComplaints"
+    sql:
+      query: |
+        SELECT id, complaint_category_one, complaint_category_two, complaint_category_third
+        FROM llxz_marketing.ct_order_complaints
+        WHERE status = 0
+        AND channel IN ('005', '007', '008', '009', '011', '012', '082', '085')
+        AND delete_time IS NULL
+        AND shop_id = '${shop_id}'
+        ORDER BY create_time DESC
+        LIMIT 1
+      columns:
+        - "id"
+        - "complaint_category_one"
+        - "complaint_category_two"
+        - "complaint_category_third"
+    json:
+      complaintsCategoryOne: "${complaint_category_one}"
+      complaintsCategoryTwo: "${complaint_category_two}"
+      complaintsCategoryThird: "${complaint_category_third}"
+      status: "${target_status}"
+      result: "[自动化测试] 工单处理：待处理→跟进中，此条数据由自动化测试脚本生成"
+      resultImages:
+        - "https://oss.llxzu.com/bf9ac6ae74e845f69ff3e341c57f71be.png"
+      complaintCreateTime: null
+      id: "${id}"
+      images:
+        - "https://oss.llxzu.com/bf9ac6ae74e845f69ff3e341c57f71be.png"
+      telphone: "mm:c933d5fd323113400c0a1f48e33f1f0794e8"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+    post_sql:
+      - query: |
+          SELECT status
+          FROM llxz_marketing.ct_order_complaints
+          WHERE id = ${id}
+        column: "status"
+        expected_value: "${target_status}"
+        operator: "=="
+
+  # ========== 用例2：跟进中 → 已完结 ==========
+  - case_id: "COP_002"
+    title: "工单处理：跟进中 → 已完结"
+    description: "查询一条跟进中(status=3)投诉工单，调用处理接口将其状态改为已完结(status=1)，并通过DB验证状态变更"
+    verify_on_business_error: true
+    method: POST
+    endpoint: "/hzsx/orderComplaints/modifyOrderComplaints"
+    sql:
+      query: |
+        SELECT id, complaint_category_one, complaint_category_two, complaint_category_third
+        FROM llxz_marketing.ct_order_complaints
+        WHERE status = 3
+        AND channel IN ('005', '007', '008', '009', '011', '012', '082', '085')
+        AND delete_time IS NULL
+        AND shop_id = '${shop_id}'
+        ORDER BY create_time DESC
+        LIMIT 1
+      columns:
+        - "id"
+        - "complaint_category_one"
+        - "complaint_category_two"
+        - "complaint_category_third"
+    json:
+      complaintsCategoryOne: "${complaint_category_one}"
+      complaintsCategoryTwo: "${complaint_category_two}"
+      complaintsCategoryThird: "${complaint_category_third}"
+      status: "${target_status}"
+      result: "[自动化测试] 工单处理：跟进中→已完结，此条数据由自动化测试脚本生成"
+      resultImages:
+        - "https://oss.llxzu.com/bf9ac6ae74e845f69ff3e341c57f71be.png"
+      complaintCreateTime: null
+      id: "${id}"
+      images:
+        - "https://oss.llxzu.com/bf9ac6ae74e845f69ff3e341c57f71be.png"
+      telphone: "mm:e611d84230d79144b768ef619b81a69a3a96"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+    post_sql:
+      - query: |
+          SELECT status
+          FROM llxz_marketing.ct_order_complaints
+          WHERE id = ${id}
+        column: "status"
+        expected_value: "${target_status}"
+        operator: "=="
+
+  # ========== 用例3：跟进中 → 已撤诉 ==========
+  - case_id: "COP_003"
+    title: "工单处理：跟进中 → 已撤诉"
+    description: "查询一条跟进中(status=3)投诉工单，调用处理接口将其状态改为已撤诉(status=2)，并通过DB验证状态变更"
+    verify_on_business_error: true
+    method: POST
+    endpoint: "/hzsx/orderComplaints/modifyOrderComplaints"
+    sql:
+      query: |
+        SELECT id, complaint_category_one, complaint_category_two, complaint_category_third
+        FROM llxz_marketing.ct_order_complaints
+        WHERE status = 3
+        AND channel IN ('005', '007', '008', '009', '011', '012', '082', '085')
+        AND delete_time IS NULL
+        AND shop_id = '${shop_id}'
+        ORDER BY create_time DESC
+        LIMIT 1
+      columns:
+        - "id"
+        - "complaint_category_one"
+        - "complaint_category_two"
+        - "complaint_category_third"
+    json:
+      complaintsCategoryOne: "${complaint_category_one}"
+      complaintsCategoryTwo: "${complaint_category_two}"
+      complaintsCategoryThird: "${complaint_category_third}"
+      status: "${target_status}"
+      result: "[自动化测试] 工单处理：跟进中→已撤诉，此条数据由自动化测试脚本生成"
+      resultImages:
+        - "https://oss.llxzu.com/bf9ac6ae74e845f69ff3e341c57f71be.png"
+      complaintCreateTime: null
+      id: "${id}"
+      images:
+        - "https://oss.llxzu.com/bf9ac6ae74e845f69ff3e341c57f71be.png"
+      telphone: "mm:2a2a98c83bc3614ddf695d41c94abfcc17b3"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+    post_sql:
+      - query: |
+          SELECT status
+          FROM llxz_marketing.ct_order_complaints
+          WHERE id = ${id}
+        column: "status"
+        expected_value: "${target_status}"
+        operator: "=="

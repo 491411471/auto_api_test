@@ -1,0 +1,82 @@
+# data/api/post_lease_management/event_record_api.yaml
+# 跟进记录接口测试数据
+# 接口1：/hzsx/dcm/order/eventProgress（获取跟进分类类型）
+# 接口2：/hzsx/dcm/order/addEvent（提交跟进记录）
+# 接口3：/hzsx/dcm/order/listEventRecord（查询跟进记录列表）
+# 创建时间：2026-05-28
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+event_record_tests:
+  # ==================== 获取跟进分类类型 ====================
+  - case_id: ER_001
+    title: "获取跟进分类类型"
+    description: "调用eventProgress接口获取所有跟进分类类型，验证返回列表非空"
+    method: POST
+    endpoint: "/hzsx/dcm/order/eventProgress"
+    json:
+      id: "${order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "type"
+        value: "list"
+      - path: "$.data"
+        operator: "length_gt"
+        value: 0
+
+  # ==================== 提交跟进记录 ====================
+  - case_id: ER_002
+    title: "提交跟进记录"
+    description: "随机选取一个跟进分类类型，调用addEvent提交跟进记录，验证提交成功"
+    method: POST
+    endpoint: "/hzsx/dcm/order/addEvent"
+    json:
+      progress: "${progress_code}"
+      content: "${progress_description}"
+      quickTag: ""
+      orderId: "${order_id}"
+      operator: "${operator}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ==================== 查询跟进记录验证 ====================
+  - case_id: ER_003
+    title: "查询跟进记录-验证新增记录"
+    description: "调用listEventRecord查询跟进记录，验证最新一条记录的orderId和content与提交一致"
+    method: POST
+    endpoint: "/hzsx/dcm/order/listEventRecord"
+    json:
+      pageNum: 1
+      pageSize: 10
+      orderId: "${order_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.data.records[0].orderId"
+        operator: "=="
+        value: "${order_id}"
+      - path: "$.data.records[0].content"
+        operator: "=="
+        value: "${progress_description}"
+      - path: "$.data.total"
+        operator: ">="
+        value: 1

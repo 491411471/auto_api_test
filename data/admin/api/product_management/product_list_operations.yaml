@@ -1,0 +1,213 @@
+# 运营端 - 商品管理：商品列表操作流程测试数据
+# 接口串联：空条件查询 → 批量设置库存 → 批量分类 → 查询已上架 → 批量下架 → 查询已下架 → 批量上架
+
+variables:
+  channel_group_code: "001"
+
+# ==================== 第一步：空条件获取商品列表 ====================
+step1_query_all_products:
+  case_id: "PLO_001"
+  step_id: "step1_query_all_products"
+  title: "空条件获取商品列表商品信息"
+  description: "使用空条件查询商品列表，随机获取3条数据的商品编码和商品名称"
+  method: POST
+  endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+  json:
+    pageNumber: 1
+    pageSize: 10
+    newAuditState: 2
+    channelGroupCode: "001"
+    sortField: ""
+    sortOrder: ""
+    type: "1"
+    buyOutQueryMy: "all"
+    creatTime: null
+    businessModel: ""
+    zfbAuditState: ""
+    auditState: ""
+    updateTimeKssj: ""
+    updateTimeJssj: ""
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.records"
+      operator: "not_empty"
+
+# ==================== 第二步：批量设置库存 ====================
+# 注意：productIds 和日期由 Python 代码动态注入
+step2_batch_set_inventory:
+  case_id: "PLO_002"
+  step_id: "step2_batch_set_inventory"
+  title: "批量设置库存"
+  description: "从步骤1获取2条商品编码，批量设置库存为100，日期范围为当前日期至15天后"
+  method: POST
+  endpoint: "/hzsx/product/updateProductSkusInventoryBatch"
+  json:
+    inventory: 100
+    productIds: "${batch_product_ids}"
+    dateDayKssj: "${date_day_kssj}"
+    dateDayJssj: "${date_day_jssj}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+
+# ==================== 第三步：批量分类 ====================
+# 注意：productIdList 和 submitType 由 Python 代码动态注入
+step3_batch_classify:
+  case_id: "PLO_003"
+  step_id: "step3_batch_classify"
+  title: "批量分类"
+  description: "从步骤1获取2条商品编码，随机设置分类类型(1:普通/2:芝麻免押/3:高危/4:双签)"
+  method: POST
+  endpoint: "/hzsx/examineProduct/updateSubmitTypeList"
+  json:
+    productIdList: "${batch_product_ids}"
+    submitType: "${submit_type}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data"
+      operator: "=="
+      value: true
+  verify_sql:
+    query_template: "SELECT product_id AS pid, submit_type AS stype FROM llxz_product.ct_product WHERE product_id IN ({in_clause})"
+    check_column: "stype"
+
+# ==================== 第四步：查询已上架的商品 ====================
+step4_query_on_shelf:
+  case_id: "PLO_004"
+  step_id: "step4_query_on_shelf"
+  title: "查询已上架的商品"
+  description: "查询已上架商品(type=1)，随机获取3条数据的商品编码和商品名称"
+  method: POST
+  endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+  json:
+    pageNumber: 1
+    pageSize: 10
+    newAuditState: 2
+    channelGroupCode: "001"
+    sortField: ""
+    sortOrder: ""
+    shopName: "sass人人享租1"
+    type: "1"
+    buyOutQueryMy: "all"
+    creatTime: null
+    businessModel: ""
+    zfbAuditState: ""
+    auditState: ""
+    updateTimeKssj: ""
+    updateTimeJssj: ""
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.records"
+      operator: "not_empty"
+
+# ==================== 第五步：批量下架 ====================
+step5_batch_delist:
+  case_id: "PLO_005"
+  step_id: "step5_batch_delist"
+  title: "批量下架"
+  description: "从步骤4获取2条商品编码，批量下架(type=2)"
+  method: POST
+  endpoint: "/hzsx/examineProduct/batchShelves"
+  json:
+    productIds: "${shelf_product_ids}"
+    type: 2
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data"
+      operator: "=="
+      value: true
+  verify_sql:
+    query_template: "SELECT product_id AS pid, type AS ptype FROM llxz_product.ct_product WHERE product_id IN ({in_clause})"
+    check_column: "ptype"
+    expected_value: 2
+
+# ==================== 第六步：查询已下架商品 ====================
+step6_query_off_shelf:
+  case_id: "PLO_006"
+  step_id: "step6_query_off_shelf"
+  title: "查询已下架商品"
+  description: "查询已下架商品(type=2)，随机获取3条数据的商品编码和商品名称"
+  method: POST
+  endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+  json:
+    pageNumber: 1
+    pageSize: 10
+    newAuditState: 2
+    channelGroupCode: "001"
+    sortField: ""
+    sortOrder: ""
+    shopName: "sass人人享租1"
+    type: "2"
+    buyOutQueryMy: "all"
+    creatTime: null
+    businessModel: ""
+    zfbAuditState: ""
+    auditState: ""
+    updateTimeKssj: ""
+    updateTimeJssj: ""
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.records"
+      operator: "not_empty"
+
+# ==================== 第七步：批量上架 ====================
+step7_batch_listing:
+  case_id: "PLO_007"
+  step_id: "step7_batch_listing"
+  title: "批量上架"
+  description: "从步骤6获取2条商品编码，批量上架(type=1)"
+  method: POST
+  endpoint: "/hzsx/examineProduct/batchListing"
+  json:
+    productIds: "${listing_product_ids}"
+    type: 1
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data"
+      operator: "=="
+      value: true
+  verify_sql:
+    query_template: "SELECT product_id AS pid, type AS ptype FROM llxz_product.ct_product WHERE product_id IN ({in_clause})"
+    check_column: "ptype"
+    expected_value: 1
