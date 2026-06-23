@@ -25,7 +25,7 @@ environments:
         key: "token"
         value: "hqpl38f44oqyqwl2ubkjx6rc1vsu1u9o"  # auto_login=false 时使用的兑底 token
         xianyu_token: "jae7vut0wkt552iw19b0tg2dm8ygx76k"
-      timeout: 120
+      timeout: 40
       max_retries: 3
       request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制
       xianyu_login:
@@ -44,7 +44,7 @@ environments:
       auth_config:
         key: "token"
         value: "ypd1iboqgmuw0daue30y1jpnr1lr52m0"  # auto_login=false 时使用的兑底 token
-      timeout: 120
+      timeout: 40
       max_retries: 3
       request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制
 

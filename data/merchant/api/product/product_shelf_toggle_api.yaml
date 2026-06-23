@@ -21,7 +21,7 @@ product_off_shelf_tests:
       sortField: ""
       sortOrder: ""
       channelGroupCode: "001"
-      productStatus: "1"
+      auditState: 2
     expected_status: 200
     validate_data:
       - path: "$.rpcResult"
@@ -85,7 +85,49 @@ product_off_shelf_tests:
         operator: "=="
         value: true
 
-# ==================== 用例2: 商品上架流程 ====================
+  # 步骤4: 运营端审核通过下架商品
+  - case_id: "MOFF_004"
+    title: "运营端审核通过下架商品"
+    description: "调用运营端productAudit接口，auditState=2审核通过下架商品，productSpecId通过SQL动态获取"
+    method: POST
+    endpoint: "/hzsx/examineProduct/productAudit"
+    sql:
+      - query: >
+          SELECT id as sid FROM llxz_product.ct_product_spec
+          WHERE item_id = '${product_id}'
+          AND delete_time IS NULL
+          ORDER BY create_time DESC
+          LIMIT 1
+        column: sid
+    json:
+      auditState: 2
+      synProduct: 0
+      id: "${id}"
+      repairOrderIds: ""
+      zfbProductImageItemId:
+        - 565912
+      commitments: ""
+      aliPayImages: []
+      stringList: []
+      rentDaysDTOS:
+        - days: "10"
+          customLease: 0
+          productSpecId: "${sid}"
+      addedServiceList: []
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+
+# ==================== 用例2: 商品上架流程 ======================================
 product_on_shelf_tests:
   # 步骤1: 查询已下架商品（type=2）
   - case_id: "MON_001"
@@ -162,5 +204,46 @@ product_on_shelf_tests:
         operator: "=="
         value: "SUCCESS"
       - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # 步骤4: 运营端审核通过上架商品
+  - case_id: "MON_004"
+    title: "运营端审核通过上架商品"
+    description: "调用运营端productAudit接口，auditState=2审核通过上架商品，productSpecId通过SQL动态获取"
+    method: POST
+    endpoint: "/hzsx/examineProduct/productAudit"
+    sql:
+      - query: >
+          SELECT id as sid FROM llxz_product.ct_product_spec
+          WHERE item_id = '${product_id}'
+          AND delete_time IS NULL
+          ORDER BY create_time DESC
+          LIMIT 1
+        column: sid
+    json:
+      auditState: 2
+      synProduct: 0
+      id: "${id}"
+      repairOrderIds: ""
+      zfbProductImageItemId:
+        - 567115
+      commitments: ""
+      aliPayImages: []
+      stringList: []
+      rentDaysDTOS:
+        - days: "10"
+          customLease: 0
+          productSpecId: "${sid}"
+      addedServiceList: []
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
         operator: "=="
         value: true

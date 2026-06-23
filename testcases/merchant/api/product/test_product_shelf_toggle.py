@@ -31,6 +31,7 @@ class TestProductOffShelf:
 
     _global_vars = None
     _product_id = None
+    _id = None
 
     @classmethod
     def _load_global_vars(cls):
@@ -40,7 +41,7 @@ class TestProductOffShelf:
 
     @pytest.mark.order(1)
     @allure.title("MOFF_001 - 查询已上架商品")
-    def test_step1_query_listed_products(self, merchant_api_client, db):
+    def test_step1_query_listed_products(self, merchant_api_client, db, admin_api_client):
         """查询已上架商品列表（type=1），提取第一条记录的 productId 供下架使用"""
         cases = get_test_data(_DATA_FILE, "product_off_shelf_tests")
         case = cases[0]
@@ -60,6 +61,7 @@ class TestProductOffShelf:
             pytest.skip("已上架商品列表为空，无法获取 productId 进行下架测试")
 
         self.__class__._product_id = str(records[0]["productId"])
+        self.__class__._id = str(records[0]["id"])
         allure.attach(
             f"product_id = {self._product_id}\n商品名称: {records[0].get('name', '')}",
             name="提取的商品ID",
@@ -120,6 +122,22 @@ class TestProductOffShelf:
             )
             logger.info(f"[MOFF_003] 验证通过: 商品 {self._product_id} 已在已下架列表中")
 
+    @pytest.mark.order(4)
+    @allure.title("MOFF_004 - 运营端审核通过下架商品 前置：验证商品已下架")
+    def test_step4_audit_off_shelf(self, admin_api_client, db):
+        cases = get_test_data(_DATA_FILE, "product_off_shelf_tests")
+        case = cases[3]  # MOFF_004
+        global_vars = self._load_global_vars()
+
+        if not self._product_id:
+            pytest.skip("步骤1未获取到 productId，跳过审核下架")
+
+        global_vars["product_id"] = self._product_id
+        global_vars["id"] = self._id
+        allure.dynamic.title(f"{case['case_id']} | {case['title']} (productId={self._product_id})")
+        execute_test_case(case, admin_api_client, db, global_vars)
+        logger.info(f"[MOFF_004] 审核通过下架商品 productId={self._product_id}")
+
 
 # ==================== 用例2: 商品上架流程 ====================
 @allure.epic("商家端")
@@ -130,6 +148,7 @@ class TestProductOnShelf:
 
     _global_vars = None
     _product_id = None
+    _id = None
 
     @classmethod
     def _load_global_vars(cls):
@@ -139,7 +158,7 @@ class TestProductOnShelf:
 
     @pytest.mark.order(1)
     @allure.title("MON_001 - 查询已下架商品")
-    def test_step1_query_unlisted_products(self, merchant_api_client, db):
+    def test_step1_query_unlisted_products(self, merchant_api_client, db, admin_api_client):
         """查询已下架商品列表（type=2），提取第一条记录的 productId 供上架使用"""
         cases = get_test_data(_DATA_FILE, "product_on_shelf_tests")
         case = cases[0]
@@ -156,6 +175,7 @@ class TestProductOnShelf:
             pytest.skip("已下架商品列表为空，无法获取 productId 进行上架测试")
 
         self.__class__._product_id = str(records[0]["productId"])
+        self.__class__._id = str(records[0]["id"])
         allure.attach(
             f"product_id = {self._product_id}\n商品名称: {records[0].get('name', '')}",
             name="提取的商品ID",
@@ -175,6 +195,7 @@ class TestProductOnShelf:
             pytest.skip("步骤1未获取到 productId，跳过上架操作")
 
         global_vars["product_id"] = self._product_id
+        global_vars["id"] = self._id
         allure.dynamic.title(f"{case['case_id']} | {case['title']} (productId={self._product_id})")
         execute_test_case(case, merchant_api_client, db, global_vars)
         logger.info(f"[MON_002] 上架商品成功 productId={self._product_id}")
@@ -215,3 +236,20 @@ class TestProductOnShelf:
                 f"商品 {self._product_id} 未出现在已上架列表中，上架未生效"
             )
             logger.info(f"[MON_003] 验证通过: 商品 {self._product_id} 已在已上架列表中")
+
+    @pytest.mark.order(4)
+    @allure.title("MON_004 - 运营端审核商品上架")
+    def test_step4_audit_on_shelf(self, admin_api_client, db):
+        """调用运营端 productAudit 接口，auditState=2 审核通过上架商品"""
+        cases = get_test_data(_DATA_FILE, "product_on_shelf_tests")
+        case = cases[3]  # MON_004
+        global_vars = self._load_global_vars()
+
+        if not self._product_id:
+            pytest.skip("步骤1未获取到 productId，跳过审核上架")
+
+        global_vars["product_id"] = self._product_id
+        global_vars["id"] = self._id
+        allure.dynamic.title(f"{case['case_id']} | {case['title']} (productId={self._product_id})")
+        execute_test_case(case, admin_api_client, db, global_vars)
+        logger.info(f"[MON_004] 审核通过上架商品 productId={self._product_id}")

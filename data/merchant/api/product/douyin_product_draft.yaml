@@ -404,3 +404,27 @@ douyin_product_draft_tests:
       - path: "$.data"
         operator: "=="
         value: true
+
+  # 步骤4: 运营端审核通过已发布的抖音商品
+  - case_id: "DPD_004"
+    title: "运营端审核通过抖音商品"
+    description: "草稿箱发布商品后，调用运营端 examineProductConfirm 接口审核通过，id 通过 SQL 从 ct_product 动态获取"
+    method: GET
+    endpoint: "/hzsx/examineProduct/examineProductConfirm"
+    sql:
+      - query: >
+          SELECT id AS _item_id FROM llxz_product.ct_product
+          WHERE product_id = '${product_id}'
+          AND delete_time IS NULL
+          ORDER BY create_time DESC
+          LIMIT 1
+        column: _item_id
+    params:
+      auditState: 2
+      tikTokShopIds: "${shop_id}"
+      id: "${_item_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"

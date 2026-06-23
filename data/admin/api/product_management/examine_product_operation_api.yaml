@@ -16,10 +16,12 @@ examine_product_operation_tests:
           SELECT id, product_id
           FROM llxz_product.ct_product
           WHERE status = 1
-          AND shop_id = '${shop_id}'
           AND delete_time IS NULL
+          AND channel_group_code = "001"
+          and audit_state =0
+          and product_type not in ('xianyu','meituan','kuaishou','')
           ORDER BY create_time DESC
-          LIMIT 1,2
+          LIMIT 2
         columns:
           - id
           - product_id

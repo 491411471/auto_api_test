@@ -199,9 +199,37 @@ def process_dynamic_data(case: Dict[str, Any], db, variables: Dict[str, Any]) ->
                         allure.attach(f"{column} = {result}", name=f"从数据库获取的变量（多行）{step_suffix}", attachment_type=allure.attachment_type.TEXT)
                     elif columns:
                         # 多行多字段，通常保存为列表[字典]
-                        variables['sql_result'] = result
-                        logger.info(f"从数据库获取的变量（多行多字段）: sql_result = {result}")
-                        allure.attach(f"sql_result = {result}", name=f"从数据库获取的变量（多行多字段）{step_suffix}", attachment_type=allure.attachment_type.TEXT)
+                        var_prefix = sql_config.get('var_prefix')
+                        if var_prefix and isinstance(var_prefix, dict):
+                            # var_prefix 展开：{prefix: index} × columns → {prefix}_{col}
+                            # 例如 var_prefix: {first: 0, second: 1}，columns: [id, product_id]
+                            #   → first_id, first_product_id, second_id, second_product_id
+                            for prefix, idx in var_prefix.items():
+                                if isinstance(idx, int) and 0 <= idx < len(result):
+                                    row = result[idx]
+                                    if isinstance(row, dict):
+                                        for col in columns:
+                                            var_name = f"{prefix}_{col}"
+                                            variables[var_name] = row.get(col)
+                            logger.info(f"var_prefix 展开完成: {var_prefix}")
+                            allure.attach(
+                                json.dumps(
+                                    {k: v for k, v in variables.items()
+                                     if any(k.startswith(f"{pfx}_") for pfx in var_prefix)},
+                                    ensure_ascii=False, indent=2, default=str
+                                ),
+                                name=f"var_prefix 展开结果{step_suffix}",
+                                attachment_type=allure.attachment_type.JSON
+                            )
+                        else:
+                            # 无 var_prefix 时兜底存为 sql_result（向后兼容）
+                            variables['sql_result'] = result
+                            logger.info(f"从数据库获取的变量（多行多字段）: sql_result = {result}")
+                            allure.attach(
+                                f"sql_result = {result}",
+                                name=f"从数据库获取的变量（多行多字段）{step_suffix}",
+                                attachment_type=allure.attachment_type.TEXT
+                            )
                     else:
                         variables['sql_result'] = result
                         logger.info(f"从数据库获取的变量（多行）: sql_result = {result}")

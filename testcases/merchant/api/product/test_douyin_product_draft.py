@@ -140,4 +140,49 @@ class TestDouyinProductDraft:
 
         allure.dynamic.title(f"{case['case_id']} | {case['title']} (draftId={self._draft_id}, productId={self._product_id})")
         execute_test_case(case, merchant_api_client, db, global_vars)
+
+        # 发布后从 ct_product 查询正式商品的 product_id（草稿和正式商品 product_id 不同）
+        query_published = (
+            "SELECT product_id FROM llxz_product.ct_product "
+            f"WHERE name = '{self._product_name}' "
+            "AND product_of_dou_yin = 1 "
+            "AND delete_time IS NULL "
+            "ORDER BY create_time DESC LIMIT 1"
+        )
+        published_product_id = None
+        for attempt in range(1, 6):
+            try:
+                result = db.fetch_one(query_published)
+                if result:
+                    published_product_id = result.get("product_id") if isinstance(result, dict) else result[0]
+                if published_product_id:
+                    logger.info(f"[DPD_003] 第 {attempt} 次查询已发布商品: product_id={published_product_id}")
+                    break
+            except Exception as e:
+                logger.warning(f"[DPD_003] 第 {attempt} 次查询异常: {e}")
+            logger.info(f"[DPD_003] 已发布商品 product_id 未就绪，等待 2 秒后重试 ({attempt}/5)...")
+            time.sleep(2)
+
+        if published_product_id:
+            self.__class__._product_id = published_product_id
+            logger.info(f"[DPD_003] 已更新 product_id: 草稿={global_vars.get('product_id')} -> 已发布={published_product_id}")
+        else:
+            logger.warning(f"[DPD_003] 未查询到已发布商品的 product_id，继续使用草稿值={self._product_id}")
+
         logger.info(f"[DPD_003] 发布成功 draftId={self._draft_id}, productId={self._product_id}")
+
+    @pytest.mark.order(4)
+    @allure.title("DPD_004 - 运营端审核通过抖音商品")
+    def test_step4_audit_product(self, admin_api_client, db):
+        """草稿箱发布商品后，调用运营端 examineProductConfirm 接口审核通过，id 由 SQL 从 ct_product 动态获取"""
+        cases = get_test_data(_DATA_FILE, "douyin_product_draft_tests")
+        case = cases[3]  # DPD_004
+        global_vars = self._load_global_vars()
+
+        if not self._product_id:
+            pytest.skip("步骤1未获取到 product_id，跳过审核")
+
+        global_vars["product_id"] = str(self._product_id)
+        allure.dynamic.title(f"{case['case_id']} | {case['title']} (productId={self._product_id})")
+        execute_test_case(case, admin_api_client, db, global_vars)
+        logger.info(f"[DPD_004] 审核通过 productId={self._product_id}")

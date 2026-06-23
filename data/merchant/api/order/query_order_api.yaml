@@ -135,13 +135,13 @@ order_query_tests:
     <<: *common_endpoint
     json:
       <<: *common_json
-      addressUserPhone: "15705659822"
+      addressUserPhone: "15309625265"
       guangGaoId: ""
     expected_status: 200
     validate_data:
       - path: "data.records[*].uid"
         operator: "all_eq"
-        value: "3a5e5a2b822134efbde2fe2292a9995e985bc18evmv4g74rnsfh"
+        value: "3f69d9f0dbb2cf4bdda84750d17272c80d3a76f1qat88kyv66ti"
 
   - case_id: OQ_010
     title: "按创建时间范围查询"
