@@ -1,0 +1,426 @@
+# 运营端 - 商品管理：抖音商品查询接口测试数据
+# 接口：POST /hzsx/examineProduct/selectExaminePoroductList
+# 覆盖场景：抖音审核状态、上架状态、店铺名称/ID、商品名称/编码、产品新旧、平台审核、购买套餐
+
+variables:
+  channelGroupCode: "001"
+
+douyin_product_query_tests:
+  # ========== DQC_001: 抖音审核 - 待审核 ==========
+  - case_id: "DQC_001"
+    title: "抖音审核-待审核"
+    description: "以抖音审核状态=待审核为查询条件，验证返回数据全部为待审核"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      aduitRes: "INIT"
+      buyOutQueryMy: "all"
+      mappingStatus: ""
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].aduitRes"
+        operator: "all_eq"
+        value: "待审核"
+
+  # ========== DQC_002: 抖音审核 - 审核通过 ==========
+  - case_id: "DQC_002"
+    title: "抖音审核-审核通过"
+    description: "以抖音审核状态=审核通过为查询条件，验证返回数据全部为审核通过"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      aduitRes: "PASS"
+      buyOutQueryMy: "all"
+      mappingStatus: ""
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].aduitRes"
+        operator: "all_eq"
+        value: "审核通过"
+
+  # ========== DQC_003: 上架状态 - 已上架 ==========
+  - case_id: "DQC_003"
+    title: "上架状态-已上架"
+    description: "以上架状态=已上架(type=1)为查询条件，验证返回数据全部为已上架"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      type: "1"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].type"
+        operator: "all_eq"
+        value: 1
+        type_check: "int"
+
+  # ========== DQC_004: 上架状态 - 已下架 ==========
+  - case_id: "DQC_004"
+    title: "上架状态-已下架"
+    description: "以上架状态=已下架(type=2)为查询条件，验证返回数据全部为已下架"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      type: "2"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].type"
+        operator: "all_eq"
+        value: 2
+        type_check: "int"
+
+  # ========== DQC_005: 店铺名称查询 ==========
+  - case_id: "DQC_005"
+    title: "店铺名称查询-sass人人享租1"
+    description: "以店铺名称为查询条件，验证返回数据的shopName全部匹配"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      shopName: "sass人人享租1"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].shopName"
+        operator: "all_eq"
+        value: "sass人人享租1"
+
+  # ========== DQC_006: 店铺ID查询 ==========
+  - case_id: "DQC_006"
+    title: "店铺ID查询"
+    description: "以店铺ID为查询条件，验证返回数据的shopId全部匹配"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      shopId: "71008738021cd3393bacbac182bd6a86af0b5c87"
+      shopName: ""
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].shopId"
+        operator: "all_eq"
+        value: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+  # ========== DQC_007: 商品名称查询（SQL动态获取） ==========
+  - case_id: "DQC_007"
+    title: "商品名称查询"
+    description: "以SQL获取的抖音商品名称为查询条件，验证返回数据的name全部匹配"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    sql:
+      - query: >
+          SELECT product_id, name FROM llxz_product.ct_product
+          WHERE product_of_dou_yin = '1'
+          AND delete_time IS NULL
+          ORDER BY create_time DESC
+          LIMIT 1
+        columns:
+          - product_id
+          - name
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      productName: "${name}"
+      shopId: ""
+      shopName: ""
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].name"
+        operator: "all_eq"
+        value: "${name}"
+
+  # ========== DQC_008: 商品编码查询（SQL动态获取） ==========
+  - case_id: "DQC_008"
+    title: "商品编码查询"
+    description: "以SQL获取的抖音商品编码为查询条件，验证返回数据的productId全部匹配"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    sql:
+      - query: >
+          SELECT product_id, name FROM llxz_product.ct_product
+          WHERE product_of_dou_yin = '1'
+          AND delete_time IS NULL
+          ORDER BY create_time DESC
+          LIMIT 1
+        columns:
+          - product_id
+          - name
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      productName: ""
+      productId: "${product_id}"
+      shopId: ""
+      shopName: ""
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].productId"
+        operator: "all_eq"
+        value: "${product_id}"
+
+  # ========== DQC_009: 产品新旧 - 全新 ==========
+  - case_id: "DQC_009"
+    title: "产品新旧-全新"
+    description: "以产品新旧=全新(oldNewDegree=1)为查询条件，验证返回数据全部为全新"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      oldNewDegree: 1
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].oldNewDegree"
+        operator: "all_eq"
+        value: 1
+        type_check: "int"
+
+  # ========== DQC_010: 平台审核 - 审核通过 ==========
+  - case_id: "DQC_010"
+    title: "平台审核-审核通过"
+    description: "以平台审核状态=审核通过(auditState=0)为查询条件，验证返回数据全部为审核通过"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      auditState: 0
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].auditState"
+        operator: "all_eq"
+        value: 0
+        type_check: "int"
+
+  # ========== DQC_011: 平台审核 - 审核拒绝 ==========
+  - case_id: "DQC_011"
+    title: "平台审核-审核拒绝"
+    description: "以平台审核状态=审核拒绝(auditState=2)为查询条件，验证返回数据全部为审核拒绝"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      auditState: 2
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].auditState"
+        operator: "all_eq"
+        value: 2
+        type_check: "int"
+
+  # ========== DQC_012: 购买套餐 - 有 ==========
+  - case_id: "DQC_012"
+    title: "购买套餐-有"
+    description: "以购买套餐=有(buyOutQueryMy=yes)为查询条件，验证返回数据buyOutMealContainIsMy全部为yes"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      buyOutQueryMy: "yes"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].buyOutMealContainIsMy"
+        operator: "all_eq"
+        value: "yes"
+
+  # ========== DQC_013: 购买套餐 - 无 ==========
+  - case_id: "DQC_013"
+    title: "购买套餐-无"
+    description: "以购买套餐=无(buyOutQueryMy=no)为查询条件，验证返回数据buyOutMealContainIsMy全部为no"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      buyOutQueryMy: "no"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].buyOutMealContainIsMy"
+        operator: "all_eq"
+        value: "no"

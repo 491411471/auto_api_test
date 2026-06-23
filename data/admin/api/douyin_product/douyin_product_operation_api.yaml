@@ -1,0 +1,426 @@
+# 运营端 - 商品管理：抖音商品操作接口测试数据
+# 覆盖场景：批量库存设置、绑定门店、修改商品、上架/下架、复制商品、关锁/开锁
+
+variables:
+  channelGroupCode: "001"
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+# ==================== 抖音商品操作测试 ====================
+douyin_product_operation_tests:
+
+  # ========== TC_001: 批量库存设置 ==========
+  - case_id: "DPO_001"
+    title: "抖音商品批量库存设置"
+    description: "SQL查询2个抖音商品product_id，批量设置库存为10"
+    method: POST
+    endpoint: "/hzsx/examineProduct/batchUpdateDyStock"
+    sql:
+      - query: >
+          SELECT product_id FROM llxz_product.ct_product
+          WHERE product_of_dou_yin = '1'
+          AND delete_time IS NULL
+          ORDER BY create_time DESC
+          LIMIT 2
+        column: product_id
+        multiple: true
+    json:
+      productIds: "${product_id}"
+      stock: 10
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ========== TC_002 步骤1: 查询门店 ==========
+  - case_id: "DPO_002_S1"
+    title: "查询门店信息"
+    description: "SQL查询可用门店的name和shop_id"
+    sql:
+      - query: >
+          SELECT name AS shop_name, shop_id
+          FROM llxz_product.ct_shop
+          WHERE status = 5
+          AND shop_on_off_line_type = 0
+          order by RAND()
+          LIMIT 1
+        columns:
+          - shop_name
+          - shop_id
+    json:
+      productIds: []
+      stock: 100
+    expected_status: 200
+    validate_data: []
+
+  # ========== TC_002 步骤2: 查询抖音商品id ==========
+  - case_id: "DPO_002_S2"
+    title: "查询抖音商品id"
+    description: "查询抖音商品列表,获取商品id用于绑定门店"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      categoryId: null
+      channelGroupCode: "001"
+      creatTime: null
+      pageNumber: 1
+      pageSize: 10
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+
+  # ========== TC_002 步骤3: 绑定门店 ==========
+  - case_id: "DPO_002_S3"
+    title: "抖音商品绑定门店"
+    description: "使用SQL查询的门店信息绑定抖音商品"
+    method: POST
+    endpoint: "/hzsx/examineProduct/batchEditDyShop"
+    json:
+      ids: "${ids}"
+      tikTokShopIds:
+        - "${shop_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ========== TC_003 步骤1: 查询抖音商品列表 ==========
+  - case_id: "DPO_003_S1"
+    title: "查询抖音商品列表"
+    description: "查询已审核通过的抖音商品，提取productId"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      productId: ""
+      auditState: 2
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+    extract_vars:
+      - var_name: "product_id"
+        path: "$.data.records[0].productId"
+
+  # ========== TC_003 步骤2: 查询商品编辑信息 ==========
+  - case_id: "DPO_003_S2"
+    title: "查询商品编辑信息"
+    description: "根据productId查询商品编辑详情，提取id/productId/type等字段"
+    method: GET
+    endpoint: "/hzsx/examineProduct/selectExamineProductEdit"
+    params:
+      productId: "${product_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+    extract_vars:
+      - var_name: "product_record_id"
+        path: "$.data.product.id"
+      - var_name: "edit_product_id"
+        path: "$.data.product.productId"
+      - var_name: "product_type"
+        path: "$.data.product.type"
+      - var_name: "commission_type"
+        path: "$.data.product.commissionType"
+      - var_name: "commission"
+        path: "$.data.product.commission"
+      - var_name: "product_name"
+        path: "$.data.product.name"
+
+  # ========== TC_003 步骤3: 修改商品信息 ==========
+  - case_id: "DPO_003_S3"
+    title: "修改抖音商品信息"
+    description: "修改商品名称、佣金等信息"
+    method: POST
+    endpoint: "/hzsx/examineProduct/updateExamineProduct"
+    json:
+      categoryId: 4945
+      id: "${product_record_id}"
+      goodsSort: 0
+      name: "${product_name}"
+      type: "${product_type}"
+      productId: "${edit_product_id}"
+      images:
+        - "https://oss.llxzu.com/8acfe831282f4cfea8df900c92df760d.png"
+      commissionType: "${commission_type}"
+      commission: "${commission}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ========== TC_004 步骤1: 查询已上架商品 ==========
+  - case_id: "DPO_004_S1"
+    title: "查询已上架的抖音商品"
+    description: "查询type=1(已上架)的抖音商品"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      aduitRes: "PASS"
+      type: "1"
+      productId: ""
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+    extract_vars:
+      - var_name: "product_id"
+        path: "$.data.records[0].productId"
+      - var_name: "record_id"
+        path: "$.data.records[0].id"
+
+  # ========== TC_004 步骤2: 商品下架 ==========
+  - case_id: "DPO_004_S2"
+    title: "操作商品下架"
+    description: "对已上架商品执行下架操作(type=3)"
+    method: GET
+    endpoint: "/hzsx/product/setProuctShowState"
+    params:
+      productId: "${product_id}"
+      type: 3
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ========== TC_005 步骤1: 查询不显示商品 ==========
+  - case_id: "DPO_005_S1"
+    title: "查询不显示的抖音商品"
+    description: "查询type=3(不显示)的抖音商品"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      type: "3"
+      productId: ""
+      auditState: 2
+      shopIds:
+        - "${shop_id}"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+    extract_vars:
+      - var_name: "product_id"
+        path: "$.data.records[0].productId"
+
+  # ========== TC_005 步骤2: 商品上架 ==========
+  - case_id: "DPO_005_S2"
+    title: "操作商品上架"
+    description: "对不显示商品执行上架操作(type=1)"
+    method: GET
+    endpoint: "/hzsx/product/setProuctShowState"
+    params:
+      productId: "${product_id}"
+      type: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ========== TC_006 步骤1: 查询商品用于复制 ==========
+  - case_id: "DPO_006_S1"
+    title: "查询抖音商品列表(复制用)"
+    description: "查询抖音商品获取productId和shopId"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productOfDouYin: 1
+      sortField: ""
+      sortOrder: ""
+      productId: ""
+      shopIds:
+        - "${shop_id}"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+    extract_vars:
+      - var_name: "product_id"
+        path: "$.data.records[0].productId"
+      - var_name: "source_shop_id"
+        path: "$.data.records[0].shopId"
+
+  # ========== TC_006 步骤2: 复制商品 ==========
+  - case_id: "DPO_006_S2"
+    title: "复制抖音商品"
+    description: "复制指定抖音商品到目标门店"
+    method: POST
+    endpoint: "/hzsx/product/busCopyTikTokProductForShop"
+    json:
+      productId: "${product_id}"
+      shopIds:
+        - "${source_shop_id}"
+      copyProduct: true
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data.msg"
+        operator: "=="
+        value: "复制成功"
+
+  # ========== TC_007 步骤1: 查询未关锁商品(SQL) ==========
+  - case_id: "DPO_007_S1"
+    title: "查询未关锁的抖音商品"
+    description: "SQL查询lock_state=0的商品id"
+    method: POST
+    endpoint: "/hzsx/examineProduct/lockExamineProduct"
+    sql:
+      - query: >
+          SELECT id FROM llxz_product.ct_product
+          WHERE lock_state = 0
+          AND delete_time IS NULL
+          LIMIT 1
+        column: id
+    json:
+      id: "${id}"
+      lockState: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # ========== TC_008 步骤1: 查询已关锁商品(SQL) ==========
+  - case_id: "DPO_008_S1"
+    title: "查询已关锁的抖音商品"
+    description: "SQL查询lock_state=1的商品id"
+    method: POST
+    endpoint: "/hzsx/examineProduct/lockExamineProduct"
+    sql:
+      - query: >
+          SELECT id  FROM llxz_product.ct_product
+          WHERE lock_state = 1
+          AND delete_time IS NULL
+          LIMIT 1
+        column: id
+    json:
+      id: "${id}"
+      lockState: 0
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.errorMessage"
+        operator: "is_none"
+      - path: "$.data"
+        operator: "=="
+        value: true
