@@ -1,0 +1,247 @@
+# 运营端 - 商品管理：快手商品查询接口测试数据
+# 接口：POST /hzsx/examineProduct/selectExaminePoroductList
+# 覆盖场景：审批状态(正在审核/审核通过)、上架状态(已上架/已下架)、
+#           店铺名称、店铺编码、商品编码、商品名称、新旧程度、组合条件查询
+
+variables:
+  channelGroupCode: "001"
+  productType: "kuaishou"
+
+# ==================== 公共锚点 ====================
+.common_endpoint: &common_endpoint
+  method: POST
+  endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+
+.common_json: &common_json
+  pageNumber: 1
+  pageSize: 10
+  channelGroupCode: "001"
+  productType: "kuaishou"
+  productOfDouYin: null
+  sortField: ""
+  sortOrder: ""
+  creatTime: null
+  categoryId: null
+
+kuaishou_product_tests:
+  # ========== TC01: 审批状态--正在审核 ==========
+  - case_id: "KP_001"
+    title: "审批状态--正在审核"
+    description: "查询审批状态为正在审核(auditState=0)的快手商品，验证所有返回结果的auditState均为0"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      auditState: "0"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].auditState"
+        operator: "all_eq"
+        value: 0
+
+  # ========== TC02: 审批状态--审核通过 ==========
+  - case_id: "KP_002"
+    title: "审批状态--审核通过"
+    description: "查询审批状态为审核通过(auditState=2)的快手商品，验证所有返回结果的auditState均为2"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      auditState: "2"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].auditState"
+        operator: "all_eq"
+        value: 2
+
+  # ========== TC03: 查询条件--已上架 ==========
+  - case_id: "KP_003"
+    title: "查询条件--已上架"
+    description: "查询已上架状态(type=1)的快手商品，验证所有返回结果的type均为1"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      type: "1"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].type"
+        operator: "all_eq"
+        value: 1
+
+  # ========== TC04: 查询条件--已下架 ==========
+  - case_id: "KP_004"
+    title: "查询条件--已下架"
+    description: "查询已下架状态(type=2)的快手商品，验证所有返回结果的type均为2"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      type: "2"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].type"
+        operator: "all_eq"
+        value: 2
+
+  # ========== TC05: 以店铺名称为查询条件--sass人人享租1 ==========
+  - case_id: "KP_005"
+    title: "以店铺名称为查询条件--sass人人享租1"
+    description: "使用店铺名称'sass人人享租1'查询快手商品，验证所有返回结果的shopName均为'sass人人享租1'"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      shopId: ""
+      shopName: "sass人人享租1"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].shopName"
+        operator: "all_eq"
+        value: "sass人人享租1"
+
+  # ========== TC06: 以店铺编码为查询条件 ==========
+  - case_id: "KP_006"
+    title: "以店铺编码为查询条件"
+    description: "使用店铺编码查询快手商品，验证所有返回结果的shopId均与查询条件一致"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      shopId: "71008738021cd3393bacbac182bd6a86af0b5c87"
+      shopName: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].shopId"
+        operator: "all_eq"
+        value: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+  # ========== TC07: 以商品编码为查询条件 ==========
+  - case_id: "KP_007"
+    title: "以商品编码为查询条件"
+    description: "使用商品编码查询快手商品，验证所有返回结果的productId均与查询条件一致"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: ""
+      productId: "${product_id}"
+      shopId: ""
+      shopName: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].productId"
+        operator: "all_eq"
+        value: "${product_id}"
+
+  # ========== TC08: 以商品名称为查询条件 ==========
+  - case_id: "KP_008"
+    title: "以商品名称为查询条件"
+    description: "使用商品名称查询快手商品，验证所有返回结果的name均与查询条件一致"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: "${product_name}"
+      productId: ""
+      shopId: ""
+      shopName: ""
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].name"
+        operator: "contains"
+        value: "${product_name}"
+
+  # ========== TC09: 以"全新"为查询条件 ==========
+  - case_id: "KP_009"
+    title: "以'全新'为查询条件"
+    description: "查询新旧程度为全新(oldNewDegree=1)的快手商品，验证所有返回结果的oldNewDegree均为1"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      oldNewDegree: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].oldNewDegree"
+        operator: "all_eq"
+        value: 1
+
+  # ========== TC10: 以审批状态：通过，上架状态：上架组合条件查询 ==========
+  - case_id: "KP_010"
+    title: "审批状态通过+上架状态上架组合查询"
+    description: "组合查询审批状态为通过(auditState=2)且上架状态为上架(type=1)的快手商品，验证所有返回结果均满足条件"
+    <<: *common_endpoint
+    json:
+      <<: *common_json
+      auditState: "2"
+      type: "1"
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      createDate: null
+      creatTime: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].auditState"
+        operator: "all_eq"
+        value: 2
+      - path: "$.data.records[*].type"
+        operator: "all_eq"
+        value: 1
