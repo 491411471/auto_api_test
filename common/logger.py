@@ -26,8 +26,14 @@ class ColoredFormatter(logging.Formatter):
         return formatter.format(record)
 
 def setup_logger(name=__name__, log_file='logs/api_test.log', level=logging.INFO):
+    """设置logger，防止重复添加handler"""
     os.makedirs('logs', exist_ok=True)
     logger = logging.getLogger(name)
+    
+    # 防止重复添加handler（关键修复）
+    if logger.handlers:
+        return logger
+    
     logger.setLevel(level)
     logger.propagate = False
 

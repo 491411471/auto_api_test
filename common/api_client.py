@@ -169,7 +169,11 @@ class APIClient:
         for attempt in range(self.max_retries):
             try:
                 self._log_request(method, url, **kwargs)
-                logger.info(f"请求参数：{kwargs}")
+                # 格式化输出请求参数为标准JSON格式
+                try:
+                    logger.info(f"请求参数：\n{json.dumps(kwargs, indent=2, ensure_ascii=False, default=str)}")
+                except Exception:
+                    logger.info(f"请求参数：{kwargs}")
                 logger.info(f"请求方法：{method}")
                 logger.info(f"请求URL：{url}")
                 logger.info(f"请求超时设置: {self.timeout}秒 (尝试 {attempt+1}/{self.max_retries})")
@@ -177,6 +181,16 @@ class APIClient:
                 resp = self.session.request(method, url, timeout=self.timeout, **kwargs)
                 self._log_response(resp)
                 resp.raise_for_status()
+                
+                # 记录接口返回结果（限制600字符）
+                try:
+                    response_body = resp.text
+                    if len(response_body) > 600:
+                        logger.info(f"接口返回结果：{response_body[:600]}")
+                    else:
+                        logger.info(f"接口返回结果：{response_body}")
+                except Exception as e:
+                    logger.debug(f"记录响应日志时出错: {e}")
                 
                 # 检查响应是否包含可重试的业务错误
                 try:
