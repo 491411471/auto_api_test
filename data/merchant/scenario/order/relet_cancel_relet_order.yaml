@@ -1,4 +1,4 @@
-# 续租/取消续租完整流程测试
+﻿# 续租/取消续租完整流程测试
 # 流程：查询账期详情 → 动态计算续租日期 → 执行续租 → 取消续租
 # 接口1：/hzsx/business/order/queryOrderStagesDetail（查询账期详情）
 # 接口2：/hzsx/business/order/extendOrderRelet（续租）
@@ -8,7 +8,7 @@
 variables:
   shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
   # 待测试的订单号（可替换为其他可续租订单）
-  order_id: "008OI202606092064246436626591744T"
+  order_id: "008OI202603272037419008738381824T"
 
 merchant:
 

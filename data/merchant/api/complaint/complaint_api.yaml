@@ -1,4 +1,4 @@
-# data/api/complaint/complaint_api.yaml
+﻿# data/api/complaint/complaint_api.yaml
 # 投诉相关接口测试数据
 
 variables:
@@ -6,7 +6,7 @@ variables:
   random_name: "${random_name}"
   random_phone: "${random_phone}"
   excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
-  excluded_order_id_2: "008OI202606092064246436626591744T"  # 续租还款测试专用订单，需排除
+  excluded_order_id_2: "008OI202603272037419008738381824T"  # 续租还款测试专用订单，需排除
 
 complaint_tests:
   # ==================== 测试用例一：投诉流程（新增投诉 + 查询验证） ====================

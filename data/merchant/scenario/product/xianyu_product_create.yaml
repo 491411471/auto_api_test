@@ -52,7 +52,6 @@ xianyu_product_create_tests:
       city: 110100
       draft: ""
       categoryId: "${category_id}"
-      id: 1679
     expected:
       businessSuccess: true
       data: true

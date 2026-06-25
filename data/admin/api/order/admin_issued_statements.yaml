@@ -1,10 +1,10 @@
-# 运营端 - 订单列表：完结订单接口测试数据
+﻿# 运营端 - 订单列表：完结订单接口测试数据
 # 接口：POST /hzsx/business/order/merchantsIssuedStatements
 # 流程：SQL获取待结算/租用中订单 → 调用完结订单接口 → SQL验证订单状态变为09
 
 variables:
   exclude_order_id: "008OI202606022061759565939113984T"
-  excluded_order_id_2: "008OI202606092064246436626591744T"  # 续租还款测试专用订单，需排除
+  excluded_order_id_2: "008OI202603272037419008738381824T"  # 续租还款测试专用订单，需排除
 
 admin_issued_statements_tests:
   - case_id: "MIS_001"

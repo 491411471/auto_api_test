@@ -66,6 +66,8 @@ class TestXianYuProductCreate:
 
         # # ========== 第二阶段：审核商品 ==========
         with allure.step("阶段二：审核闲鱼商品"):
+            # 审核是运营端操作，使用运营端 token
+            # 注意：审核通过后后端会调用闲鱼 API 发布商品，需要后端配置正确的闲鱼 SessionKey
             self._audit_xianyu_product(admin_api_client, db, project_root, p_id)
 
         # ========== 第三阶段：商家端下架商品（从YAML读取配置） ==========
@@ -125,6 +127,7 @@ class TestXianYuProductCreate:
         response = xianyu_api_client.post(endpoint, json=json_data)
         allure.attach(str(response.status_code), "HTTP 状态码", attachment_type=allure.attachment_type.TEXT)
         result = response.json()
+        print("闲鱼商品创建-接口响应：", result)  # 打印响应便于调试
         allure.attach(json.dumps(result, indent=2, ensure_ascii=False), "闲鱼商品创建-接口响应", attachment_type=allure.attachment_type.JSON)
         if not result.get('businessSuccess'):
             error_detail = (
@@ -133,6 +136,7 @@ class TestXianYuProductCreate:
                 f"  错误类型: {result.get('responseType', 'N/A')}\n"
                 f"  错误信息: {result.get('errorMessage', '未知错误')}"
             )
+            print(error_detail)  # 打印错误详情
             attach_error_detail(error_detail, "业务错误详情")
         return result
 
@@ -161,6 +165,7 @@ class TestXianYuProductCreate:
         return product_id, p_type, p_id
 
     def _audit_xianyu_product(self, admin_api_client, db, project_root, p_id):
+        """审核闲鱼商品（运营端操作）"""
         audit_body = self._load_audit_template(project_root, p_id)
         audit_result = self._send_audit_request(admin_api_client, audit_body)
         self._assert_audit_response(audit_result)
@@ -377,6 +382,5 @@ class TestXianYuProductCreate:
                 actual_value = result.get(path)
 
             validate(actual_value, operator, expected_value, path)
-
-        allure.attach("闲鱼商品删除成功：接口调用成功，响应符合 YAML 断言", "删除阶段结果",
-                      attachment_type=allure.attachment_type.TEXT)
+        print("闲鱼商品删除成功：接口调用成功，响应符合 YAML 断言")
+        allure.attach("闲鱼商品删除成功：接口调用成功，响应符合 YAML 断言", "删除阶段结果", attachment_type=allure.attachment_type.TEXT)

@@ -123,23 +123,28 @@ def dw_db():
 
 
 def pytest_collection_modifyitems(session, config, items):
-    """，避免影响其他测试，将test_merchant_onboarding放到测试用例的最后执行，因为改用会生成新的token"""
+    """调整测试执行顺序，将test_merchant_onboarding放到最后执行，因为该用例会生成新的token，避免影响其他测试"""
     target_filename = "test_merchant_onboarding.py"
     tail = []
     others = []
+    
     for item in items:
+        # 获取测试项的文件名
         try:
             item_file = os.path.basename(str(item.fspath))
         except Exception:
-            item_file = item.nodeid.split("::")[0]
-
-        if item_file == target_filename or target_filename in str(item.fspath):
+            # 兼容新版本的pytest
+            item_file = item.path.name if hasattr(item, 'path') else item.nodeid.split("::")[0].split("/")[-1]
+        
+        # 如果文件名包含test_merchant_onboarding.py，则放到最后
+        if target_filename in str(item_file):
             tail.append(item)
         else:
             others.append(item)
-
+    
+    # 重新排序：其他测试先执行，test_merchant_onboarding最后执行
     if tail:
         items[:] = others + tail
-        logger.info(f"Reordered collection: moved {len(tail)} tests from {target_filename} to the end")
+        logger.info(f"[测试顺序调整] 已将 {len(tail)} 个 {target_filename} 测试用例移到末尾执行")
 
 

@@ -1,9 +1,9 @@
-# 浏览历史查询接口测试用例
+﻿# 浏览历史查询接口测试用例
 # 全局变量（公共配置）
 variables:
   shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
   excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
-  excluded_order_id_2: "008OI202606092064246436626591744T"  # 续租还款测试专用订单，需排除
+  excluded_order_id_2: "008OI202603272037419008738381824T"  # 续租还款测试专用订单，需排除
 
 order_operator_tests:
   - case_id: BH_001

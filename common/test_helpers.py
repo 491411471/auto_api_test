@@ -198,7 +198,7 @@ def process_dynamic_data(case: Dict[str, Any], db, variables: Dict[str, Any]) ->
                         logger.info(f"从数据库获取的变量（多行）: {column} = {result}")
                         allure.attach(f"{column} = {result}", name=f"从数据库获取的变量（多行）{step_suffix}", attachment_type=allure.attachment_type.TEXT)
                     elif columns:
-                        # 多行多字段，通常保存为列表[字典]
+                        #
                         var_prefix = sql_config.get('var_prefix')
                         if var_prefix and isinstance(var_prefix, dict):
                             # var_prefix 展开：{prefix: index} × columns → {prefix}_{col}
@@ -852,6 +852,7 @@ def execute_test_case(case: Dict[str, Any], api_client, db, variables: Dict[str,
         # 步骤4：第二次变量替换
         with allure.step("3. 第二次变量替换（使用包含数据库结果的完整 variables 替换所有剩余占位符）"):
             case = replace_placeholders(case, variables)
+
 
             # 构造最终替换后的结构化摘要（params / json / sql）
             _final_summary: Dict[str, Any] = {}

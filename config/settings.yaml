@@ -27,11 +27,12 @@ environments:
         xianyu_token: "jae7vut0wkt552iw19b0tg2dm8ygx76k"
       timeout: 40
       max_retries: 3
-      request_interval: 3  # 请求间隔时间（秒），防止触发"连续点击"限制
+      request_interval: 3  # 请求间隔时间（秒），防止触发“连续点击”限制
       xianyu_login:
         mobile: "13811680671"
         smsLoginVerifyCode: "1"
-        loginTimestamp: "44638162506202789"
+        loginTimestamp: "23626142606202097"
+        source: "SHOP"  # 闲鱼登录也需要 source 字段
     
     # 运营端配置
     admin:

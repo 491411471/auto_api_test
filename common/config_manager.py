@@ -126,7 +126,8 @@ class ConfigManager:
         if env_data.get("auto_login", False):
             endpoint_data = self.get_endpoint_config(env_name, endpoint='merchant')
             xianyu_login = endpoint_data.get('xianyu_login')
-            if xianyu_login:
+            # 检查是否禁用了动态登录
+            if xianyu_login and not xianyu_login.get('disabled', False):
                 base_url = env_data.get('base_url')
                 try:
                     xianyu_token = TokenProvider.get_token_with_key(
