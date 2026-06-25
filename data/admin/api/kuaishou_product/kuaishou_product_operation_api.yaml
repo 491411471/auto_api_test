@@ -1,0 +1,303 @@
+# 运营端 - 快手商品操作测试数据
+# 测试用例1: 修改快手商品信息
+# 测试用例2: 上架快手商品
+# 测试用例3: 下架快手商品
+# 测试用例4: 复制快手商品
+
+variables:
+  channelGroupCode: "001"
+  productType: "kuaishou"
+
+# ==================== 测试用例1: 修改快手商品信息 ====================
+kuaishou_product_update_tests:
+  # 步骤1: 查询待修改的商品
+  - case_id: "KPU_001"
+    title: "查询待修改的快手商品"
+    description: "通过 SQL 查询已审核通过的快手商品，获取 id 和 product_id"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    sql:
+      - query: >
+          SELECT id, product_id 
+          FROM llxz_product.ct_product 
+          WHERE product_type='kuaishou' 
+          AND audit_state=2 
+          AND channel_group_code='001' 
+          AND delete_time IS NULL 
+          ORDER BY create_time DESC 
+          LIMIT 1
+        columns:
+          - id
+          - product_id
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productType: "kuaishou"
+      shopIds:
+        - "71008738021cd3393bacbac182bd6a86af0b5c87"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+
+  # 步骤2: 修改快手商品信息
+  - case_id: "KPU_002"
+    title: "修改快手商品信息"
+    description: "调用 updateExamineProduct 接口修改快手商品信息"
+    method: POST
+    endpoint: "/hzsx/examineProduct/updateExamineProduct"
+    json:
+      categoryId: 5095
+      id: "${product_db_id}"
+      goodsSort: "1"
+      name: "自动化测试---${original_product_name}"
+      type: 1
+      productId: "${product_db_product_id}"
+      images:
+        - "https://oss.llxzu.com/a9d32fed4fb14d29a6d2603472defce1.png"
+        - "https://oss.llxzu.com/fef653ba4c2a4785bb5eb7f64ed002e2.png"
+      commissionType: 1
+      commission: 100
+      commonStatus: 3
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+# ==================== 测试用例2: 上架快手商品 ====================
+kuaishou_product_on_shelf_tests:
+  # 步骤1: 查询不显示快手商品
+  - case_id: "KPOS_001"
+    title: "查询不显示的快手商品"
+    description: "查询所有不显示(type=3)的快手商品，从中随机选择一个"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productType: "kuaishou"
+      productOfDouYin: null
+      sortField: ""
+      sortOrder: ""
+      auditState: ""
+      type: "3"
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      buyOutQueryMy: "all"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+    extract_vars:
+      - var_name: "off_shelf_product_id"
+        path: "$.data.records[0].productId"
+
+  # 步骤2: 上架商品
+  - case_id: "KPOS_002"
+    title: "上架快手商品"
+    description: "调用 setProuctShowState 接口上架快手商品（type=1）"
+    method: GET
+    endpoint: "/hzsx/product/setProuctShowState"
+    params:
+      productId: "${off_shelf_product_id}"
+      type: "1"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+# ==================== 测试用例3: 下架快手商品 ====================
+kuaishou_product_off_shelf_tests:
+  # 步骤1: 查询已上架的商品
+  - case_id: "KPOFS_001"
+    title: "查询已上架的快手商品"
+    description: "查询所有已上架(type=1)的快手商品，从中随机选择一个"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productType: "kuaishou"
+      productOfDouYin: null
+      sortField: ""
+      sortOrder: ""
+      auditState: ""
+      type: "1"
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      buyOutQueryMy: "all"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+    extract_vars:
+      - var_name: "on_shelf_product_id"
+        path: "$.data.records[0].productId"
+
+  # 步骤2: 下架商品
+  - case_id: "KPOFS_002"
+    title: "下架快手商品"
+    description: "调用 setProuctShowState 接口下架快手商品（type=3）"
+    method: GET
+    endpoint: "/hzsx/product/setProuctShowState"
+    params:
+      productId: "${on_shelf_product_id}"
+      type: "3"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+# ==================== 测试用例4: 复制快手商品 ====================
+kuaishou_product_copy_tests:
+  # 步骤1: 查询待复制的商品
+  - case_id: "KPC_001"
+    title: "查询待复制的快手商品"
+    description: "查询快手商品列表，获取 product_id 和 name 用于复制"
+    method: POST
+    endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      channelGroupCode: "001"
+      productType: "kuaishou"
+      productOfDouYin: null
+      sortField: ""
+      sortOrder: ""
+      auditState: ""
+      productName: ""
+      productId: ""
+      shopId: ""
+      shopName: ""
+      shopIds:
+        - "71008738021cd3393bacbac182bd6a86af0b5c87"
+      creatTime: null
+      categoryId: null
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.total"
+        operator: ">="
+        value: 1
+    extract_vars:
+      - var_name: "copy_product_id"
+        path: "$.data.records[0].productId"
+      - var_name: "copy_product_name"
+        path: "$.data.records[0].name"
+
+  # 步骤2: 复制快手商品
+  - case_id: "KPC_002"
+    title: "复制快手商品"
+    description: "调用 busCopyTikTokProductForShop 接口复制快手商品到指定店铺"
+    method: POST
+    endpoint: "/hzsx/product/busCopyTikTokProductForShop"
+    json:
+      productId: "${copy_product_id}"
+      shopIds:
+        - "71008738021cd3393bacbac182bd6a86af0b5c87"
+      copyProduct: true
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.code"
+        operator: "=="
+        value: "200"
+      - path: "$.data.msg"
+        operator: "=="
+        value: "复制成功"
+      - path: "$.data.res"
+        operator: "=="
+        value: true
+
+  # 步骤3: 审核通过复制后的商品
+  - case_id: "KPC_003"
+    title: "审核通过复制后的快手商品"
+    description: "复制商品后，调用 examineProductConfirm 接口审核通过，id 通过 SQL 从 ct_product 动态获取"
+    method: GET
+    endpoint: "/hzsx/examineProduct/examineProductConfirm"
+    sql:
+      - query: >
+          SELECT id AS _item_id, product_id
+          FROM llxz_product.ct_product
+          WHERE product_type = 'kuaishou'
+          AND audit_state = '0'
+          AND channel_group_code = '001'
+          AND delete_time IS NULL
+          AND name LIKE '${copy_product_name}%%'
+          ORDER BY create_time DESC
+          LIMIT 1
+        column: _item_id
+    params:
+      auditState: 2
+      id: "${_item_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true

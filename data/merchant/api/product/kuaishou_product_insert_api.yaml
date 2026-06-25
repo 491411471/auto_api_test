@@ -1,0 +1,241 @@
+# 商家端 - 新增快手商品 + 运营端审核快手商品测试数据
+# 步骤1: 商家端新增快手商品 → 保存 product_title → SQL 查询商品 id
+# 步骤2: 运营端审核快手商品
+
+variables:
+  shop_id: "71008738021cd3393bacbac182bd6a86af0b5c86"
+  channel_group_code: "001"
+  login_id: 1000196
+
+# ==================== 快手商品新增与审核流程 ====================
+kuaishou_product_insert_tests:
+  # 步骤1: 商家端新增快手商品
+  - case_id: "KPI_001"
+    title: "商家端新增快手商品"
+    description: "调用 busInsertProduct 接口新增快手商品，保存 product_title 用于后续 SQL 查询"
+    method: POST
+    endpoint: "/hzsx/product/busInsertProduct"
+    json:
+      name: "${product_title}"
+      oldNewDegree: 1
+      labels: []
+      additionals: null
+      shopAdditionals: []
+      makeOrderServicesIds: []
+      buyOutSupport: 0
+      productSkuses:
+        - cycs:
+            - days: 1
+              price: ""
+              salePrice: "1300.00"
+              montyNum: 0
+              dayOrMonth: "day"
+              periodRent: "1"
+              firstRent: "1"
+              depositAmount: "1000"
+          skuBuyOutSupport: 0
+          depositPrice: 0
+          inventory: "1000"
+          memo: null
+          marketPrice: "1000"
+          platformSpecValue: null
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "1"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "2"
+          salePrice: "1300.00"
+          sort: 1
+        - cycs:
+            - days: 1
+              price: ""
+              salePrice: "1300.00"
+              montyNum: 0
+              dayOrMonth: "day"
+              periodRent: "1"
+              firstRent: "1"
+              depositAmount: "1000"
+          skuBuyOutSupport: 0
+          depositPrice: 0
+          inventory: "1000"
+          memo: null
+          marketPrice: "1000"
+          platformSpecValue: null
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "1"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "22"
+          salePrice: "1300.00"
+          sort: 2
+        - cycs:
+            - days: 1
+              price: ""
+              salePrice: "1300.00"
+              montyNum: 0
+              dayOrMonth: "day"
+              periodRent: "1"
+              firstRent: "1"
+              depositAmount: "1000"
+          skuBuyOutSupport: 0
+          depositPrice: 0
+          inventory: "1000"
+          memo: null
+          marketPrice: "1000"
+          platformSpecValue: null
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "11"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "2"
+          salePrice: "1300.00"
+          sort: 3
+        - cycs:
+            - days: 1
+              price: ""
+              salePrice: "1300.00"
+              montyNum: 0
+              dayOrMonth: "day"
+              periodRent: "1"
+              firstRent: "1"
+              depositAmount: "1000"
+          skuBuyOutSupport: 0
+          depositPrice: 0
+          inventory: "1000"
+          memo: null
+          marketPrice: "1000"
+          platformSpecValue: null
+          specAll:
+            - opeSpecId: 1
+              platformSpecName: "颜色"
+              platformSpecValue: "11"
+            - opeSpecId: 2
+              platformSpecName: "规格"
+              platformSpecValue: "22"
+          salePrice: "1300.00"
+          sort: 4
+      minRentCycle: ""
+      maxRentCycle: ""
+      type: 1
+      detail: "<p>${product_detail}</p>"
+      province: "340000"
+      city: "340100"
+      freightType: "PAY"
+      addIds:
+        - 794
+      images:
+        - uid: "${uid_1}"
+          src: "https://oss.llxzu.com/a9d32fed4fb14d29a6d2603472defce1.png"
+          url: "https://oss.llxzu.com/a9d32fed4fb14d29a6d2603472defce1.png"
+          isMain: null
+          width: 700
+          height: 700
+      src: null
+      productId: ""
+      salesVolume: null
+      lowestSalePrice: null
+      parameters: []
+      productCouponList: null
+      collected: null
+      specs:
+        - name: "颜色"
+          opeSpecId: 1
+          values:
+            - name: "1"
+            - name: "11"
+        - name: "规格"
+          opeSpecId: 2
+          values:
+            - name: "2"
+            - name: "22"
+      serviceTel: null
+      categoryIds:
+        - 5093
+        - 5094
+      rentMoneyOfDouYin: 1000
+      dealOfDouYin: 1000
+      title: "${product_title}"
+      appointHour: 10
+      createDate:
+        - "${create_date_start}"
+        - "${create_date_end}"
+      speFirstName: "规格1"
+      colorSpecs:
+        name: "颜色"
+        opeSpecId: 1
+        values:
+          - name: "1"
+          - name: "11"
+      speSecName: "规格2"
+      specSecond:
+        name: "规格"
+        opeSpecId: 2
+        values:
+          - name: "2"
+          - name: "22"
+      productColorPicture: []
+      videoUrl: ""
+      videoImages: ""
+      address:
+        - "340000"
+        - "340100"
+        - "340111"
+      customLeaseTerm: "1"
+      shopId: null
+      isBuyout: 0
+      soldStart: "${sold_start}"
+      soldEnd: "${sold_end}"
+      productType: "kuaishou"
+      productOfDouYin: null
+      id: 2088
+      categoryId: 5094
+      channelGroupCode: "001"
+      draft: ""
+      isTable: false
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+  # 步骤2: 运营端审核快手商品
+  - case_id: "KPI_002"
+    title: "运营端审核快手商品"
+    description: "商家端新增快手商品后，调用运营端 examineProductConfirm 接口审核通过，id 通过 SQL 从 ct_product 动态获取（使用 product_title 查询）"
+    method: GET
+    endpoint: "/hzsx/examineProduct/examineProductConfirm"
+    sql:
+      - query: >
+          SELECT id AS _item_id FROM llxz_product.ct_product
+          WHERE name = '${product_title}'
+          AND product_type = 'kuaishou'
+          AND delete_time IS NULL
+          ORDER BY create_time DESC
+          LIMIT 1
+        column: _item_id
+    params:
+      auditState: 2
+      id: "${_item_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true

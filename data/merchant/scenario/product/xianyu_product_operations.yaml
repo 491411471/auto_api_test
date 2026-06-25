@@ -1,0 +1,267 @@
+# 闲鱼商品操作测试数据
+# 包含：上架、下架、修改商品
+
+# ==================== 测试用例1：上架闲鱼商品 ====================
+
+# 步骤1：查询已下架的闲鱼商品
+xianyu_query_offline_product_test:
+  - case_id: "XQO_001"
+    title: "查询已下架的闲鱼商品"
+    description: "查询type=2的已下架闲鱼商品列表"
+    method: POST
+    endpoint: "/hzsx/product/selectBusinessPrdouct"
+    json:
+      channelCatId: null
+      type: "2"
+      sortField: ""
+      sortOrder: ""
+      pageSize: 10
+      pageNumber: 1
+      channelGroupCode: "001"
+      productType: "xianyu"
+    expected_status: 200
+    output_variables:
+      - "product_id_from_list"  # 从records[9].productId提取
+
+# 步骤2：上架闲鱼商品
+xianyu_online_product_test:
+  - case_id: "XON_001"
+    title: "上架闲鱼商品"
+    description: "将已下架的闲鱼商品上架，type=1"
+    method: POST
+    endpoint: "/hzsx/xianyu/product/updateProductInfo"
+    json:
+      productId: "${product_id}"
+      type: 1
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+# 步骤3：运营端审核上架商品（审核通过）
+xianyu_audit_online_product_test:
+  - case_id: "XAO_001"
+    title: "审核上架闲鱼商品"
+    description: "运营端审核上架商品，审核通过"
+    method: POST
+    endpoint: "/hzsx/xianyu/product/opeAuditProductPost"
+    json:
+      auditState: 2
+      reason: null
+      id: "${product_db_id}"
+      configIdList: []
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+
+# ==================== 测试用例2：下架闲鱼商品 ====================
+
+# 步骤1：查询已上架的闲鱼商品
+xianyu_query_online_product_test:
+  - case_id: "XQON_001"
+    title: "查询已上架的闲鱼商品"
+    description: "查询type=1的已上架闲鱼商品列表"
+    method: POST
+    endpoint: "/hzsx/product/selectBusinessPrdouct"
+    json:
+      channelCatId: null
+      type: "1"
+      sortField: ""
+      sortOrder: ""
+      pageSize: 10
+      pageNumber: 1
+      channelGroupCode: "001"
+      productType: "xianyu"
+    expected_status: 200
+    output_variables:
+      - "product_id_from_list"  # 从records[9].productId提取
+
+# 步骤2：下架闲鱼商品
+xianyu_offline_product_test:
+  - case_id: "XOFF_001"
+    title: "下架闲鱼商品"
+    description: "将已上架的闲鱼商品下架，type=2"
+    method: POST
+    endpoint: "/hzsx/xianyu/product/updateProductInfo"
+    json:
+      productId: "${product_id}"
+      type: 2
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+# 步骤3：运营端审核下架商品（审核通过）
+xianyu_audit_offline_product_test:
+  - case_id: "XAOF_001"
+    title: "审核下架闲鱼商品"
+    description: "运营端审核下架商品，审核通过"
+    method: POST
+    endpoint: "/hzsx/xianyu/product/opeAuditProductPost"
+    json:
+      auditState: 2
+      reason: null
+      id: "${product_db_id}"
+      configIdList: []
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+
+# ==================== 测试用例3：修改闲鱼商品 ====================
+
+# 步骤1：查询闲鱼商品
+xianyu_query_product_for_update_test:
+  - case_id: "XQU_001"
+    title: "查询闲鱼商品用于修改"
+    description: "查询type=1的闲鱼商品列表，获取商品id"
+    method: POST
+    endpoint: "/hzsx/product/selectBusinessPrdouct"
+    json:
+      isDelete: false
+      channelCatId: null
+      type: "1"
+      sortField: ""
+      sortOrder: ""
+      pageSize: 10
+      pageNumber: 1
+      channelGroupCode: "001"
+      productType: "xianyu"
+    expected_status: 200
+    output_variables: product_db_id  # 从records[9].id提取
+
+# 步骤2：获取闲鱼商品详情
+xianyu_get_product_info_test:
+  - case_id: "XGP_001"
+    title: "获取闲鱼商品详情"
+    description: "根据商品id获取闲鱼商品详细信息"
+    method: GET
+    endpoint: "/hzsx/xianyu/product/getXianYuProductInfo"
+    params:
+      id: "${product_db_id}"
+    expected_status: 200
+    output_variables:
+      - "product_detail"  # 保存完整的商品详情数据
+
+# 步骤3：修改闲鱼商品
+xianyu_update_product_test:
+  - case_id: "XUP_001"
+    title: "修改闲鱼商品"
+    description: "修改闲鱼商品信息，名称和标题增加自动化测试字样"
+    method: POST
+    endpoint: "/hzsx/xianyu/product/updateXianYuProduct"
+    json:
+      categoryIds:
+        - 9
+        - 18
+      channelCatIds:
+        - "031d790f7cb06802a7f7e02f36b0b49a"
+        - "67b5a5875ea34aeea7f7e02f36b0b49a"
+        - "886f2f4da51e3beaa7f7e02f36b0b49a"
+        - "97da5bfdd5eb8133acde29f76907b07f"
+      name: "${product_name}_自动化测试"
+      title: "${product_title}_自动化测试"
+      oldNewDegree: 9
+      openR3f1: false
+      itemLeaseDTO:
+        inventory: "${inventory}"
+        marketPrice: "${market_price}"
+        rentalDepositPriceInCent: "${deposit_price}"
+        memo: ""
+        parts: []
+        earliestLeaseDays: "${earliest_lease_days}"
+        cycs:
+          - days: "${cycle_days}"
+            dayOrMonth: "${day_or_month}"
+            priceCent: "${price_cent}"
+            totalRental: "${total_rental}"
+            id: "${cycle_id}"
+      images:
+        - isMain: null
+          src: "${image_url}"
+          uid: 1
+          url: "${image_url}"
+          width: 750
+          height: 750
+          xyImageId: "1310908776538599528"
+      detail: "自动化测试-${product_detail_text}"
+      address:
+        - "${province}"
+        - "${city}"
+      freightType: "FREE"
+      type: 1
+      addIds:
+        - 784
+      productId: "${product_id}"
+      channelCatId: "${channel_cat_id}"
+      province: "${province}"
+      city: "${city}"
+      draft: ""
+      categoryId: "${category_id}"
+      id: "${product_db_id}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+
+# 步骤4：运营端审核修改后的商品（审核通过）
+xianyu_audit_updated_product_test:
+  - case_id: "XAUP_001"
+    title: "审核修改后的闲鱼商品"
+    description: "运营端审核修改后的商品，审核通过"
+    method: POST
+    endpoint: "/hzsx/xianyu/product/opeAuditProductPost"
+    json:
+      auditState: 2
+      reason: null
+      id: "${product_db_id}"
+      configIdList: []
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
