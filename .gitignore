@@ -1,36 +1,63 @@
-.env
-.env.local
-.env.*.local
-*.env
-
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-
-# Virtualenv
-.venv/
-venv/
-env/
-
-# IDE
-.idea/
-.vscode/
-
-# Logs and reports
-*.log
+# --- 1. 运行时产生的动态目录 ---
+# 日志文件
 logs/
-reports/
+# Allure 报告源数据
 reports/allure_results/
-reports/allure_html/data/attachments/
-
-# pytest caches
+# Allure 生成的静态HTML报告
+reports/allure_html/
+# Pytest 缓存
 .pytest_cache/
 
-# OS
+# --- 2. Python 编译与虚拟环境 ---
+# 字节码编译文件
+__pycache__/
+*.py[cod]
+*$py.class
+# 虚拟环境目录（如果你在项目内创建了 venv）
+venv/
+.venv/
+env/
+# 分发/打包文件
+dist/
+build/
+*.egg-info/
+
+# --- 3. 敏感配置与环境变量 ---
+# 本地配置文件（如果存在，用来覆盖 yaml）
+.env
+*.local.yaml
+*.secret.yaml
+# 即使 settings.yaml 在 config 里，通常我们也只提交模板，不提交真实配置
+# 建议将 config/settings.yaml 重命名为 config/settings.yaml.example 并提交
+# 然后忽略真实的 config/settings.yaml
+config/settings.yaml
+config/config.py
+
+# --- 4. IDE 与编辑器配置 ---
+# PyCharm
+.idea/
+# VS Code
+.vscode/
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# --- 5. 操作系统文件 ---
+# macOS
 .DS_Store
+# Windows
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Byte-compiled / optimized / DLL files
-*.so
+# --- 6. 其他 ---
+# 临时文件
+*.bak
+*.swp
+*~
 
+# --- 7. 强制追踪空目录的占位符（可选） ---
+# 如果你想确保 logs 和 reports 目录存在于仓库中（但不包含内容）
+# 可以在这些目录下创建 .gitkeep 文件，并取消下面的注释
+!.gitkeep
+/config/
