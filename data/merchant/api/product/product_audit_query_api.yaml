@@ -85,7 +85,7 @@ product_audit_tests:
       - query: |
           SELECT id, product_id 
           FROM llxz_product.ct_product
-          WHERE type = 1
+          WHERE type = "1"
           AND shop_id = '${shop_id}'
           AND channel_group_code = "001"
           and product_type not in ('xianyu','meituan','kuaishou','')
@@ -119,7 +119,7 @@ product_audit_tests:
       - query: |
           SELECT id, name 
           FROM llxz_product.ct_product
-          WHERE type = 1
+          WHERE type = "1"
           AND shop_id = '${shop_id}'
           AND channel_group_code = "001"
           and product_type not in ('xianyu','meituan','kuaishou','')

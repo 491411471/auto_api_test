@@ -1,0 +1,188 @@
+# 支付宝-小程序 接口自动化测试数据
+# 包含5个测试步骤：商家入驻 → 发起投诉 → 撤销投诉 → 查看领券中心 → 领取优惠券
+
+variables:
+  # ==================== 全局静态变量 ====================
+  customer_origin: "1"
+  uid: "b4a745b433aab99df6c9967b60cf7e679a108ecakg4gz2anib0o"
+  order_id: "008OI202606022061759565939113984T"
+  complaint_content: "此为小程序端自动化测试产生数据，请勿介入处理。"
+  complaint_type_id: 5
+  complaint_category_one: 33
+  complaint_category_two: 34
+  complaint_images:
+    - "https://oss.llxzu.com/a82b6b90a5ba44268c8dede7b16a4740.jpg?x-oss-process=image/watermark,rotate_320,fill_1,color_FFFFFF,size_24,t_25,text_6Zu26Zu25LqrIDIwMjYtMDYtMjY"
+  coupon_scene: "RENT"
+  revoke_status: "2"
+
+# ==================== 步骤1：商家入驻申请 ====================
+# 注意：name 和 cellphone 由 Python 代码动态生成并注入变量
+step1_merchant_add:
+  case_id: "ALI_001"
+  step_id: "step1_merchant_add"
+  title: "商家入驻申请"
+  description: "调用商家入驻接口，提交商家名称和手机号进行入驻申请，name和cellphone为动态生成数据"
+  method: POST
+  endpoint: "/llxz-api-web/llxz/merchant/add"
+  json:
+    name: "${name}"
+    cellphone: "${cellphone}"
+    customerOrigin: "${customer_origin}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+
+# ==================== 步骤2：小程序发起投诉 ====================
+# 注意：name 和 telphone 由 Python 代码动态生成并注入变量
+step2_add_complaint:
+  case_id: "ALI_002"
+  step_id: "step2_add_complaint"
+  title: "小程序发起投诉"
+  description: "调用投诉接口发起投诉，name和telphone为动态生成数据"
+  method: POST
+  endpoint: "/llxz-api-web/hzsx/aliPay/orderComplaints/addOrderComplaints"
+  json:
+    uid: "${uid}"
+    name: "${complaint_name}"
+    telphone: "${complaint_phone}"
+    content: "${complaint_content}"
+    orderId: "${order_id}"
+    typeId: "${complaint_type_id}"
+    images: ${complaint_images}
+    complaintsCategoryOne: "${complaint_category_one}"
+    complaintsCategoryTwo: "${complaint_category_two}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+
+# ==================== 步骤3：撤销投诉 ====================
+# 注意：id 由 SQL 查询获取，若查不到则跳过（Python 代码处理）
+# SQL: SELECT id FROM llxz_marketing.ct_order_complaints WHERE order_id = '${order_id}' ORDER BY create_time DESC LIMIT 1
+step3_revoke_complaint:
+  case_id: "ALI_003"
+  step_id: "step3_revoke_complaint"
+  title: "撤销投诉"
+  description: "通过SQL查询投诉记录ID，调用撤销投诉接口。若未查询到投诉记录则跳过本用例"
+  method: POST
+  endpoint: "/llxz-api-web/hzsx/aliPay/orderComplaints/updateOrderComplaints"
+  sql:
+    query: "SELECT id FROM llxz_marketing.ct_order_complaints WHERE order_id = '${order_id}' ORDER BY create_time DESC LIMIT 1"
+    column: "complaint_id"
+  json:
+    id: "${complaint_id}"
+    uid: "${uid}"
+    status: "${revoke_status}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+
+# ==================== 步骤4：查看领券中心优惠券信息 ====================
+# 注意：需要在请求头中添加 channelid=008（Python 代码处理）
+# 从响应中提取 couponTemplateDtos 下的所有 id，供步骤5随机选择
+step4_coupon_center:
+  case_id: "ALI_004"
+  step_id: "step4_coupon_center"
+  title: "查看领券中心优惠券信息"
+  description: "查询领券中心优惠券信息，需在请求头中添加channelid=008，并提取优惠券模板ID供下一步使用"
+  method: GET
+  endpoint: "/llxz-api-web/hzsx/aliPay/couponCenter/index"
+  params:
+    uid: "${uid}"
+    scene: "${coupon_scene}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+  extract_vars:
+    - var_name: "coupon_template_ids"
+      path: "$.data.couponList[*].id"
+
+# ==================== 步骤5：小程序端领取优惠券 ====================
+# 注意：phone 由 Python 代码动态生成，templateId 从上一步提取的列表中随机选取
+# 若未获取到 templateId，则跳过本用例
+step5_bind_coupon:
+  case_id: "ALI_005"
+  step_id: "step5_bind_coupon"
+  title: "小程序端领取优惠券"
+  description: "从步骤4获取的优惠券模板ID中随机选取一个进行领取。若未获取到模板ID则跳过本用例"
+  method: POST
+  endpoint: "/llxz-api-web/hzsx/aliPay/couponCenter/bindCoupon"
+  json:
+    uid: "${uid}"
+    phone: "${bind_phone}"
+    templateId: "${template_id}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+    - path: "$.data"
+      operator: "contains"
+      value: "领取成功"

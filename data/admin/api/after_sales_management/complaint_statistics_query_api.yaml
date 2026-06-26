@@ -592,7 +592,7 @@ complaint_statistics_query_tests:
     endpoint: "/hzsx/orderComplaints/getOrderComplaintsShopDetial"
     # 单条 SQL 使用两个子查询（按第3天）并返回多列供断言
     sql:
-      query: |
+      query: >
         SELECT
           COALESCE(o.completed_order_num, 0) AS completed_order_num,
           COALESCE(c.complaint_total_num, 0) AS complaint_total_num,

@@ -186,7 +186,7 @@ class APIClient:
                 try:
                     response_body = resp.text
                     if len(response_body) > 600:
-                        logger.info(f"接口返回结果：{response_body[:600]}")
+                        logger.info(f"接口返回结果：{response_body[:1000]}")
                     else:
                         logger.info(f"接口返回结果：{response_body}")
                 except Exception as e:

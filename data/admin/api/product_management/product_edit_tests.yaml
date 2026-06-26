@@ -1,0 +1,494 @@
+# 运营端 - 商品管理：商品列表-编辑商品测试数据
+# 覆盖场景：长租模式编辑商品、短租模式编辑商品
+# 测试流程：查询商品 → 获取商品详情 → 修改商品信息
+
+variables:
+  channelGroupCode: "001"
+  shopId: "71008738021cd3393bacbac182bd6a86af0b5c86af0b5c87"
+
+# ==================== 长租模式 ====================
+# 步骤1: 查询店铺商品-长租
+step1_query_long_rental:
+  case_id: "PE_001"
+  step_id: "step1_query_long_rental"
+  title: "查询店铺商品-长租"
+  description: "查询长租模式(businessModel=1)已审核商品列表，获取最后一个商品的id"
+  method: POST
+  endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+  json:
+    pageNumber: 1
+    pageSize: 10
+    newAuditState: 2
+    channelGroupCode: "001"
+    sortField: ""
+    sortOrder: ""
+    shopName: "sass人人享租1"
+    type: ""
+    creatTime: null
+    businessModel: "1"
+    updateTimeKssj: ""
+    updateTimeJssj: ""
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.records"
+      operator: "not_empty"
+
+# 步骤2: 获取商品信息-长租
+step2_get_product_detail_long:
+  case_id: "PE_002"
+  step_id: "step2_get_product_detail_long"
+  title: "获取商品信息-长租"
+  description: "根据步骤1获取的商品id，查询商品详情信息"
+  method: GET
+  endpoint: "/hzsx/product/selectProductEdit"
+  params:
+    id: "${product_id_long}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.id"
+      operator: "=="
+      value: "${product_id_long}"
+
+# 步骤3: 修改商品信息-长租
+step3_update_product_long:
+  case_id: "PE_003"
+  step_id: "step3_update_product_long"
+  title: "修改商品信息-长租"
+  description: "编辑长租商品:增加规格3、修改商品名称后缀+自动化测试、修改发货地和归还地址"
+  method: POST
+  endpoint: "/hzsx/product/updateBusProduct"
+  # 使用模板变量,由Python代码动态填充
+  json_template:
+    categoryId: "${categoryId}"
+    thirdCategoryId: "${categoryId}"
+    # 关键修复：categoryIds不能为null，必须是数组（即使是空数组）
+    categoryIds: "${categoryIds}"
+    goodsSort: 0
+    name: "${name}+自动化测试"
+    title: "${title}+自动化测试"
+    operateCategoryId: null
+    oldNewDegree: "${oldNewDegree}"
+    labels: []
+    additionals: null
+    shopAdditionals: []
+    makeOrderServicesIds: "${makeOrderServicesIds}"
+    repairOrderCofigs: null
+    buyOutSupport: "${buyOutSupport}"
+    productSkuses: "${productSkuses_with_spec3}"
+    minRentCycle: "${minRentCycle}"
+    maxRentCycle: "${maxRentCycle}"
+    shopId: null
+    shopName: null
+    shopLogo: null
+    shopScore: null
+    shopStatus: null
+    shopIsLocked: null
+    shopIsDisabled: null
+    shopExtensionStatus: null
+    productStatus: null
+    type: "${type}"
+    detail: "${detail}"
+    province: 110000
+    city: 110100
+    freightType: "${freightType}"
+    freightDay: null
+    addIds: "${addIds}"
+    images: "${images}"
+    sellPoints: "${sellPoints}"
+    subImages: null
+    src: null
+    id: "${id}"
+    productId: "${productId}"
+    salesVolume: null
+    lowestSalePrice: null
+    parameters: []
+    productCouponList: null
+    collected: null
+    specs: "${specs_with_spec3}"
+    serviceTel: null
+    channelGroupCode: "${channelGroupCode}"
+    channelGroupName: null
+    icon: "${icon}"
+    iconType: "${iconType}"
+    speFirstName: "${speFirstName}"
+    speSecName: "${speSecName}"
+    speThirdName: "规格3"
+    showPriceRatio: "${showPriceRatio}"
+    showOriginalPrice: null
+    couponLst: null
+    off: null
+    lockState: "${lockState}"
+    videoUrl: ""
+    videoImages: ""
+    unicomCard: null
+    displayUnicomCard: 0
+    commissionRate: null
+    copyProduct: null
+    customLeaseTerm: "0"
+    firstCustomPrice: null
+    productColorPicture: []
+    productOfDouYin: null
+    rentMoneyOfDouYin: null
+    dealOfDouYin: null
+    operator: null
+    operatorType: null
+    soldStart: null
+    soldEnd: null
+    appointHour: null
+    firstRent: null
+    enjoyFirst: null
+    enjoyFirstPrice: null
+    enjoyPrice: null
+    commonProblem: "${commonProblem}"
+    rentalProcess: "${rentalProcess}"
+    rentalNoticeDescription: null
+    rentalNoticeProcess: null
+    rentalNoticeStandard: null
+    dyDeposit: null
+    opeOrShop: null
+    hasJSQ: null
+    rentOneFree: null
+    repairOrderIds: null
+    productType: "${productType}"
+    zfbCode: null
+    lowPriceskuId: null
+    lowPriceSpecValueIdOne: null
+    lowPriceSpecValueIdSec: null
+    lowPriceSpecValueIdThird: null
+    openQuantitySwitch: null
+    parentCategoryId: null
+    deliveryValidity: null
+    commitments: ""
+    aliPayImages: "${aliPayImages}"
+    shopOnOffLineType: null
+    skuPriceList: null
+    submitType: null
+    itemFineness: null
+    itemFinenessGrade: null
+    whetherSupportFreeDeposit: null
+    whetherContinueRent: null
+    isRentAndReturn: null
+    superRenewalSwitch: null
+    isPresale: null
+    earliestDeliveryTime: null
+    latestDeliveryTime: null
+    productMappingOtherShop: null
+    source: null
+    detailButler: "${detailButler}"
+    businessModel: "1"
+    productCombDtoList: null
+    productSkusInventoryList: []
+    leaseType: 2
+    loginId: null
+    draft: null
+    orderId: null
+    dyFieldDisplay: null
+    customLabels: null
+    customLabelIcons: null
+    serviceStandard: null
+    havePremium: null
+    matchBattery: null
+    matchOther: null
+    detailIntro: null
+    dyErrorMsg: null
+    renewalSwitch: 0
+    operationType: 1
+    userDto: null
+    jdItemBrandCode: null
+    jdItemModelCode: null
+    isPrivateDomain: null
+    jdCategoryId: null
+    jdItemId: null
+    mtItemId: null
+    rankProductDto: null
+    clearOutTime: null
+    copyTarget: null
+    rentNum: null
+    earliestLeaseDays: null
+    mtScopeType: null
+    mtScopeShopList: null
+    spuId: null
+    spuName: null
+    publishMonth: null
+    smartRicing: null
+    showGuiGeAddBtn: true
+    colorSpecs: "${colorSpecs}"
+    address:
+      - "110000"
+      - "110100"
+    iscustomLeaseTerm: "0"
+    spethird:
+      name: "品牌"
+      opeSpecId: 3
+      values:
+        - name: "3"
+          productSpecId: "${spec3_uuid_1}"
+        - name: "33"
+          productSpecId: "${spec3_uuid_2}"
+    isBuyout: 1
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data"
+      operator: "=="
+      value: true
+
+# ==================== 短租模式 ====================
+# 步骤4: 查询店铺商品-短租
+step4_query_short_rental:
+  case_id: "PE_004"
+  step_id: "step4_query_short_rental"
+  title: "查询店铺商品-短租"
+  description: "查询短租模式(businessModel=0)已审核商品列表，获取最后一个商品的id"
+  method: POST
+  endpoint: "/hzsx/examineProduct/selectExaminePoroductList"
+  json:
+    pageNumber: 1
+    pageSize: 10
+    newAuditState: 2
+    channelGroupCode: "001"
+    sortField: ""
+    sortOrder: ""
+    type: ""
+    creatTime: null
+    businessModel: "0"
+    updateTimeKssj: ""
+    updateTimeJssj: ""
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.records"
+      operator: "not_empty"
+
+# 步骤5: 获取商品信息-短租
+step5_get_product_detail_short:
+  case_id: "PE_005"
+  step_id: "step5_get_product_detail_short"
+  title: "获取商品信息-短租"
+  description: "根据步骤4获取的商品id，查询商品详情信息"
+  method: GET
+  endpoint: "/hzsx/product/selectProductEdit"
+  params:
+    id: "${product_id_short}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data.id"
+      operator: "=="
+      value: "${product_id_short}"
+
+# 步骤6: 修改商品信息-短租
+step6_update_product_short:
+  case_id: "PE_006"
+  step_id: "step6_update_product_short"
+  title: "修改商品信息-短租"
+  description: "编辑短租商品:增加规格3、修改日历库存(当前日期往后推15天,库存1000)"
+  method: POST
+  endpoint: "/hzsx/product/updateBusProduct"
+  # 使用模板变量,由Python代码动态填充
+  json_template:
+    categoryId: "${categoryId}"
+    thirdCategoryId: "${categoryId}"
+    categoryIds: "${categoryIds}"
+    goodsSort: 0
+    name: "${name}+自动化测试"
+    title: "${title}+自动化测试"
+    operateCategoryId: null
+    oldNewDegree: "${oldNewDegree}"
+    labels: []
+    additionals: null
+    shopAdditionals: []
+    makeOrderServicesIds: "${makeOrderServicesIds}"
+    repairOrderCofigs: null
+    buyOutSupport: "${buyOutSupport}"
+    productSkuses: "${productSkuses_with_spec3}"
+    minRentCycle: "${minRentCycle}"
+    maxRentCycle: "${maxRentCycle}"
+    shopId: null
+    shopName: null
+    shopLogo: null
+    shopScore: null
+    shopStatus: null
+    shopIsLocked: null
+    shopIsDisabled: null
+    shopExtensionStatus: null
+    productStatus: null
+    type: "${type}"
+    detail: "${detail}"
+    province: "${province}"
+    city: "${city}"
+    freightType: "${freightType}"
+    freightDay: null
+    addIds: "${addIds}"
+    images: "${images}"
+    sellPoints: "${sellPoints}"
+    subImages: null
+    src: null
+    id: "${id}"
+    productId: "${productId}"
+    salesVolume: null
+    lowestSalePrice: null
+    parameters: []
+    productCouponList: null
+    collected: null
+    specs: "${specs_with_spec3}"
+    serviceTel: null
+    channelGroupCode: "${channelGroupCode}"
+    channelGroupName: null
+    icon: null
+    iconType: ""
+    speFirstName: "${speFirstName}"
+    speSecName: "${speSecName}"
+    speThirdName: "规格3"
+    showPriceRatio: "${showPriceRatio}"
+    showOriginalPrice: null
+    couponLst: null
+    off: null
+    lockState: "${lockState}"
+    videoUrl: ""
+    videoImages: ""
+    unicomCard: null
+    displayUnicomCard: 0
+    commissionRate: null
+    copyProduct: null
+    customLeaseTerm: "0"
+    firstCustomPrice: null
+    productColorPicture: []
+    productOfDouYin: null
+    rentMoneyOfDouYin: null
+    dealOfDouYin: null
+    operator: null
+    operatorType: null
+    soldStart: null
+    soldEnd: null
+    appointHour: null
+    firstRent: null
+    enjoyFirst: null
+    enjoyFirstPrice: null
+    enjoyPrice: null
+    commonProblem: null
+    rentalProcess: null
+    rentalNoticeDescription: null
+    rentalNoticeProcess: null
+    rentalNoticeStandard: null
+    dyDeposit: null
+    opeOrShop: null
+    hasJSQ: null
+    rentOneFree: null
+    repairOrderIds: null
+    productType: "${productType}"
+    zfbCode: null
+    lowPriceskuId: null
+    lowPriceSpecValueIdOne: null
+    lowPriceSpecValueIdSec: null
+    lowPriceSpecValueIdThird: null
+    openQuantitySwitch: null
+    parentCategoryId: null
+    deliveryValidity: null
+    commitments: ""
+    aliPayImages: "${aliPayImages}"
+    shopOnOffLineType: null
+    skuPriceList: null
+    submitType: null
+    itemFineness: "${itemFineness}"
+    itemFinenessGrade: null
+    whetherSupportFreeDeposit: ""
+    whetherContinueRent: "1"
+    isRentAndReturn: null
+    superRenewalSwitch: null
+    isPresale: null
+    earliestDeliveryTime: null
+    latestDeliveryTime: null
+    productMappingOtherShop: null
+    source: "${source}"
+    detailButler: "${detailButler}"
+    businessModel: "0"
+    productCombDtoList: null
+    productSkusInventoryList: "${productSkusInventoryList_with_calendar}"
+    leaseType: 2
+    loginId: null
+    draft: null
+    orderId: null
+    dyFieldDisplay: null
+    customLabels: null
+    customLabelIcons: null
+    serviceStandard: null
+    havePremium: null
+    matchBattery: null
+    matchOther: null
+    detailIntro: null
+    dyErrorMsg: null
+    renewalSwitch: 0
+    operationType: 1
+    userDto: null
+    jdItemBrandCode: null
+    jdItemModelCode: null
+    isPrivateDomain: null
+    jdCategoryId: null
+    jdItemId: null
+    mtItemId: null
+    rankProductDto: null
+    clearOutTime: null
+    copyTarget: null
+    rentNum: null
+    earliestLeaseDays: null
+    mtScopeType: null
+    mtScopeShopList: null
+    spuId: null
+    spuName: null
+    publishMonth: null
+    smartRicing: null
+    showGuiGeAddBtn: true
+    colorSpecs: "${colorSpecs}"
+    address:
+      - "${province}"
+      - "${city}"
+    calendar: "${calendar_with_spec3}"
+    iscustomLeaseTerm: "0"
+    spethird:
+      name: "品牌"
+      opeSpecId: 3
+      values:
+        - name: "3"
+          productSpecId: "${spec3_uuid_1}"
+        - name: "33"
+          productSpecId: "${spec3_uuid_2}"
+    isBuyout: 1
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.data"
+      operator: "=="
+      value: true

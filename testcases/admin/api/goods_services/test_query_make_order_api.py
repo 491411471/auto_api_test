@@ -52,9 +52,10 @@ class TestQueryMakeOrder:
         now = datetime.now()
         past_30 = now + timedelta(days=-30)
 
-        # 支付时间范围（日期格式）
-        global_vars["payment_time_start"] = past_30.strftime("%Y-%m-%d")
-        global_vars["payment_time_end"] = now.strftime("%Y-%m-%d")
+        # 支付时间范围：使用日期+时间（开始时分秒为当天 00:00:00，结束为当天 23:59:59）
+        # 这样可以和接口返回的带时间戳的 paymentTime 字符串直接比较（all_between 使用字符串或数值比较）
+        global_vars["payment_time_start"] = past_30.strftime("%Y-%m-%d 00:00:00")
+        global_vars["payment_time_end"] = now.strftime("%Y-%m-%d 23:59:59")
 
         # createDate 是支付日期前一天（ISO 格式，与前端传参一致）
         global_vars["create_date_start"] = (past_30 + timedelta(days=-1)).strftime("%Y-%m-%dT16:00:00.000Z")

@@ -4,9 +4,9 @@
 variables:
   channel_group_code: "001"
   company_name: "福州立租网络科技有限公司"
-  business_license_url: "https://oss.llxzu.com/999bc48b37a64c2984124006be653776.jpg"
+  business_license_url: "https://oss.llxzu.com/5f2f68770de8454bbd1fd0e576ef7618.jpg"
   run_type: "摄影器材及其他租赁"
-  login_timestamp: "91140181606202605"
+  login_timestamp: "23220162606202413"
 
 # ==================== 第一步：获取注册码 ====================
 step1_generate_reg_code:
@@ -21,6 +21,9 @@ step1_generate_reg_code:
     companyName: "${company_name}"
     businessLicenseUrl: "${business_license_url}"
     runType: "${run_type}"
+    zfbCode: "2088123456789012"
+    zfbName: "aqtest合肥品品信息科技有限公司JO"
+    zfbType: 2
   expected_status: 200
   validate_data:
     - path: "$.responseType"

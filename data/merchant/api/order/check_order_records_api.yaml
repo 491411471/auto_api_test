@@ -123,7 +123,7 @@ order_records_tests:
         WHERE shop_id = '${shop_id}' 
         AND uid = '${uid}' 
         AND delete_time IS NULL 
-        AND status IN ('05', '06', '09');
+        AND status IN ('06', '09');
       column: idcard_transaction_order_count
     json:
       orderId: ${order_id}

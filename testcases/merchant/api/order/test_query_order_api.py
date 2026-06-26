@@ -13,7 +13,8 @@ class TestOrderQuery:
     @classmethod
     def _load_global_vars(cls):
         if cls._global_vars is None:
-            cls._global_vars = get_global_variables("query_order_api.yaml")
+            # use the full data file path so variable loader can resolve correctly
+            cls._global_vars = get_global_variables(cls._DATA_FILE)
         return cls._global_vars.copy()
 
     @staticmethod
@@ -31,14 +32,18 @@ class TestOrderQuery:
             "end_date": end_date,
             "start_date_iso": start_date_iso,
             "end_date_iso": end_date_iso,
+            # also provide create_time range variables used by some test cases/YAMLs
+            # format matches backend expectation: "YYYY-MM-DD HH:MM:SS"
+            "create_time_start": (today - timedelta(days=30)).strftime("%Y-%m-%d 00:00:00"),
+            "create_time_end": datetime.now().strftime("%Y-%m-%d 23:59:59"),
         })
         return global_vars
 
     @pytest.mark.smoke
     @pytest.mark.parametrize(
         "case",
-        get_test_data("query_order_api.yaml", "order_query_tests"),
-        ids=[case['case_id'] for case in get_test_data("query_order_api.yaml", "order_query_tests")]
+        get_test_data("data/merchant/api/order/query_order_api.yaml", "order_query_tests"),
+        ids=[case['case_id'] for case in get_test_data("data/merchant/api/order/query_order_api.yaml", "order_query_tests")]
     )
     def test_order_query(self, api_client, db, case):
         # 1. 加载全局变量

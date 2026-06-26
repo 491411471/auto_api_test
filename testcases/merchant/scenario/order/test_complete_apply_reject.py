@@ -4,7 +4,7 @@ import pytest
 import yaml
 import time
 from common.logger import logger
-from .base_complete_apply import BaseCompleteApplyFlow
+from testcases.merchant.scenario.order.base_complete_apply import BaseCompleteApplyFlow
 
 def load_yaml(yaml_path):
     with open(yaml_path, 'r', encoding='utf-8') as f:

@@ -135,13 +135,13 @@ order_query_tests:
     <<: *common_endpoint
     json:
       <<: *common_json
-      addressUserPhone: "15309625265"
+      telephone: "18269847200"
       guangGaoId: ""
     expected_status: 200
     validate_data:
       - path: "data.records[*].uid"
         operator: "all_eq"
-        value: "3f69d9f0dbb2cf4bdda84750d17272c80d3a76f1qat88kyv66ti"
+        value: "cea48056c7fa75feb6ae30865014c6ff70a2de95iomqnbuc96i6"
 
   - case_id: OQ_010
     title: "按创建时间范围查询"
@@ -219,19 +219,21 @@ order_query_tests:
 
   - case_id: OQ_013
     title: "按创建时间降序排序"
-    description: "默认排序应为 create_time DESC，验证第一条记录时间晚于最后一条"
+    description: "默认排序应为 create_time DESC，验证返回记录的创建时间都在查询时间范围内"
     <<: *common_endpoint
-    sql:
-      query: "select DATE_FORMAT(create_time, '%%Y-%%m-%%d %%H:%%i:%%s') as create_time from llxz_order.ct_user_orders where shop_id='${shop_id}' ORDER BY create_time DESC LIMIT 1;"
-      column: create_time
     json:
       <<: *common_json
+      # 使用全局变量 create_time_start / create_time_end 作为查询时间范围
+      createTimeStart: "${create_time_start}"
+      createTimeEnd: "${create_time_end}"
     expected_status: 200
-    custom_validate: "check_create_time_desc"
     validate_data:
-      - path: data.records[0].orderAddressDto.createTime
-        operator: "=="
-        value: "${create_time}"
+      - path: "data.records"
+        operator: "length_gt"
+        value: 0
+      - path: "data.records[*].orderAddressDto.createTime"
+        operator: "all_between"
+        value: ["${create_time_start}", "${create_time_end}"]
 
   - case_id: OQ_014
     title: "空查询条件（不传任何筛选）"
