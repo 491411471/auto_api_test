@@ -1,1 +1,0 @@
-{"total":2,"items":[{"uid":"97db586f75d6c0a13de07b0647acb009","name":"商家端","statistic":{"failed":5,"broken":1,"skipped":2,"passed":22,"unknown":0,"total":30}},{"uid":"aa9a028ed8e724ad6f3c87a7d19176ba","name":"运营端","statistic":{"failed":0,"broken":0,"skipped":0,"passed":5,"unknown":0,"total":5}}]}
