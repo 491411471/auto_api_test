@@ -182,7 +182,13 @@ def validate(actual: Any, operator: str, expected: Any, path: str = "") -> None:
 
     # 字符串相关操作符
     elif operator in ("contains", "in", "IN"):
-        assert expected in str(actual), format_error(f"期望包含 '{expected}', 实际 '{actual}'")
+        # 支持列表期望值：检查所有期望元素是否都在实际列表中
+        if isinstance(expected, list):
+            assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
+            for item in expected:
+                assert item in actual, format_error(f"期望值 {item} 不在实际列表中，实际: {actual}")
+        else:
+            assert expected in str(actual), format_error(f"期望包含 '{expected}', 实际 '{actual}'")
 
     elif operator == "not_contains":
         assert expected not in str(actual), format_error(f"期望不包含 '{expected}', 实际 '{actual}'")
@@ -263,9 +269,15 @@ def validate(actual: Any, operator: str, expected: Any, path: str = "") -> None:
 
     # 列表相关操作符
     elif operator == "all_in":
+        # 检查所有期望值是否都在实际列表中（期望值 ⊆ 实际列表）
         assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
-        for item in actual:
-            assert item in expected, format_error(f"元素 {item} 不在期望集合 {expected} 中")
+        for item in expected:
+            assert item in actual, format_error(f"期望值 {item} 不在实际列表中，实际: {actual}")
+
+    elif operator == "any_in":
+        # 检查实际列表中是否至少有一个元素在期望范围内
+        assert isinstance(actual, list), format_error(f"期望列表, 实际 {type(actual)}")
+        assert any(item in expected for item in actual), format_error(f"实际列表中没有任何元素在期望范围内 {expected}，实际: {actual}")
 
     elif operator == "any_contain":
         if isinstance(actual, list):

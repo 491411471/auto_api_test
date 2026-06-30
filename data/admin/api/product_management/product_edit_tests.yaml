@@ -18,6 +18,7 @@ step1_query_long_rental:
   json:
     pageNumber: 1
     pageSize: 10
+    auditState: 2
     newAuditState: 2
     channelGroupCode: "001"
     sortField: ""
@@ -262,6 +263,7 @@ step4_query_short_rental:
   json:
     pageNumber: 1
     pageSize: 10
+    auditState: 2
     newAuditState: 2
     channelGroupCode: "001"
     sortField: ""

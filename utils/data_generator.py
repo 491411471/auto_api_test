@@ -33,11 +33,12 @@ def generate_test_data(data_type: str, **kwargs):
     生成自动化测试所需的随机数据
     支持类型:
       - cn_phone, cn_name, cn_email, cn_id_card, cn_address, cn_company, alipay_account
-      - uid (返回32位十六进制UUID)
-      - product_title (独立生成商品标题)
-      - product_detail (独立生成商品详情)
-      - product (返回完整商品信息，标题和详情强关联)
+      - uid
+      - product_title, product_detail, product
+      - logistics_no (物流单号字符串)
+      - logistics (完整物流信息字典)
     """
+    # ===== 原有逻辑保持不变 =====
     if data_type == "cn_phone":
         return fake.unique.phone_number() if kwargs.get("unique") else fake.phone_number()
 
@@ -62,39 +63,54 @@ def generate_test_data(data_type: str, **kwargs):
     elif data_type == "uid":
         return uuid.uuid4().hex
 
-    # ---------- 独立生成商品标题（有真实感，但与其他调用不强制关联） ----------
     elif data_type == "product_title":
-        # 每次调用都随机生成一组数据，用于构建标题
         data = _generate_product_data()
-        # 标题格式：成色 + 品牌 + 品类 + 型号 + 特征摘要
-        title = f"{data['condition']}{data['brand']}{data['category']}{data['model']}"
-        # 若传入 length，可控制标题字数（此处简单截断或扩展，但为保持自然，暂不处理）
-        return title
+        return f"{data['condition']}{data['brand']}{data['category']}{data['model']}"
 
-    # ---------- 独立生成商品详情（有真实感，但与其他调用不强制关联） ----------
     elif data_type == "product_detail":
         data = _generate_product_data()
-        # 构建详情段落，包含成色、功能、配件、建议等内容
-        detail = (f"本商品为{data['condition']}，品牌{data['brand']}，型号{data['model']}。"
-                  f"外观保护良好，功能一切正常，附带原装配件。"
-                  f"适合自用或送礼，性价比高。")
-        return detail
+        return f"本商品为{data['condition']}，品牌{data['brand']}，型号{data['model']}。外观保护良好，功能一切正常，附带原装配件。"
 
-    # ---------- 强关联的完整商品信息 ----------
     elif data_type == "product":
         data = _generate_product_data()
-        title = f"{data['condition']} {data['brand']} {data['category']} {data['model']} {random.choice(data['features'])}"
-        detail = (f"本商品为{data['condition']}，品牌{data['brand']}，型号{data['model']}。"
-                  f"外观保护良好，功能一切正常，附带原装配件。"
-                  f"适合自用或送礼，性价比高。")
-        # 同时可返回更多字段
         return {
-            "title": title,
-            "detail": detail,
+            "title": f"{data['condition']} {data['brand']} {data['category']} {data['model']}",
+            "detail": f"本商品为{data['condition']}，品牌{data['brand']}，型号{data['model']}。外观保护良好，功能一切正常。",
             "category": data["category"],
             "brand": data["brand"],
             "condition": data["condition"],
             "price": data["price"]
+        }
+
+    # ========== 新增：极简物流号生成 ==========
+    elif data_type in ("logistics_no", "logistics"):
+        # 快递公司规则：前缀 + 数字长度
+        rules = {
+            "sf":  ("SF", 12),   # 顺丰
+            "zto": ("ZTO", 12),  # 中通
+            "sto": ("STO", 12),  # 申通
+            "yto": ("YTO", 12),  # 圆通
+            "yd":  ("YD", 13),   # 韵达
+            "ems": ("EMS", 13),  # EMS
+        }
+        # 指定公司或随机选一个
+        code = kwargs.get("company", random.choice(list(rules.keys())))
+        prefix, length = rules[code]
+
+        # 生成数字部分（顺丰最后一位当随机数即可，测试环境无需严格校验）
+        number = "".join(random.choices("0123456789", k=length))
+        tracking_no = f"{prefix}{number}"
+
+        # 仅单号
+        if data_type == "logistics_no":
+            return tracking_no
+
+        # 完整信息
+        name_map = {"sf":"顺丰速运","zto":"中通快递","sto":"申通快递","yto":"圆通速递","yd":"韵达快递","ems":"EMS"}
+        return {
+            "company": name_map[code],
+            "company_code": code,
+            "tracking_no": tracking_no
         }
 
     else:
@@ -190,4 +206,4 @@ def generate_random_value(
 
 if __name__ == "__main__":
 
-    print(generate_test_data("cn_address"))
+    print(generate_test_data("logistics_no", company="sf"))

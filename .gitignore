@@ -3,8 +3,8 @@
 logs/
 # Allure 报告源数据
 reports/allure_results/
-# Allure 生成的静态HTML报告
-reports/allure_html/
+# Allure 生成的静态HTML报告 (修改这里，确保递归忽略)
+reports/allure_html/**
 # Pytest 缓存
 .pytest_cache/
 
