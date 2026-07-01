@@ -85,8 +85,8 @@ def admin_api_client():
 def xianyu_api_client():
     """闲鱼店铺 API 客户端（使用 merchant 配置中的 xianyu_token）"""
     cfg = config_manager.get_xianyu_api_client_config()
-    # xianyu 使用 merchant 端的 token 语义，显式注入 endpoint
-    cfg['endpoint'] = 'merchant'
+    # xianyu 使用独立的 endpoint 标识，确保 token 刷新时精准失效，不影响 merchant
+    cfg['endpoint'] = 'xianyu'
     client = APIClient(**cfg)
     logger.info(f"闲鱼店铺 API 客户端初始化完成 (token: {cfg['auth_config']['token'][:10]}...)")
     yield client

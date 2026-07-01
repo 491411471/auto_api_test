@@ -1,0 +1,228 @@
+# 支付宝-小程序 归还商品全流程测试数据
+# 流程：租用中 → 归还商品 → 商家驳回 → 再次归还 → 商家确认归还
+
+variables:
+  uid: "5c26fd969129a46b14a4c01f91e6b4ee56611ba9f6o5yw9l47p9"
+
+# ==================== 步骤1：用户归还商品 ====================
+step1_give_back:
+  case_id: "ALI_ORDER_008"
+  step_id: "step1_give_back"
+  title: "归还商品-用户归还"
+  description: "查询status='06'且is_violation='01'的订单，发起归还商品申请"
+  method: POST
+  endpoint: "/llxz-api-web/hzsx/api/order/giveBack/userOrderBackSubmitConfirm"
+  sql:
+    query: "SELECT status, uid, order_id FROM llxz_order.ct_user_orders WHERE status = '06' AND is_violation = '01' AND shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' AND channel_provenance not in ('6','8')"
+    columns:
+      - order_id
+      - uid
+      - status
+  json:
+    addressId: 784
+    expressId: 1
+    expressNo: "${express_no}"
+    orderId: "${order_id}"
+    uid: "${uid}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.httpStatus"
+      operator: "=="
+      value: 200
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+    - path: "$.data"
+      operator: "=="
+      value: null
+    - path: "$.businessFail"
+      operator: "=="
+      value: false
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.rpcSuccess"
+      operator: "=="
+      value: true
+    - path: "$.rpcFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcTimeout"
+      operator: "=="
+      value: false
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalFail"
+      operator: "=="
+      value: false
+
+# ==================== 步骤2：商家驳回归还 ====================
+step2_reject:
+  case_id: "ALI_ORDER_008"
+  step_id: "step2_reject"
+  title: "归还商品-商家驳回"
+  description: "商家驳回用户的归还申请"
+  method: POST
+  endpoint: "/hzsx/business/order/businessRejectGivebackOrder"
+  json:
+    orderId: "${order_id}"
+    rejectReason: "${reject_reason}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.httpStatus"
+      operator: "=="
+      value: 200
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+    - path: "$.data"
+      operator: "=="
+      value: null
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.businessFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcSuccess"
+      operator: "=="
+      value: true
+    - path: "$.rpcFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcTimeout"
+      operator: "=="
+      value: false
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalFail"
+      operator: "=="
+      value: false
+
+# ==================== 步骤3：再次归还商品 ====================
+step3_give_back_again:
+  case_id: "ALI_ORDER_008"
+  step_id: "step3_give_back_again"
+  title: "归还商品-再次归还"
+  description: "商家驳回后，用户再次发起归还商品申请"
+  method: POST
+  endpoint: "/llxz-api-web/hzsx/api/order/giveBack/userOrderBackSubmitConfirm"
+  json:
+    addressId: 784
+    expressId: 1
+    expressNo: "${express_no_2}"
+    orderId: "${order_id}"
+    uid: "${uid}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.httpStatus"
+      operator: "=="
+      value: 200
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+    - path: "$.data"
+      operator: "=="
+      value: null
+    - path: "$.businessFail"
+      operator: "=="
+      value: false
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.rpcSuccess"
+      operator: "=="
+      value: true
+    - path: "$.rpcFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcTimeout"
+      operator: "=="
+      value: false
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalFail"
+      operator: "=="
+      value: false
+
+# ==================== 步骤4：商家确认归还 ====================
+step4_confirm_give_back:
+  case_id: "ALI_ORDER_008"
+  step_id: "step4_confirm_give_back"
+  title: "归还商品-商家确认归还"
+  description: "商家确认归还，验证订单状态变为08（待结算）"
+  method: GET
+  endpoint: "/hzsx/ope/order/userConfirmGiveBack"
+  params:
+    orderId: "${order_id}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.httpStatus"
+      operator: "=="
+      value: 200
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+    - path: "$.data"
+      operator: "=="
+      value: true
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.businessFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcSuccess"
+      operator: "=="
+      value: true
+    - path: "$.rpcFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcTimeout"
+      operator: "=="
+      value: false
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalFail"
+      operator: "=="
+      value: false

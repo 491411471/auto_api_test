@@ -37,7 +37,10 @@ def replace_placeholders(data: Any, variables: Dict[str, Any]) -> Any:
             placeholder = f"${{{key}}}"
             if data == placeholder:
                 # 递归处理 value（可能包含嵌套占位符）
-                return replace_placeholders(value, variables)
+                # 注意：不强制 str() 转换，保留原始类型（list/dict/int 等）
+                # 仅当值为 None 时转为空字符串
+                result = replace_placeholders(value, variables)
+                return '' if result is None else result
         # 部分匹配替换（可能字符串内嵌多个占位符）
         def replacer(match):
             key = match.group(1)
@@ -399,14 +402,6 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
                 name="断言前可用变量（SQL结果）",
                 attachment_type=allure.attachment_type.TEXT
             )
-        # 检查是否有未替换的占位符
-        validate_data_str = json.dumps(case['validate_data'], ensure_ascii=False, default=str)
-        if '${' in validate_data_str:
-            import re as _re
-            unresolved = _re.findall(r'\$\{([^}]+)\}', validate_data_str)
-            msg = f"以下变量未替换，可能已导致断言失败:\n" + '\n'.join(f'  ${{{v}}}' for v in set(unresolved))
-            logger.warning(msg)
-            allure.attach(msg, name="未替换变量警告", attachment_type=allure.attachment_type.TEXT)
         for idx, v in enumerate(case['validate_data']):
             path = v['path']
             operator = v['operator']
@@ -418,6 +413,13 @@ def validate_response(case: Dict[str, Any], response_data: Dict[str, Any], varia
             if expected is not None and needs_replacement(expected):
                 expected = replace_placeholders(expected, variables)
                 logger.debug(f"断言 {idx+1} 期望值替换: {v['value']} -> {expected}")
+            # 替换后诊断：检查是否仍有未替换的占位符
+            if expected is not None and needs_replacement(expected):
+                import re as _re
+                unresolved = _re.findall(r'\$\{([^}]+)\}', str(expected))
+                if unresolved:
+                    msg = f"断言 {idx+1} 期望值替换后仍存在未替换变量: {', '.join(f'${{{v}}}' for v in set(unresolved))}"
+                    logger.warning(msg)
             # ======================================================
 
             # 特殊处理空 records

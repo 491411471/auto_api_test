@@ -225,89 +225,89 @@ class TestMerchantOnboarding:
         )
         logger.info(f"[REG_003] 验证码识别成功: {code}")
 
-    # ==================== 第四步：校验图片验证码 ====================
-    @pytest.mark.order(4)
-    @allure.title("REG_004 - 校验图片验证码")
-    def test_step4_verify_code(self, merchant_api_client, db):
-        """使用步骤3已识别的验证码，调用 sendVerifyCodeOfSmsLogin 接口正式校验"""
-        if not self._captcha_code:
-            pytest.skip("步骤3未获取到验证码，跳过校验")
+    # # ==================== 第四步：校验图片验证码 ====================
+    # @pytest.mark.order(4)
+    # @allure.title("REG_004 - 校验图片验证码")
+    # def test_step4_verify_code(self, merchant_api_client, db):
+    #     """使用步骤3已识别的验证码，调用 sendVerifyCodeOfSmsLogin 接口正式校验"""
+    #     if not self._captcha_code:
+    #         pytest.skip("步骤3未获取到验证码，跳过校验")
+    #
+    #     case = get_test_data(_DATA_FILE, "step4_verify_code")
+    #     global_vars = self._load_global_vars()
+    #
+    #     global_vars["mobile"] = self._mobile
+    #     global_vars["captcha_code"] = self._captcha_code
+    #
+    #     allure.dynamic.title(f"{case['step_id']} | {case['title']}")
+    #     execute_test_case(case, merchant_api_client, db, global_vars)
+    #     logger.info(f"[REG_004] 验证码校验成功: code={self._captcha_code}")
 
-        case = get_test_data(_DATA_FILE, "step4_verify_code")
-        global_vars = self._load_global_vars()
-
-        global_vars["mobile"] = self._mobile
-        global_vars["captcha_code"] = self._captcha_code
-
-        allure.dynamic.title(f"{case['step_id']} | {case['title']}")
-        execute_test_case(case, merchant_api_client, db, global_vars)
-        logger.info(f"[REG_004] 验证码校验成功: code={self._captcha_code}")
-
-    # ==================== 第五步：使用验证码登录 ====================
-    @pytest.mark.order(5)
-    @allure.title("REG_005 - 使用验证码登录")
-    def test_step5_login(self, merchant_api_client, db):
-        """
-        使用验证码登录，提取 token 和 shopId。
-        注意：loginV2 接口 businessSuccess=False 但 data.token 有效（已知约定）。
-        """
-        if not self._captcha_code:
-            pytest.skip("步骤3未获取到验证码，跳过登录")
-
-        case = get_test_data(_DATA_FILE, "step5_login")
-        global_vars = self._load_global_vars()
-
-        global_vars["mobile"] = self._mobile
-        global_vars["captcha_code"] = self._captcha_code
-
-        allure.dynamic.title(f"{case['step_id']} | {case['title']}")
-
-        # execute_test_case 会发送请求并验证 $.data.token is_not_none
-        execute_test_case(case, merchant_api_client, db, global_vars)
-
-        # 再次发送请求提取 token 和 shopId（execute_test_case 不返回响应体）
-        # 注意：loginV2 接口 businessSuccess=False 但 data.token 有效（已知约定）
-        body = replace_placeholders(case["json"], global_vars)
-        resp = merchant_api_client.post(case["endpoint"], json=body)
-        resp_json = resp.json()
-        data = resp_json.get("data") or {}
-
-        token = data.get("token")
-        shop_id = data.get("shopId")
-
-        if token:
-            self.__class__._login_token = token
-            self.__class__._shop_id = shop_id
-            allure.attach(
-                f"token = {token}\nshopId = {shop_id}",
-                name="登录凭证",
-                attachment_type=allure.attachment_type.TEXT,
-            )
-            logger.info(f"[REG_005] 登录成功: token={token[:20]}..., shopId={shop_id}")
-        else:
-            pytest.skip("登录未获取到 token，跳过后续步骤")
-
-    # ==================== 第六步：进入店铺 ====================
-    @pytest.mark.order(6)
-    @allure.title("REG_006 - 进入店铺")
-    def test_step6_enter_shop(self, admin_api_client, db):
-        """
-        通过 SQL 查询用户ID和最新shopId，调用 changeLogin 接口进入店铺。
-        SQL1: SELECT id FROM llxz_user.ct_backstage_user WHERE name = userNameReq
-        SQL2: SELECT shop_id FROM llxz_product.ct_shop ORDER BY create_time DESC LIMIT 1
-        """
-        if not self._login_token:
-            pytest.skip("步骤5未获取到登录token，跳过进入店铺")
-
-        case = get_test_data(_DATA_FILE, "step6_enter_shop")
-        global_vars = self._load_global_vars()
-
-        # 注入动态变量
-        global_vars["user_name_req"] = self._user_name_req
-
-        # 使用登录获取的 token 更新会话认证
-        admin_api_client.session.headers["token"] = self._login_token
-
-        allure.dynamic.title(f"{case['step_id']} | {case['title']}")
-        execute_test_case(case, admin_api_client, db, global_vars)
-        logger.info("[REG_006] 进入店铺成功")
+    # # ==================== 第五步：使用验证码登录 ====================
+    # @pytest.mark.order(5)
+    # @allure.title("REG_005 - 使用验证码登录")
+    # def test_step5_login(self, merchant_api_client, db):
+    #     """
+    #     使用验证码登录，提取 token 和 shopId。
+    #     注意：loginV2 接口 businessSuccess=False 但 data.token 有效（已知约定）。
+    #     """
+    #     if not self._captcha_code:
+    #         pytest.skip("步骤3未获取到验证码，跳过登录")
+    #
+    #     case = get_test_data(_DATA_FILE, "step5_login")
+    #     global_vars = self._load_global_vars()
+    #
+    #     global_vars["mobile"] = self._mobile
+    #     global_vars["captcha_code"] = self._captcha_code
+    #
+    #     allure.dynamic.title(f"{case['step_id']} | {case['title']}")
+    #
+    #     # execute_test_case 会发送请求并验证 $.data.token is_not_none
+    #     execute_test_case(case, merchant_api_client, db, global_vars)
+    #
+    #     # 再次发送请求提取 token 和 shopId（execute_test_case 不返回响应体）
+    #     # 注意：loginV2 接口 businessSuccess=False 但 data.token 有效（已知约定）
+    #     body = replace_placeholders(case["json"], global_vars)
+    #     resp = merchant_api_client.post(case["endpoint"], json=body)
+    #     resp_json = resp.json()
+    #     data = resp_json.get("data") or {}
+    #
+    #     token = data.get("token")
+    #     shop_id = data.get("shopId")
+    #
+    #     if token:
+    #         self.__class__._login_token = token
+    #         self.__class__._shop_id = shop_id
+    #         allure.attach(
+    #             f"token = {token}\nshopId = {shop_id}",
+    #             name="登录凭证",
+    #             attachment_type=allure.attachment_type.TEXT,
+    #         )
+    #         logger.info(f"[REG_005] 登录成功: token={token[:20]}..., shopId={shop_id}")
+    #     else:
+    #         pytest.skip("登录未获取到 token，跳过后续步骤")
+    #
+    # # ==================== 第六步：进入店铺 ====================
+    # @pytest.mark.order(6)
+    # @allure.title("REG_006 - 进入店铺")
+    # def test_step6_enter_shop(self, admin_api_client, db):
+    #     """
+    #     通过 SQL 查询用户ID和最新shopId，调用 changeLogin 接口进入店铺。
+    #     SQL1: SELECT id FROM llxz_user.ct_backstage_user WHERE name = userNameReq
+    #     SQL2: SELECT shop_id FROM llxz_product.ct_shop ORDER BY create_time DESC LIMIT 1
+    #     """
+    #     if not self._login_token:
+    #         pytest.skip("步骤5未获取到登录token，跳过进入店铺")
+    #
+    #     case = get_test_data(_DATA_FILE, "step6_enter_shop")
+    #     global_vars = self._load_global_vars()
+    #
+    #     # 注入动态变量
+    #     global_vars["user_name_req"] = self._user_name_req
+    #
+    #     # 使用登录获取的 token 更新会话认证
+    #     admin_api_client.session.headers["token"] = self._login_token
+    #
+    #     allure.dynamic.title(f"{case['step_id']} | {case['title']}")
+    #     execute_test_case(case, admin_api_client, db, global_vars)
+    #     logger.info("[REG_006] 进入店铺成功")

@@ -41,6 +41,11 @@ class APIClient:
         '登录已过期',
         'token已过期',
         'token无效',
+        '该账号在别处登录',
+        '别处登录',
+        '账号被踢下线',
+        '登录失效',
+        '请重新登录',
     ]
 
     def __init__(
@@ -62,10 +67,11 @@ class APIClient:
         self.retry_patterns = retry_patterns or self.DEFAULT_RETRY_PATTERNS
         self.session = requests.Session()
         self._last_request_time = 0.0  # 上次请求时间戳
-        self._endpoint = endpoint  # 终端类型（admin/merchant），用于 token 刷新
+        self._endpoint = endpoint  # 终端类型（admin/merchant/xianyu），用于 token 精准刷新
         self._auth_type = auth_type
         self._auth_config = auth_config or {}
-        self._token_refreshed = False  # 标记本次会话是否已刷新过 token（避免无限循环）
+        self._token_refresh_count = 0  # token 刷新次数（允许最多 3 次，防止死循环）
+        self._max_token_refresh = 3
 
         # 配置认证
         self._apply_auth(auth_type, auth_config)
@@ -90,7 +96,8 @@ class APIClient:
 
     def _refresh_token(self):
         """
-        刷新 token：清空缓存 → 重新登录获取 → 更新 session headers。
+        精准刷新当前 endpoint 的 token：仅失效当前端的缓存 → 重新登录 → 更新 session headers。
+        不影响其他端（merchant/admin/xianyu）的有效 token。
         仅当 endpoint 已配置时才能刷新。返回 True 表示刷新成功。
         """
         if not self._endpoint:
@@ -101,12 +108,17 @@ class APIClient:
             from common.token_provider import TokenProvider
             from common.config_manager import config_manager
 
-            # 1. 清空 TokenProvider 缓存
-            TokenProvider.clear_cache()
-            logger.info(f"[Token刷新] 已清空 TokenProvider 缓存")
+            # 1. 精准失效当前 endpoint 对应的 token 缓存（不影响其他端）
+            cache_key_map = TokenProvider.ENDPOINT_CACHE_KEY_MAP
+            cache_key = cache_key_map.get(self._endpoint, self._endpoint)
+            TokenProvider.invalidate_token(cache_key)
+            logger.info(f"[Token刷新] 已精准失效 {self._endpoint}({cache_key}) 的 token 缓存")
 
-            # 2. 从 config_manager 获取新配置（会触发重新登录）
-            new_cfg = config_manager.get_api_client_config(endpoint=self._endpoint)
+            # 2. 从 config_manager 获取新配置（会触发仅当前端的重新登录）
+            if self._endpoint == 'xianyu':
+                new_cfg = config_manager.get_xianyu_api_client_config()
+            else:
+                new_cfg = config_manager.get_api_client_config(endpoint=self._endpoint)
             new_auth_config = new_cfg.get('auth_config', {})
 
             # 3. 更新 session headers
@@ -114,7 +126,7 @@ class APIClient:
             self._apply_auth(new_cfg.get('auth_type'), new_auth_config)
 
             new_token = new_auth_config.get('value') or new_auth_config.get('token', '')
-            logger.info(f"[Token刷新] token 刷新成功: {new_token[:16]}..." if new_token else "[Token刷新] token 刷新完成")
+            logger.info(f"[Token刷新] {self._endpoint} token 刷新成功: {new_token[:16]}..." if new_token else f"[Token刷新] {self._endpoint} token 刷新完成")
             allure.attach(
                 f"endpoint={self._endpoint}\nnew_token={new_token[:16]}...",
                 name="Token 自动刷新",
@@ -122,7 +134,7 @@ class APIClient:
             )
             return True
         except Exception as e:
-            logger.error(f"[Token刷新] token 刷新失败: {e}")
+            logger.error(f"[Token刷新] {self._endpoint} token 刷新失败: {e}")
             return False
 
     def _is_login_invalid(self, response_json: dict) -> bool:
@@ -198,11 +210,11 @@ class APIClient:
                     error_message = str(response_json.get('errorMessage', '') or '')
 
                     # —— 优先检测登录失效 ——
-                    if self._is_login_invalid(response_json) and not self._token_refreshed:
+                    if self._is_login_invalid(response_json) and self._token_refresh_count < self._max_token_refresh:
                         error_detail = response_json.get('code', '') or response_json.get('errorMsg', '')
-                        logger.warning(f"[Token刷新] 检测到登录失效: {error_detail}，尝试刷新 token 并重试")
+                        logger.warning(f"[Token刷新] 检测到登录失效: {error_detail}，尝试精准刷新 {self._endpoint} token (第{self._token_refresh_count+1}次)")
                         if self._refresh_token():
-                            self._token_refreshed = True  # 仅允许刷新一次，防止无限循环
+                            self._token_refresh_count += 1
                             self._last_request_time = time.time() - self.request_interval
                             continue  # 用新 token 重试
                         else:

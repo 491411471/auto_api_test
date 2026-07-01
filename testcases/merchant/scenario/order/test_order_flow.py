@@ -5,6 +5,7 @@ import yaml
 import random
 import pytest
 from common.logger import logger
+from common.test_helpers import replace_placeholders
 from testcases.conftest import admin_api_client
 from utils.variable_utils import validate, get_value_by_path
 
@@ -29,7 +30,7 @@ class TestOrderFlow:
             try:
                 # 获取 SQL 模板并替换占位符
                 sql_template = config['merchant']['query_order_sql']
-                sql = sql_template.replace('${shop_id}', shop_id)
+                sql = replace_placeholders(sql_template, base_vars)
                 
                 # 附加 SQL 语句到 Allure 报告
                 allure.attach(sql, "查询订单-SQL语句", allure.attachment_type.TEXT)
@@ -305,11 +306,8 @@ class TestOrderFlow:
             for check in verify_cfg['validate']:
                 path = check['path'].lstrip('$').lstrip('.')
                 actual = get_value_by_path(resp_json, path)
-                # 如果 value 中包含 ${expected_renting_status}，需提前替换
-                expected = check['value']
-                if isinstance(expected, str) and expected.startswith('${'):
-                    # 支持从全局变量读取实际期望状态，例如 env 配置
-                    expected = global_vars.get(expected.strip('${}'), expected)
+                # 使用 replace_placeholders 统一处理占位符替换
+                expected = replace_placeholders(check['value'], global_vars)
                 validate(actual, check['operator'], expected, path)
 
             actual_status = get_value_by_path(resp_json, 'data.records[0].status')

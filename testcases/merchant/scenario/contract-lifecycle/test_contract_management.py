@@ -13,6 +13,7 @@ import pytest
 import yaml
 import os
 from common.logger import logger
+from common.test_helpers import replace_placeholders
 from utils.data_loader import get_test_data, get_global_variables
 from utils.variable_utils import validate, get_value_by_path
 
@@ -114,7 +115,7 @@ class TestContractManagement:
         Returns:
             记录ID
         """
-        query_sql = sql_template.replace('${shop_id}', shop_id)
+        query_sql = replace_placeholders(sql_template, {"shop_id": shop_id})
         
         # 记录SQL
         allure.attach(
@@ -230,7 +231,7 @@ class TestContractManagement:
         Returns:
             实际状态值
         """
-        verify_sql = sql_template.replace('${log_id}', str(log_id))
+        verify_sql = replace_placeholders(sql_template, {"log_id": log_id})
         
         # 记录SQL
         allure.attach(

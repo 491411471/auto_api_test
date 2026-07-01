@@ -2,6 +2,7 @@ import allure
 import os
 from common.logger import logger
 import json
+from common.test_helpers import replace_placeholders
 
 class BaseCompleteApplyFlow:
     """订单完结申请流程的公共操作"""
@@ -13,9 +14,7 @@ class BaseCompleteApplyFlow:
         返回 (order_id, voucher_url)
         """
         with allure.step("1. 从数据库查询可完结的订单号"):
-            sql = (config['merchant']['query_order_sql']
-                   .replace('${shop_id}', variables['shop_id'])
-                   .replace('${excluded_order_id}', variables.get('excluded_order_id', '')))
+            sql = replace_placeholders(config['merchant']['query_order_sql'], variables)
             result = db.fetch_one(sql)
             if result is None:
                 logger.warning("未查询到可完结的订单，返回空结果")

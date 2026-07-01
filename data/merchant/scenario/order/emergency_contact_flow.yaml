@@ -4,7 +4,7 @@ description: "识别新增紧急联系人信息 → 保存新增紧急联系人 
 
 variables:
   excluded_order_id: "008OI202606022061759565939113984T"  # 续租测试专用订单，需排除
-  excluded_order_id_2: "008OI202603272037419008738381824T"  # 续租还款测试专用订单，需排除
+  excluded_order_id_2: "${test_order_id}"  # 续租还款测试专用订单，需排除
 
 # 测试订单配置
 test_order:

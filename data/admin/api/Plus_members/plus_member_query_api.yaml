@@ -1,0 +1,251 @@
+# 运营端 - Plus会员订单管理测试数据
+# 接口：POST /hzsx/membership/queryMemberShipPage
+# 接口：POST /hzsx/membership/queryMemberShipList
+# 接口：POST /hzsx/membership/updateMemberAmount
+
+variables:
+  channelGroupCode: "001"
+
+# ==================== 公共锚点 ====================
+.common_page_endpoint: &common_page_endpoint
+  method: POST
+  endpoint: "/hzsx/membership/queryMemberShipPage"
+
+.common_list_endpoint: &common_list_endpoint
+  method: POST
+  endpoint: "/hzsx/membership/queryMemberShipList"
+
+.common_update_endpoint: &common_update_endpoint
+  method: POST
+  endpoint: "/hzsx/membership/updateMemberAmount"
+
+.common_page_json: &common_page_json
+  pageNum: 1
+  pageSize: 100
+
+# ==================== 测试用例1: 以关联渠道为查询条件 ====================
+plus_member_channel_query_tests:
+  - case_id: "PM_001"
+    title: "以关联渠道为查询条件"
+    description: "使用渠道编码'008'查询Plus会员订单，验证所有返回结果的channelName包含该渠道"
+    <<: *common_page_endpoint
+    json:
+      <<: *common_page_json
+      channel: "008"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].channelName"
+        operator: "contains"
+        value: "零零享-支付宝"
+
+# ==================== 测试用例2: 以用户名为查询条件 ====================
+plus_member_username_query_tests:
+  - case_id: "PM_002"
+    title: "以用户名为查询条件"
+    description: "使用用户名'刘爱强'查询Plus会员订单，验证所有返回结果的userName匹配，无数据时跳过"
+    <<: *common_page_endpoint
+    json:
+      <<: *common_page_json
+      userName: "陆玉"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].userName"
+        operator: "all_eq"
+        value: "陆玉"
+
+# ==================== 测试用例3: 以商户为查询条件 ====================
+plus_member_shop_query_tests:
+  - case_id: "PM_003"
+    title: "以商户为查询条件"
+    description: "使用商户ID查询Plus会员订单，验证所有返回结果的shopId匹配"
+    <<: *common_page_endpoint
+    json:
+      <<: *common_page_json
+      shopId: "71008738021cd3393bacbac182bd6a86af0b5c87"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].shopId"
+        operator: "all_eq"
+        value: "71008738021cd3393bacbac182bd6a86af0b5c87"
+
+# ==================== 测试用例4: 以购买状态-已支付为查询条件 ====================
+plus_member_paid_status_tests:
+  # 步骤1: 查询第一页已支付订单列表（用于验证单页数据正确性）
+  - case_id: "PM_004_01"
+    title: "查询第一页已支付订单列表"
+    description: "查询支付状态为已支付(payStatus=01)的订单列表，验证单页数据正确性"
+    <<: *common_page_endpoint
+    json:
+      <<: *common_page_json
+      payStatus: "01"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].status"
+        operator: "all_eq"
+        value: "01"
+
+  # 步骤2: 循环查询所有页并计算总金额，与汇总接口比对
+  - case_id: "PM_004_02"
+    title: "循环查询所有页已支付订单并验证金额汇总"
+    description: "循环调用分页接口查询所有已支付订单，计算amount总和，与queryMemberShipList接口的paidAmount进行等值断言"
+    <<: *common_list_endpoint
+    json:
+      payStatus: "01"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.paidAmount"
+        operator: "exists"
+        value: true
+
+# ==================== 测试用例5: 以购买状态-已支付、已退款为查询条件 ====================
+plus_member_paid_refunded_query_tests:
+  - case_id: "PM_005"
+    title: "以购买状态-已支付、已退款为查询条件"
+    description: "查询支付状态为已支付或已退款(payStatus=01,04)的订单，验证status字段值在指定范围内"
+    <<: *common_page_endpoint
+    json:
+      <<: *common_page_json
+      payStatus: "01,04"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].status"
+        operator: "any_in"
+        value: ["01", "04"]
+
+# ==================== 测试用例6: 以购买状态-已退款为查询条件 ====================
+plus_member_refunded_status_tests:
+  # 步骤1: 查询第一页已退款订单列表
+  - case_id: "PM_006_01"
+    title: "查询第一页已退款订单列表"
+    description: "查询支付状态为已退款(payStatus=04)的订单列表，验证单页数据正确性"
+    <<: *common_page_endpoint
+    json:
+      <<: *common_page_json
+      payStatus: "04"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].status"
+        operator: "any_in"
+        value: ["01", "04"]
+
+  # 步骤2: 循环查询所有页已退款订单并验证金额汇总
+  - case_id: "PM_006_02"
+    title: "循环查询所有页已退款订单并验证金额汇总"
+    description: "循环调用分页接口查询所有已退款订单，计算amount总和，与queryMemberShipList接口的refundAmount进行等值断言"
+    <<: *common_list_endpoint
+    json:
+      payStatus: "04"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.refundAmount"
+        operator: "exists"
+        value: true
+
+# ==================== 测试用例7: 以购买状态-待支付为查询条件 ====================
+plus_member_unpaid_status_tests:
+  - case_id: "PM_007"
+    title: "以购买状态-待支付为查询条件"
+    description: "查询支付状态为待支付(payStatus=00)的订单，验证所有返回结果的status=00"
+    <<: *common_page_endpoint
+    json:
+      <<: *common_page_json
+      payStatus: "00"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data.records[*].status"
+        operator: "all_eq"
+        value: "00"
+
+# ==================== 测试用例8: 会议Plus-修改价格 ====================
+plus_member_update_price_tests:
+  - case_id: "PM_008"
+    title: "会员Plus-修改价格"
+    description: "从数据库获取最新的Plus会员价格记录ID，并更新为随机金额，验证数据库更新成功"
+    <<: *common_update_endpoint
+    sql:
+      - query: >
+          SELECT id 
+          FROM llxz_components.ct_alipay_membership_pay 
+          ORDER BY create_time DESC 
+          LIMIT 1
+        column: "id"
+    json:
+      id: "${id}"
+      amount: "${random_float_1_100}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.data"
+        operator: "=="
+        value: true
+    post_sql:
+      - query: >
+          SELECT amount
+          FROM llxz_components.ct_alipay_membership_pay
+          WHERE id = '${id}'
+        column: "amount"
+        expected_value: "${random_float_1_100}"
+        expected_operator: "=="
+    extract_vars:
+      - var_name: "updated_amount"
+        path: "$.data"
+        default: ""

@@ -6,6 +6,7 @@ import random
 import time
 import json
 from common.logger import logger
+from common.test_helpers import replace_placeholders
 
 
 def load_yaml(yaml_path):
@@ -49,7 +50,7 @@ class TestRepairOrder:
 
                 # 构建SQL，排除已尝试的订单
                 sql_template = config['merchant']['query_order_sql']
-                sql = sql_template.replace('${shop_id}', shop_id)
+                sql = replace_placeholders(sql_template, base_vars)
 
                 if tried_order_ids:
                     # 安全地添加 NOT IN 条件，必须在 ORDER BY 之前

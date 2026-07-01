@@ -4,7 +4,7 @@
 
 variables:
   exclude_order_id: "008OI202606022061759565939113984T"
-  excluded_order_id_2: "008OI202603272037419008738381824T"  # 续租还款测试专用订单，需排除
+  excluded_order_id_2: "${test_order_id}"  # 续租还款测试专用订单，需排除
 
 admin_close_order_tests:
   - case_id: "CO_001"

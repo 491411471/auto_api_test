@@ -7,7 +7,7 @@
 variables:
   shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"
   # 待测试的订单号（可替换为其他可续租订单）
-  order_id: "008OI202603272037419008738381824T"
+  order_id: "${test_order_id}"  # 引用全局测试订单号（集中定义于 config/settings.yaml）
 
 merchant:
 

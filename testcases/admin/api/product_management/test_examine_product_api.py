@@ -124,11 +124,12 @@ class TestExamineProductQuery:
             pytest.skip(skip_msg)
 
         # 6. 随机选取一条商品记录，提取关键字段
+        # 强制转为字符串，确保后续 ${product_name} 等占位符替换时类型一致
         selected = random.choice(records)
-        self.__class__._product_name = selected["name"]
-        self.__class__._product_id = selected["productId"]
-        self.__class__._shop_id = selected["shopId"]
-        self.__class__._shop_name = selected["shopName"]
+        self.__class__._product_name = str(selected["name"])
+        self.__class__._product_id = str(selected["productId"])
+        self.__class__._shop_id = str(selected["shopId"])
+        self.__class__._shop_name = str(selected["shopName"])
 
         extracted_info = (
             f"商品名称: {self._product_name}\n"

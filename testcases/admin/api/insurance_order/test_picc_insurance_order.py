@@ -136,8 +136,9 @@ class TestPiccInsuranceOrder:
             pytest.skip(skip_msg)
 
         # 6. 提取变量（对应 YAML 中 extract_vars 配置）
-        self.__class__._extracted_order_id = records[0]["orderId"]
-        self.__class__._extracted_record_id = records[0]["id"]
+        # 强制转为字符串，确保后续 ${dynamic_order_id} 占位符替换时类型一致
+        self.__class__._extracted_order_id = str(records[0]["orderId"])
+        self.__class__._extracted_record_id = str(records[0]["id"])
         logger.info(
             f"提取 dynamic_order_id={self._extracted_order_id}, "
             f"dynamic_record_id={self._extracted_record_id}"

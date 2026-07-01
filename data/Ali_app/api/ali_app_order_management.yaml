@@ -1,0 +1,397 @@
+# 支付宝-小程序 订单管理 接口自动化测试数据
+# 包含7个测试用例：申请修改结算单 → 修改归还物流信息 → 查询不同状态订单数
+
+variables:
+  uid: "5c26fd969129a46b14a4c01f91e6b4ee56611ba9f6o5yw9l47p9"
+
+# ==================== 测试用例1：申请修改结算单（步骤1） ====================
+step1_modify_settlement:
+  case_id: "ALI_ORDER_001"
+  step_id: "step1_modify_settlement"
+  title: "申请修改结算单"
+  description: "查询待结算的订单（status IN '07','08'，channel_id='008'），调用修改结算单接口"
+  method: POST
+  endpoint: "/llxz-api-web/hzsx/api/order/settlement/userModifySettlementApply"
+  json:
+    orderId: "008OI202603192034538744749965312T"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.httpStatus"
+      operator: "=="
+      value: 200
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+    - path: "$.data"
+      operator: "=="
+      value: null
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.businessFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcSuccess"
+      operator: "=="
+      value: true
+    - path: "$.rpcFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcTimeout"
+      operator: "=="
+      value: false
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalFail"
+      operator: "=="
+      value: false
+
+# ==================== 测试用例2：修改归还物流信息 ====================
+# 注意：unrentExpressNo 由 Python 代码通过 generate_test_data("logistics_no") 动态生成
+step2_update_back_express:
+  case_id: "ALI_ORDER_002"
+  step_id: "step2_update_back_express"
+  title: "修改归还物流信息"
+  description: "查询待结算订单（LIMIT 1,1取第二条），动态生成物流单号，更新归还物流信息"
+  method: POST
+  endpoint: "/llxz-api-web/hzsx/api/components/updateBackExpressInfo"
+  json:
+    orderId: "008OI202603192034538744749965312T"
+    unrentExpressId: 1
+    unrentExpressNo: "${logistics_no}"
+    uid: "${uid}"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.httpStatus"
+      operator: "=="
+      value: 200
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+    - path: "$.data"
+      operator: "=="
+      value: true
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.businessFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcSuccess"
+      operator: "=="
+      value: true
+    - path: "$.rpcFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcTimeout"
+      operator: "=="
+      value: false
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalFail"
+      operator: "=="
+      value: false
+
+# ==================== 测试用例3-7：按不同状态查询订单数（参数化） ====================
+# 共用端点：支付宝小程序订单列表查询
+# 所有用例均需在请求头中添加 channelid=008
+order_query_cases:
+  # ========== 测试用例3：查询待发货订单数 ==========
+  - case_id: "ALI_ORDER_003"
+    title: "查询待发货订单数"
+    description: "查询状态为PENDING_DEAL（待支付/代发货）的订单，验证至少返回1条记录"
+    method: POST
+    endpoint: "/llxz-api-web/hzsx/api/order/userOrderList"
+    json:
+      status:
+        - "PENDING_DEAL"
+      pageNumber: 1
+      pageSize: 10
+      overDueQueryFlag: false
+      channelIdList:
+        - "008"
+      statusList:
+        - "04"
+      uid: "${uid}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorCode"
+        operator: "=="
+        value: null
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.businessFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcSuccess"
+        operator: "=="
+        value: true
+      - path: "$.rpcFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcTimeout"
+        operator: "=="
+        value: false
+      - path: "$.finalSuccess"
+        operator: "=="
+        value: true
+      - path: "$.finalFail"
+        operator: "=="
+        value: false
+      - path: "$.data.records[*]"
+        operator: "length_gt"
+        value: 0
+
+  # ========== 测试用例4：查询待收货订单数 ==========
+  - case_id: "ALI_ORDER_004"
+    title: "查询待收货订单数"
+    description: "查询状态为WAITING_USER_RECEIVE_CONFIRM（待收货）的订单，验证至少返回1条记录"
+    method: POST
+    endpoint: "/llxz-api-web/hzsx/api/order/userOrderList"
+    json:
+      status:
+        - "WAITING_USER_RECEIVE_CONFIRM"
+      pageNumber: 1
+      pageSize: 10
+      overDueQueryFlag: false
+      channelIdList:
+        - "008"
+      statusList:
+        - "05"
+      uid: "${uid}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorCode"
+        operator: "=="
+        value: null
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.businessFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcSuccess"
+        operator: "=="
+        value: true
+      - path: "$.rpcFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcTimeout"
+        operator: "=="
+        value: false
+      - path: "$.finalSuccess"
+        operator: "=="
+        value: true
+      - path: "$.finalFail"
+        operator: "=="
+        value: false
+      - path: "$.data.records[*]"
+        operator: "length_gt"
+        value: 0
+
+  # ========== 测试用例5：查询租用中订单数 ==========
+  - case_id: "ALI_ORDER_005"
+    title: "查询租用中订单数"
+    description: "查询状态为RENTING（租用中）的订单，验证至少返回1条记录"
+    method: POST
+    endpoint: "/llxz-api-web/hzsx/api/order/userOrderList"
+    json:
+      status:
+        - "RENTING"
+      pageNumber: 1
+      pageSize: 10
+      overDueQueryFlag: false
+      channelIdList:
+        - "008"
+      statusList:
+        - "06"
+      uid: "${uid}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorCode"
+        operator: "=="
+        value: null
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.businessFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcSuccess"
+        operator: "=="
+        value: true
+      - path: "$.rpcFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcTimeout"
+        operator: "=="
+        value: false
+      - path: "$.finalSuccess"
+        operator: "=="
+        value: true
+      - path: "$.finalFail"
+        operator: "=="
+        value: false
+      - path: "$.data.records[*]"
+        operator: "length_gt"
+        value: 0
+
+  # ========== 测试用例6：查询待结算订单数 ==========
+  - case_id: "ALI_ORDER_006"
+    title: "查询待结算订单数"
+    description: "查询状态为WAITING_SETTLEMENT/WAITING_CONFIRM_SETTLEMENT/WAITING_SETTLEMENT_PAYMENT的订单"
+    method: POST
+    endpoint: "/llxz-api-web/hzsx/api/order/userOrderList"
+    json:
+      status:
+        - "WAITING_SETTLEMENT"
+        - "WAITING_CONFIRM_SETTLEMENT"
+        - "WAITING_SETTLEMENT_PAYMENT"
+      pageNumber: 1
+      pageSize: 10
+      overDueQueryFlag: false
+      channelIdList:
+        - "008"
+      statusList:
+        - "07"
+        - "WAITING_CONFIRM_SETTLEMENT"
+        - "08"
+      uid: "${uid}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorCode"
+        operator: "=="
+        value: null
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.businessFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcSuccess"
+        operator: "=="
+        value: true
+      - path: "$.rpcFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcTimeout"
+        operator: "=="
+        value: false
+      - path: "$.finalSuccess"
+        operator: "=="
+        value: true
+      - path: "$.finalFail"
+        operator: "=="
+        value: false
+      - path: "$.data.records[*]"
+        operator: "length_gt"
+        value: 0
+
+  # ========== 测试用例7：查询全部订单数 ==========
+  - case_id: "ALI_ORDER_007"
+    title: "查询全部订单数"
+    description: "不限定状态，查询全部订单，验证至少返回1条记录"
+    method: POST
+    endpoint: "/llxz-api-web/hzsx/api/order/userOrderList"
+    json:
+      pageNumber: 1
+      pageSize: 10
+      overDueQueryFlag: false
+      channelIdList:
+        - "008"
+      uid: "${uid}"
+    expected_status: 200
+    validate_data:
+      - path: "$.rpcResult"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.responseType"
+        operator: "=="
+        value: "SUCCESS"
+      - path: "$.errorCode"
+        operator: "=="
+        value: null
+      - path: "$.errorMessage"
+        operator: "=="
+        value: null
+      - path: "$.businessSuccess"
+        operator: "=="
+        value: true
+      - path: "$.businessFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcSuccess"
+        operator: "=="
+        value: true
+      - path: "$.rpcFail"
+        operator: "=="
+        value: false
+      - path: "$.rpcTimeout"
+        operator: "=="
+        value: false
+      - path: "$.finalSuccess"
+        operator: "=="
+        value: true
+      - path: "$.finalFail"
+        operator: "=="
+        value: false
+      - path: "$.data.records[*]"
+        operator: "length_gt"
+        value: 0

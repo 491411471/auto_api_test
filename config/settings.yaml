@@ -9,6 +9,8 @@ environments:
   test:
     shop_id: "71008738021cd3393bacbac182bd6a86af0b5c87"  # 商家端测试环境公用
     base_url: "https://test.llxzu.com"
+    # 全局测试订单号（集中管理，所有用例统一引用，修改此处即可全局生效）
+    test_order_id: "008OI202606252070050844371030016T"
 
     # 动态登录配置（auto_login=true 时自动调用登录接口获取 token，忽略下方硬编码 value）
     auto_login: true
