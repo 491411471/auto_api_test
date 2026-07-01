@@ -1,0 +1,218 @@
+# 支付宝-小程序 下单+人脸+签约 接口自动化测试数据
+#
+# 设计：
+#   步骤1：真实创单（调用公司自研创单接口 /llxz-api-web/hzsx/api/order/userSubmitOrder）→ orderId
+#   步骤2：Mock人脸识别（模拟第三方人脸核验，携带orderId上下文）→ faceToken
+#   步骤3：Mock支付宝签约（模拟第三方签约，携带orderId+faceToken上下文）→ agreementNo
+#   步骤4：签约回调（模拟支付宝异步通知）→ 验证订单状态更新(没有签约实际上订单状态也没有变化)
+
+# 测试用例：
+#   测试用例1: 正常下单+人脸+签约全流程（4步：真实创单→Mock人脸→Mock签约→签约回调）
+
+variables:
+  user_id: "test_user_001"
+  product_id: "test_product_001"
+  # 创单接口需要的动态日期占位符，由测试代码运行时注入：
+  #   ${biz_no}         - 业务流水号（_generate_biz_no()生成）
+  #   ${start_date}     - 当前日期，格式 yyyy-MM-dd
+  #   ${end_date}       - 当前日期，格式 yyyy-MM-dd
+  #   ${estimate_start} - 当前日期+3天，格式 yyyy-MM-dd
+  #   ${estimate_end}   - 当前日期+3天，格式 yyyy-MM-dd
+
+# ==================== 步骤1：真实创单（调用公司自研创单接口 /llxz-api-web/hzsx/api/order/userSubmitOrder） ====================
+step1_create_order:
+  case_id: "ALI_FACE_001"
+  step_id: "step1_create_order"
+  title: "真实创单-调用userSubmitOrder接口创建订单"
+  description: "调用公司自研创单接口（被测范围），使用真实用户数据创建订单，获取orderId供后续Mock步骤使用"
+  method: POST
+  # ===== 真实创单接口（公司自研，被测范围） =====
+  endpoint: "/llxz-api-web/hzsx/api/order/userSubmitOrder"
+  json:
+    displayUnicomCard: ""
+    orderId: "${biz_no}"
+    repairOrderCofigsIds: []
+    addressId: 328934
+    originalPrice: 1
+    price: 1
+    productId: "1775805859890"
+    start: "${start_date}"
+    end: "${end_date}"
+    duration: 1
+    logisticForm: "01"
+    num: 1
+    skuId: 530023
+    monthRentAmount: 1
+    deposit: 5
+    couponIdList: null
+    rentAmount: 1
+    installmentCount: 1
+    localAddress: ""
+    client: 1
+    logisticType: 0
+    creditAmount: 0
+    additionalServicesIds: []
+    remark: null
+    channelId: "008"
+    activityNo: ""
+    shareCode: ""
+    nsfLevel: "rank1"
+    antiCheatingLevel: "rank1"
+    channelProvenance: "2"
+    sourceId: "MjA4ODMwMjkzMzc1NDIxNXwyMDIxMDAyMTIwNjIxMDQzfDE3ODI4NzM0NTUzMjl8ZmFsc2V8VE9LRU5fSVNfTlVMTA=="
+    zfbUserId: "2088902644935707"
+    sourceUid: "2088902644935707"
+    shareType: ""
+    validTime: ""
+    makeKey: ""
+    makeValue: ""
+    isSelf: null
+    customLeaseTerm: 0
+    activityConsultId: null
+    productColorPictures: null
+    productName: "FK-gw001【娱乐】"
+    shopId: "2025051401305354621747200653217"
+    orderSource: 0
+    discountType: 1
+    submitType: null
+    callback: ""
+    isPresale: ""
+    concertInfoDTOList: []
+    horizontalCount: ""
+    totalHorizontalTime: "0.0"
+    screenshotCount: ""
+    version: "0.2.2607011036.40"
+    chooseCouponPack: ""
+    linkCode: ""
+    readConfig: null
+    activityId: ""
+    estimateStart: "${estimate_start}"
+    estimateEnd: "${estimate_end}"
+    fixedLease: false
+    uid: "5c26fd969129a46b14a4c01f91e6b4ee56611ba9f6o5yw9l47p9"
+  expected_status: 200
+  validate_data:
+    - path: "$.rpcResult"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.httpStatus"
+      operator: "=="
+      value: 200
+    - path: "$.responseType"
+      operator: "=="
+      value: "SUCCESS"
+    - path: "$.errorCode"
+      operator: "=="
+      value: null
+    - path: "$.errorMessage"
+      operator: "=="
+      value: null
+    - path: "$.businessSuccess"
+      operator: "=="
+      value: true
+    - path: "$.businessFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcSuccess"
+      operator: "=="
+      value: true
+    - path: "$.rpcFail"
+      operator: "=="
+      value: false
+    - path: "$.rpcTimeout"
+      operator: "=="
+      value: false
+    - path: "$.finalSuccess"
+      operator: "=="
+      value: true
+    - path: "$.finalFail"
+      operator: "=="
+      value: false
+  extract_vars:
+    - var_name: "order_id"
+      path: "$.data.orderId"
+    - var_name: "serial_no"
+      path: "$.data.serialNo"
+
+# ==================== 步骤2：Mock人脸识别 ====================
+step2_face_verify:
+  case_id: "ALI_FACE_001"
+  step_id: "step2_face_verify"
+  title: "人脸识别-获取faceToken"
+  description: "调用Mock人脸识别接口，携带orderId上下文，获取faceToken（流程第二步）"
+  method: POST
+  endpoint: "${mock_base_url}/mock/face/verify"
+  json:
+    image: "mock_face_image_base64"
+    order_id: "${order_id}"
+  expected_status: 200
+  validate_data:
+    - path: "$.code"
+      operator: "=="
+      value: "10000"
+    - path: "$.mock"
+      operator: "=="
+      value: true
+  extract_vars:
+    - var_name: "face_token"
+      path: "$.faceToken"
+
+# ==================== 步骤3：Mock支付宝签约 ====================
+step3_alipay_sign:
+  case_id: "ALI_FACE_001"
+  step_id: "step3_alipay_sign"
+  title: "合同签约-获取agreementNo"
+  description: "调用Mock支付宝签约接口，携带orderId+faceToken上下文，获取agreementNo（流程第三步）"
+  method: POST
+  endpoint: "${mock_base_url}/mock/alipay/agreement/sign"
+  json:
+    face_token: "${face_token}"
+    user_id: "${user_id}"
+    order_id: "${order_id}"
+  expected_status: 200
+  validate_data:
+    - path: "$.code"
+      operator: "=="
+      value: "10000"
+    - path: "$.mock"
+      operator: "=="
+      value: true
+  extract_vars:
+    - var_name: "agreement_no"
+      path: "$.agreement_no"
+
+# ==================== 步骤4：签约成功回调（真实支付宝网关回调接口） ====================
+step4_payment_callback:
+  case_id: "ALI_FACE_001"
+  step_id: "step4_payment_callback"
+  title: "签约成功回调-支付宝dispatch.notify通知"
+  description: "向真实支付宝回调网关发送签约成功通知，模拟支付宝dispatch.notify回调，完成订单状态流转（流程最后一步）"
+  method: POST
+  endpoint: "/llxz-components-center/alipay/gateWay"
+  # ===== 请求头（multipart/form-data） =====
+  headers:
+    Accept: "*/*"
+    Accept-Encoding: "gzip, deflate, br"
+    Connection: "keep-alive"
+    User-Agent: "PostmanRuntime-ApipostRuntime/1.1.0"
+    accept-charset: "utf-8"
+    channelid: "008"
+    referer: "https://2021002120621043.hybrid.alipay-eco.com/2021002120621043/dev/index.html#pages/orderList/index?__appxPageId=1&type=all"
+  # ===== form-data 字段（模拟支付宝异步通知参数） =====
+  form_data:
+    charset: "UTF-8"
+    biz_content: '{"buyer_id":"${source_uid}","buyer_open_id":"074a1CcTG1LelxKe4xQC0zgNdId0nxi95b5lsNpazWYoCo5","rent_dispatch_id":"${order_id}","dispatch_source":"ZHIMA_RENT","item_infos":[{"out_item_id":"12345","out_sku_id":"34567576565656","item_cnt":"1","rent_start_time":"${start_date} 00:00:00","rent_days":120}],"expire_time":"10","user_risk_info":{"comprehensive_risk_level":"T2","premium_user_recommend":true},"user_identity_info":{"secure_key":"O1iG+hpyF107noxjjCh8rZJx61naRUn2O7G7p5ZuoHKe+iUoqCSx/fjdbCgwECUj+eMPhpQ4IaL3Z7VD4iWANznBUpdESAcb7nEROyscdyq1jIHDfNyhAW37OgOyZ1T9","content":"VJW2gD2XoMKexSjEa3SecAlifyl2n53e9yItjbs+2n916klxqOY"}}'
+    utc_timestamp: "${utc_timestamp}"
+    sign: "${sign}"
+    app_id: "2021002120621043"
+    version: "1.1"
+    sign_type: "RSA2"
+    notify_id: "${notify_id}"
+    msg_method: "alipay.commerce.rent.order.dispatch.notify"
+  expected_status: 200
+  # 网关接口返回纯文本 "success"，非 JSON
+  validate_data:
+    - path: "$.text"
+      operator: "=="
+      value: "success"
+

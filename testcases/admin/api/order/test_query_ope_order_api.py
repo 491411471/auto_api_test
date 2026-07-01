@@ -1,6 +1,7 @@
 # testcases/admin/api/order/test_query_ope_order_api.py
 """
 运营端 - 订单列表查询接口测试
+
 接口：POST /hzsx/ope/order/queryOpeOrderByCondition
 覆盖场景：订单号、下单人姓名、订单状态、店铺名称、商品编码、APP来源、渠道来源、
 下单时间范围、下单人手机号、组合查询、空条件查询
@@ -18,8 +19,11 @@ from utils.data_loader import get_test_data, get_global_variables
 
 _DATA_FILE = "data/admin/api/order/query_ope_order_api.yaml"
 
-# 预加载 SQL（默认只查询 ct_user_orders 表，避免跨库权限问题）
+# 模块级缓存：SQL 只查一次
+_cached_order_data: dict | None = None
+
 _PRELOAD_SQL = (
+    # 仅查询 ct_user_orders 表，不 JOIN ct_shops，避免跨库权限问题
     "SELECT o.order_id, o.product_id, o.user_name, o.status, o.shop_id "
     "FROM llxz_order.ct_user_orders o "
     "WHERE o.shop_id = '71008738021cd3393bacbac182bd6a86af0b5c87' "
@@ -28,24 +32,27 @@ _PRELOAD_SQL = (
 )
 
 
-@pytest.fixture(scope="module")
-def preloaded_order_data():
-    """模块级懒加载：首次执行 SQL 并返回字典结果，所有用例共享该 fixture 的返回值。
-    使用 fixture 替代模块级全局缓存，更适配 pytest 的执行模型和并行场景。
-    """
+def _fetch_order_data(db) -> dict:
+    """懒加载：首次调用执行 SQL 并缓存，后续直接返回缓存结果"""
+    global _cached_order_data
+    if _cached_order_data is not None:
+        return _cached_order_data
+    # 尝试从 YAML 的 variables 中读取预查询 SQL（便于测试配置化）
     try:
-        with DatabaseManager() as db:
-            result = db.fetch_one(_PRELOAD_SQL)
-    except Exception as e:
-        logger.error(f"[OQ_OPE] 预查询数据库失败: {e}")
-        return {}
+        globals_from_yaml = get_global_variables(_DATA_FILE)
+    except Exception:
+        globals_from_yaml = {}
+    # 支持 YAML 中使用 ${shop_id} 占位；get_global_variables 只返回变量字典，
+    # 这里直接使用 YAML 中的 preload_sql 文本（占位符在后续框架替换环节也可能处理）。
+    sql = globals_from_yaml.get("preload_sql", _PRELOAD_SQL)
+    result = db.fetch_one(sql)
     if result:
-        data = {k: str(v) for k, v in result.items()}
-        logger.info(f"[OQ_OPE] SQL 预查询完成: {data}")
-        return data
+        _cached_order_data = {k: str(v) for k, v in result.items()}
+        logger.info(f"[OQ_OPE] SQL 预查询完成: {_cached_order_data}")
     else:
+        _cached_order_data = {}
         logger.warning("[OQ_OPE] SQL 预查询未获取到数据")
-        return {}
+    return _cached_order_data
 
 
 @allure.epic("运营端")
@@ -79,12 +86,12 @@ class TestQueryOpeOrder:
         get_test_data(_DATA_FILE, "ope_order_query_tests"),
         ids=[c["case_id"] for c in get_test_data(_DATA_FILE, "ope_order_query_tests")],
     )
-    def test_query_ope_order(self, admin_api_client, db, case, preloaded_order_data):
+    def test_query_ope_order(self, admin_api_client, db, case):
         # 1. 加载全局变量
         global_vars = self._load_global_vars()
 
         # 2. 注入预查询的订单数据（SQL 只执行一次，所有用例共享缓存）
-        order_data = preloaded_order_data
+        order_data = _fetch_order_data(db)
         if not order_data:
             pytest.skip("SQL 预查询未获取到订单数据，跳过本次测试")
         global_vars.update(order_data)
